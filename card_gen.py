@@ -46,13 +46,13 @@ def generate_cards():
                 cards.append(card)
 
     # 색 없는 실드카드를 한 번에 추가합니다.
-    for i in range(4):
+    for i in range(2):
         card_image = pygame.image.load(f"card_images/none_shield.png")
         card = Card('none', 'shield', card_image, card_back_image)
         cards.append(card)
 
     # 색 없는 색변경 카드를 추가
-    for i in range(4):
+    for i in range(2):
         card_image = pygame.image.load(f"card_images/none_change.png")
         card = Card('none', 'change', card_image, card_back_image)
         cards.append(card)
