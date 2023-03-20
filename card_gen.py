@@ -38,7 +38,7 @@ def generate_cards():
 
     card_folder = "cw_card_images" if option.color_weakness else "card_images"  # 색약 모드와 경로 차별화
 
-    for i in range(4):
+    for i in range(2):
         for color in colors:
             for value in values:
                 card_image = pygame.image.load(f"{card_folder}/{color}_{value}.png")
