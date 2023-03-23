@@ -11,12 +11,12 @@ class Button:
     """
     def __init__(self, x, y, width, height, text='Sample', on_click_function=None):
         self.x = x - width // 2
-        self.y = y - height // 2
+        self.y = y
         self.width = width
         self.height = height
         self.on_click_function = on_click_function
         self.alreadyPressed = False
-        self.font = pygame.font.SysFont('malgungothic', 30)
+        self.font = pygame.font.Font("../Maplestory Bold.ttf", 25)
 
         self.fill_colors = {
             'normal': '#ffffff',
@@ -27,7 +27,6 @@ class Button:
         self.surface = pygame.Surface((self.width, self.height))
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         self.font = self.font.render(text, True, (0, 0, 0))
-
 
     def process(self):
         """
