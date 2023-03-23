@@ -16,7 +16,7 @@ class Button:
         self.height = height
         self.on_click_function = on_click_function
         self.alreadyPressed = False
-        self.font = pygame.font.Font("../Maplestory Bold.ttf", font_size)
+        self.font = pygame.font.Font("./Maplestory Bold.ttf", font_size)
 
         self.fill_colors = {
             'normal': '#ffffff',
