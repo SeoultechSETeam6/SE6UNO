@@ -34,15 +34,28 @@ buttons = [Button(screen_width // 2, screen_height // 2, 200, 75, '싱글 플레
            Button(screen_width // 2, screen_height // 2 * 1.3, 200, 75, '설정', settings_button_click_event),
            Button(screen_width // 2, screen_height // 2 * 1.6, 200, 75, '나가기', exit_button_click_event)]
 
+selected_button_index = 0
+buttons[selected_button_index].selected = True
+
+# 배경 색상
+screen.fill((20, 20, 20))
 
 # 메인 화면 표시
 while running:
-    # 배경 색상
-    screen.fill((20, 20, 20))
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                buttons[selected_button_index].selected = False
+                selected_button_index = (selected_button_index - 1) % len(buttons)
+                buttons[selected_button_index].selected = True
+            elif event.key == pygame.K_DOWN:
+                buttons[selected_button_index].selected = False
+                selected_button_index = (selected_button_index + 1) % len(buttons)
+                buttons[selected_button_index].selected = True
+            elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
+                buttons[selected_button_index].on_click_function()
 
     for button in buttons:
         button.process()
