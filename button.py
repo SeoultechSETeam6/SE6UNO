@@ -10,14 +10,14 @@ class Button:
     **on_click_funtion**: 버튼 클릭 시 일어날 이벤트 메서드
     """
     def __init__(self, x, y, width, height, text='Sample', on_click_function=None, font_size=25, selected=False):
-        self.selected =selected
+        self.selected = selected
         self.x = x - width // 2
         self.y = y
         self.width = width
         self.height = height
         self.on_click_function = on_click_function
         self.alreadyPressed = False
-        self.font = pygame.font.Font("./Maplestory Bold.ttf", font_size)
+        self.font = pygame.font.Font("./resources/maplestory_font.ttf", font_size)
 
         self.fill_colors = {
             'normal': '#ffffff',

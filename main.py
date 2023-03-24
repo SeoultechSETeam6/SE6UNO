@@ -2,15 +2,21 @@ import pygame
 import sys
 import in_game
 from button import Button
+from option import basic_option as basic
+from option.setting_option import Option
 
 
 # Pygame 초기화
 pygame.init()
 running = True
+clock = pygame.time.Clock()
 
 
 def settings_button_click_event():
     print('설정 버튼 클릭됨')
+    option = Option()
+    option.run()
+    del option
 
 
 def exit_button_click_event():
@@ -42,6 +48,7 @@ screen.fill((20, 20, 20))
 
 # 메인 화면 표시
 while running:
+    clock.tick(basic.fps)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
