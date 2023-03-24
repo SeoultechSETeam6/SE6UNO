@@ -9,7 +9,8 @@ class Button:
     **button_text**: 버튼에 적힐 글자\n
     **on_click_funtion**: 버튼 클릭 시 일어날 이벤트 메서드
     """
-    def __init__(self, x, y, width, height, text='Sample', on_click_function=None, font_size=25):
+    def __init__(self, x, y, width, height, text='Sample', on_click_function=None, font_size=25, selected=False):
+        self.selected =selected
         self.x = x - width // 2
         self.y = y
         self.width = width
@@ -39,11 +40,11 @@ class Button:
         self.surface.fill(self.fill_colors['normal'])
 
         # 마우스 갖다댈 시
-        if self.rect.collidepoint(mouse_pos):
+        if self.rect.collidepoint(mouse_pos) or self.selected:
             self.surface.fill(self.fill_colors['hover'])
 
             # 버튼 누를 때
-            if pygame.mouse.get_pressed(num_buttons=3)[0]:
+            if self.rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed(num_buttons=3)[0]:
                 self.surface.fill(self.fill_colors['pressed'])
 
                 # 클릭 판정을 위해 클릭 된 상태라면 더 이상 이벤트를 발생시키지 않음
