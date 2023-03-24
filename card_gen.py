@@ -34,9 +34,9 @@ class Card:
 
 def generate_cards():
     cards = []
-    card_back_image = pygame.image.load("card_images/card_back.png")
+    card_back_image = pygame.image.load("resources/Image/card_image_alternative/card_back.png")
 
-    card_folder = "cw_card_images" if option.color_weakness else "card_images"  # 색약 모드와 경로 차별화
+    card_folder = "cw_card_images" if option.color_weakness else "card_image_alternative"  # 색약 모드와 경로 차별화
 
     for i in range(2):
         for color in colors:
@@ -47,13 +47,13 @@ def generate_cards():
 
     # 색 없는 실드카드를 한 번에 추가합니다.
     for i in range(2):
-        card_image = pygame.image.load(f"card_images/none_shield.png")
+        card_image = pygame.image.load(f"resources/Image/card_image_alternative/none_shield.png")
         card = Card('none', 'shield', card_image, card_back_image)
         cards.append(card)
 
     # 색 없는 색변경 카드를 추가
     for i in range(2):
-        card_image = pygame.image.load(f"card_images/none_change.png")
+        card_image = pygame.image.load(f"resources/Image/card_image_alternative/none_change.png")
         card = Card('none', 'change', card_image, card_back_image)
         cards.append(card)
     return cards
