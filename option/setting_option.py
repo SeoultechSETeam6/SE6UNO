@@ -163,6 +163,7 @@ class Option:
             "ENTER: " + pygame.key.name(save.key_setting['enter']), True, (0, 0, 0))
 
     def reset_event(self):
+        basic.mouse_event_remove()
         with open("./option/save_option.pickle", "wb") as rf:
             pickle.dump(basic.display_size, rf)
             pickle.dump(basic.color_weakness, rf)
@@ -170,6 +171,7 @@ class Option:
         self.running = False
 
     def save_event(self):
+        basic.mouse_event_remove()
         with open("./option/save_option.pickle", "wb") as sf:
             pickle.dump(save.display_size, sf)
             pickle.dump(save.color_weakness, sf)
@@ -177,6 +179,7 @@ class Option:
         self.running = False
 
     def exit_event(self):
+        basic.mouse_event_remove()
         self.running = False
 
     def pop_up(self, direction):

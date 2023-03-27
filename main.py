@@ -25,6 +25,7 @@ class Main:
         self.clock = pygame.time.Clock()
 
     def settings_button_click_event(self):
+        basic.mouse_event_remove()
         print('설정 버튼 클릭됨')
         option = Option()
         option.run()
