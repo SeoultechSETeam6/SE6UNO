@@ -1,5 +1,6 @@
 import pygame
 import pickle
+import math
 from button import Button
 from option import save_option as save
 from option import basic_option as basic
@@ -104,11 +105,15 @@ class Option:
                                    self.button_size[0], self.button_size[1],
                                    "설정 나가기", self.exit_event, self.font_size[1])
 
-        self.buttons = [self.color_weakness_button, self.reset_setting, self.save_setting, self.quit_setting]
+        self.button_list = [[], [self.color_weakness_button], [],
+                            [self.reset_setting, self.save_setting, self.quit_setting]]
         for i in self.screen_size_button:
-            self.buttons.append(i)
+            self.button_list[0].append(i)
         for i in self.key_setting_button:
-            self.buttons.append(i)
+            self.button_list[2].append(i)
+        self.selected_button_vertical_index = 0
+        self.selected_button_horizon_index = 0
+        self.button_list[self.selected_button_vertical_index][self.selected_button_horizon_index].selected = True
 
     # 버튼 클릭시 메소드 구현
     def size_1920_event(self):
@@ -201,15 +206,52 @@ class Option:
         self.screen.blit(self.change_color_weakness, (self.screen.get_width() // 7, self.screen.get_height() // 5 * 2))
         self.screen.blit(self.change_key_setting, (self.screen.get_width() // 7, self.screen.get_height() // 5 * 3))
 
-        for button in self.buttons:
-            button.process()
-            self.screen.blit(button.surface, button.rect)
+        for buttons in self.button_list:
+            for button in buttons:
+                button.process()
+                self.screen.blit(button.surface, button.rect)
         pygame.display.flip()
 
     def event(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == self.key_setting['up']:
+                    self.button_list[self.selected_button_vertical_index][
+                        self.selected_button_horizon_index].selected = False
+                    self.selected_button_vertical_index = (self.selected_button_vertical_index - 1) % len(
+                        self.button_list)
+                    self.selected_button_horizon_index = math.ceil(len(
+                        self.button_list[self.selected_button_vertical_index]) / 2) - 1
+                    self.button_list[self.selected_button_vertical_index][
+                        self.selected_button_horizon_index].selected = True
+                elif event.key == self.key_setting['down']:
+                    self.button_list[self.selected_button_vertical_index][
+                        self.selected_button_horizon_index].selected = False
+                    self.selected_button_vertical_index = (self.selected_button_vertical_index + 1) % len(
+                        self.button_list)
+                    self.selected_button_horizon_index = math.ceil(len(
+                        self.button_list[self.selected_button_vertical_index]) / 2) - 1
+                    self.button_list[self.selected_button_vertical_index][
+                        self.selected_button_horizon_index].selected = True
+                elif event.key == self.key_setting['left']:
+                    self.button_list[self.selected_button_vertical_index][
+                        self.selected_button_horizon_index].selected = False
+                    self.selected_button_horizon_index = (self.selected_button_horizon_index - 1) % len(
+                        self.button_list[self.selected_button_vertical_index])
+                    self.button_list[self.selected_button_vertical_index][
+                        self.selected_button_horizon_index].selected = True
+                elif event.key == self.key_setting['right']:
+                    self.button_list[self.selected_button_vertical_index][
+                        self.selected_button_horizon_index].selected = False
+                    self.selected_button_horizon_index = (self.selected_button_horizon_index + 1) % len(
+                        self.button_list[self.selected_button_vertical_index])
+                    self.button_list[self.selected_button_vertical_index][
+                        self.selected_button_horizon_index].selected = True
+                elif event.key == self.key_setting['enter']:
+                    self.button_list[self.selected_button_vertical_index][
+                        self.selected_button_horizon_index].on_click_function()
 
     def run(self):
         while self.running:
