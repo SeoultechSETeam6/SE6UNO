@@ -59,11 +59,11 @@ class Option:
                    self.button_size[1], "1280 * 720", self.size_1200_event, self.font_size[1])]
 
         if self.display_size[0] == 1920:
-            self.screen_size_button[0].fill_colors['normal'] = '#666666'
+            self.screen_size_button[0].fill_colors['normal'] = '#333333'
         elif self.display_size[0] == 1600:
-            self.screen_size_button[1].fill_colors['normal'] = '#666666'
+            self.screen_size_button[1].fill_colors['normal'] = '#333333'
         else:
-            self.screen_size_button[2].fill_colors['normal'] = '#666666'
+            self.screen_size_button[2].fill_colors['normal'] = '#333333'
 
         if self.color_weakness:
             self.color_weakness_button = Button(self.screen.get_width() // 3 * 2, self.screen.get_height() // 5 * 2,
