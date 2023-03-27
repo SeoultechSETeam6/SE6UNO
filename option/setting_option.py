@@ -36,6 +36,7 @@ class Option:
             self.font_size = basic.font_size[2]
             self.button_size = basic.button_size[2]
 
+        # pygame 초기화
         pygame.init()
         self.font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[0])
         self.small_font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[1])
@@ -57,7 +58,7 @@ class Option:
                    self.size_1600_event, self.font_size[1]),
             Button(self.screen.get_width() // 3 * 2 + self.screen.get_width() // 8, self.screen.get_height() // 5,
                    self.button_size[0],
-                   self.button_size[1], "1280 * 720", self.size_1200_event, self.font_size[1])]
+                   self.button_size[1], "1280 * 720", self.size_1280_event, self.font_size[1])]
 
         if self.display_size[0] == 1920:
             self.screen_size_button[0].fill_colors['normal'] = '#333333'
@@ -128,7 +129,7 @@ class Option:
         self.screen_size_button[1].fill_colors['normal'] = '#666666'
         self.screen_size_button[2].fill_colors['normal'] = '#ffffff'
 
-    def size_1200_event(self):
+    def size_1280_event(self):
         save.display_size = [1280, 720]
         self.screen_size_button[0].fill_colors['normal'] = '#ffffff'
         self.screen_size_button[1].fill_colors['normal'] = '#ffffff'
