@@ -15,11 +15,16 @@ class Main:
         self.key_setting = None
         self.font_size = None
         self.button_size = None
+        self.logo_size = None
         self.screen = None
         self.buttons = []
         self.selected_button_index = 0
         self.logo = None
         self.logo_rect = None
+        self.font = None
+        self.key_setting_up = None
+        self.key_setting_down = None
+        self.key_setting_enter = None
         pygame.init()
         self.running = True
         self.clock = pygame.time.Clock()
@@ -36,6 +41,7 @@ class Main:
         self.running = False
 
     def setting(self):
+        # 설정 불러오기
         try:
             with open("./option/save_option.pickle", "rb") as f:
                 self.display_size = pickle.load(f)
@@ -49,12 +55,15 @@ class Main:
         if self.display_size[0] == 1920:
             self.font_size = basic.font_size[0]
             self.button_size = basic.button_size[0]
+            self.logo_size = basic.logo_size[0]
         elif self.display_size[0] == 1600:
             self.font_size = basic.font_size[1]
             self.button_size = basic.button_size[1]
+            self.logo_size = basic.logo_size[1]
         else:
             self.font_size = basic.font_size[2]
             self.button_size = basic.button_size[2]
+            self.logo_size = basic.logo_size[2]
 
         # 화면 표시
         self.screen = pygame.display.set_mode(self.display_size)
@@ -62,8 +71,15 @@ class Main:
 
         # 로고 표시
         self.logo = pygame.image.load("resources/Image/logo.jpg")
+        self.logo = pygame.transform.scale(self.logo, self.logo_size)
         self.logo_rect = self.logo.get_rect()
         self.logo_rect.center = (self.display_size[0] // 2, self.logo_rect.height // 2)
+
+        # 버튼 조작 키 표시
+        self.font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[1])
+        self.key_setting_up = self.font.render("UP: " + pygame.key.name(self.key_setting['up']), True, (255, 255, 255))
+        self.key_setting_down = self.font.render("DOWN: " + pygame.key.name(self.key_setting['down']), True, (255, 255, 255))
+        self.key_setting_enter = self.font.render("Enter: " + pygame.key.name(self.key_setting['enter']), True, (255, 255, 255))
 
         # 버튼
         self.buttons = [
@@ -80,6 +96,10 @@ class Main:
     def draw(self):
         # 배경 색상
         self.screen.fill((20, 20, 20))
+        # 버튼 조작 키 업데이트
+        self.screen.blit(self.key_setting_up, (50, self.screen.get_height() // 30 * 26))
+        self.screen.blit(self.key_setting_down, (50, self.screen.get_height() // 30 * 27))
+        self.screen.blit(self.key_setting_enter, (50, self.screen.get_height() // 30 * 28))
         self.screen.blit(self.logo, self.logo_rect)
         for button in self.buttons:
             button.process()
