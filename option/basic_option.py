@@ -13,3 +13,10 @@ font_size = [[60, 25], [50, 20], [37, 16]]
 # 공통된 변수
 game_title = "UNO Game"
 fps = 60
+
+
+def mouse_event_remove():
+    while True:
+        pygame.event.clear()
+        if not pygame.mouse.get_pressed(num_buttons=3)[0]:
+            break
