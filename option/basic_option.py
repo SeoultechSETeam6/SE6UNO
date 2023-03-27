@@ -15,6 +15,7 @@ game_title = "UNO Game"
 fps = 60
 
 
+# 마우스 중복 클릭 방지 메소드
 def mouse_event_remove():
     while True:
         pygame.event.clear()

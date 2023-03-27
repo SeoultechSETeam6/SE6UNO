@@ -80,11 +80,10 @@ class Main:
     def draw(self):
         # 배경 색상
         self.screen.fill((20, 20, 20))
+        self.screen.blit(self.logo, self.logo_rect)
         for button in self.buttons:
             button.process()
             self.screen.blit(button.surface, button.rect)
-
-        self.screen.blit(self.logo, self.logo_rect)
 
         # 매 프레임마다 화면 업데이트
         pygame.display.flip()
