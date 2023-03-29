@@ -1,6 +1,7 @@
 import pygame
 import sys
 import pickle
+
 import in_game
 from button import Button
 from option import basic_option as basic
@@ -17,6 +18,7 @@ class Main:
         self.button_size = None
         self.logo_size = None
         self.screen = None
+
         self.buttons = []
         self.selected_button_index = 0
         self.logo = None
@@ -29,6 +31,11 @@ class Main:
         self.running = True
         self.clock = pygame.time.Clock()
 
+        # 인스턴스 메서드 바인딩
+        self.settings_button_click_event = self.settings_button_click_event.__get__(self)
+        self.exit_button_click_event = self.exit_button_click_event.__get__(self)
+        self.in_game_button_click_event = self.in_game_button_click_event.__get__(self)
+
     def settings_button_click_event(self):
         basic.mouse_event_remove()
         print('설정 버튼 클릭됨')
@@ -40,6 +47,10 @@ class Main:
         print('나가기 버튼 클릭됨')
         self.running = False
 
+    def in_game_button_click_event(self):
+        print('싱글 플레이 버튼 클릭됨')
+        in_game.singleplayer()
+
     def setting(self):
         # 설정 불러오기
         try:
@@ -48,6 +59,7 @@ class Main:
                 self.color_weakness = pickle.load(f)
                 self.key_setting = pickle.load(f)
         except EOFError:
+
             self.display_size = basic.display_size
             self.color_weakness = basic.color_weakness
             self.key_setting = basic.key_setting
@@ -84,7 +96,7 @@ class Main:
         # 버튼
         self.buttons = [
             Button(self.display_size[0] // 2, self.display_size[1] // 2, self.button_size[0], self.button_size[1],
-                   '싱글 플레이', in_game.game, self.font_size[1]),
+                   '싱글 플레이', self.in_game_button_click_event, self.font_size[1]),
             Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.3, self.button_size[0],
                    self.button_size[1], '설정', self.settings_button_click_event, self.font_size[1]),
             Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.6, self.button_size[0],
