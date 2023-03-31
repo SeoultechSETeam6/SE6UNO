@@ -117,25 +117,30 @@ def computer_turn(now_player_hands, current_player_index, current_player, board_
         if remain_cards:
             drawn_card = remain_cards.pop()
             now_player_hands.append(drawn_card)
-            # 드로우 한 카드를 낼 수 있는 경우 카드를 낸다
             pygame.time.delay(delay_time2)
+            # 드로우 한 카드를 낼 수 있는 경우 카드를 낸다
             if is_valid_move(drawn_card, top_card):
+                drawn_card_index = now_player_hands.index(drawn_card)
+                now_player_hands.pop(drawn_card_index)
                 board_card.append(drawn_card)
-                now_player_hands.pop(drawn_card)
+                # board_card.append(drawn_card) 오류 구문 해결
+                # now_player_hands.pop(drawn_card) 오류 구문 해결
+                # 뽑은 카드가 special일 때,
                 if drawn_card.is_special():
                     current_player_index, direction = apply_special_card_effects(drawn_card, current_player_index,
                                                                                  current_player, direction, player_hands
                                                                                  , remain_cards, player_count)
                     return current_player_index, direction
+                # 뽑은 카드가 special이 아닐때,
                 else:
                     current_player_index = (current_player_index + direction) % player_count
                     return current_player_index, direction
-            # 낼 수 없으면, ai덱에 카드를 추가하고 턴을 넘긴다.
+            # 낼 수 없으면, 턴을 넘긴다.
             else:
                 current_player_index = (current_player_index + direction) % player_count
                 return current_player_index, direction
         else:
-            # 남은 카드가 없는 경우 턴을 넘긴다.
+            # 작동하지 않는 함수. 혹시몰라서 넣어둠. 이 함수는 remain_cards에 남은 카드가 없을 때 발동함.
             current_player_index = (current_player_index + direction) % player_count
             return current_player_index, direction
 

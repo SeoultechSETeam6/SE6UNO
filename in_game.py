@@ -210,6 +210,7 @@ def singleplayer():
                             draw_requested = True
                             print(player_hands[0])
                             print("카드 드로우 성공")
+                        # 카드를 드로우 하고, 드로우한 카드를 내는 함수.
                         elif draw_requested and new_drawn_card is not None and not clicked_remain_cards:
                             if is_valid_move(new_drawn_card, top_card) and clicked_card == new_drawn_card:
                                 board_card.append(clicked_card)
@@ -233,10 +234,12 @@ def singleplayer():
                                     draw_requested = False
                                     new_drawn_card = None
                                     print("스페셜 아닌 드로우한 카드 처리 성공")
-                            current_player_index = (current_player_index + direction) % player_count
-                            draw_requested = False
-                            new_drawn_card = None
-                            print("카드 드로우만 하고 턴 넘기기 성공")
+                            # 카드를 드로우 하고 턴을 넘기는 함수.
+                            elif draw_requested and new_drawn_card is not None and clicked_remain_cards:
+                                current_player_index = (current_player_index + direction) % player_count
+                                draw_requested = False
+                                new_drawn_card = None
+                                print("카드 드로우만 하고 턴 넘기기 성공")
                         # 드로우를 하지 않고 유저 덱에서 카드를 낼 경우.
                         elif not draw_requested:
                             top_card = get_top_card(board_card)
@@ -276,7 +279,7 @@ def singleplayer():
                 new_drawn_card = None
                 current_player_index = (current_player_index + direction) % player_count
 
-            # 컴퓨터 턴 처리
+        # 컴퓨터 턴 처리
         if not user_turn:
             if computer_action_time is None:
                 turn_start_time = pygame.time.get_ticks()
