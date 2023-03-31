@@ -162,7 +162,9 @@ def apply_special_card_effects(card, current_player_index, current_player, direc
     elif card.value == "draw_2":
         print("draw_2카드 이벤트 발생")
         next_player_index = (current_player_index + direction) % player_count
-        has_shield = any(check_card.value == "shield" for check_card in player_hands[next_player_index])
+        # has_shield = any(check_card.value == "shield" for check_card in player_hands[next_player_index])
+        has_shield = next((check_card for check_card in player_hands[next_player_index] if card.value == "shield"),
+                          None)
         # shield 카드가 없으면 2장 뽑고, 턴 넘기기
         if not has_shield:
             for _ in range(2):
