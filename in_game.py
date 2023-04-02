@@ -162,12 +162,12 @@ def singleplayer():
     hovered_card_index2 = None
 
     # 각 카드들의 위치 설정, (x, y, spacing)는 유저의 카드, (x2, y2, spacing2, max_per_row)는 AI의 카드 위치를 잡는다.
-    x = 150
-    y = 800
-    spacing = 80
-    x2 = 1300
-    y2 = 80
-    spacing2 = 40
+    x = screen_width/9
+    y = screen_height*4 / 5
+    spacing = screen_height * 0.08
+    x2 = screen_width * 0.72
+    y2 = screen_height * 0.08
+    spacing2 = screen_height * 0.04
     max_per_row = 7
 
     # 플레이어들이 카드를 뽑고 남은 카드들의 위치를 잡는데 사용
@@ -337,16 +337,16 @@ def singleplayer():
 
             shuffle_cards(remain_cards)  # remain_cards를 무작위로 섞습니다.
 
-        mouse_x, mouse_y = pygame.mouse.get_pos()  # 마우스의 위치를 가져옴
-        hovered_card_index = find_hovered_card(player_hands[0], x, y, spacing, mouse_x, mouse_y)
-
-        draw_cards_user(screen, player_hands[0], x, y, spacing, hovered_card_index)  # 플레이어의 카드를 그린다.
-
         # direction 그리기
         if direction == 1:
             screen.blit(direction_img, (center_x, center_y))
         elif direction == -1:
             screen.blit(direction_reverse_img, (center_x, center_y))
+
+        mouse_x, mouse_y = pygame.mouse.get_pos()  # 마우스의 위치를 가져옴
+        hovered_card_index = find_hovered_card(player_hands[0], x, y, spacing, mouse_x, mouse_y)
+
+        draw_cards_user(screen, player_hands[0], x, y, spacing, hovered_card_index)  # 플레이어의 카드를 그린다.
 
         for i in range(len(player_hands) - 1):  # ai의 카드를 그린다.
             draw_cards_ai(screen, player_hands[i + 1], x2, y2 + (i * 200), max_per_row, spacing2, hovered_card_index2,
@@ -384,6 +384,5 @@ def singleplayer():
             draw_text(screen, "Computer wins!", font_big, (255, 255, 255), screen.get_rect().centerx, 100)
             pygame.time.delay(3000)
             running = False
-        print(paused)
         pygame.display.flip()
         clock.tick(FPS)  # FPS를 조절하여 루프 속도를 제한한다.
