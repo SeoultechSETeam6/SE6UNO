@@ -52,7 +52,9 @@ def singleplayer():
     card_count = 7
 
     # 스크린 사이즈 및 폰트
-    screen = pygame.display.set_mode((1800, 1000))
+    screen_width = 1800
+    screen_height = 1000
+    screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("UNO Game - Single")
     font = pygame.font.Font("resources/maplestory_font.ttf", 20)
     font_big = pygame.font.Font("resources/maplestory_font.ttf", 40)
@@ -121,6 +123,16 @@ def singleplayer():
     # 게임 이미지를 로드
     pause_button_img = pygame.image.load("resources/Image/button_images/pause.png").convert_alpha()
     resume_button_img = pygame.image.load("resources/Image/button_images/resume.png").convert_alpha()
+    direction_img = pygame.image.load("resources/Image/direction_images/direction.png").convert_alpha()
+    direction_reverse_img = pygame.image.load("resources/Image/direction_images/direction_reverse.png").convert_alpha()
+
+    # 이미지 크기 계산, 화면 크기 계싼
+    screen = pygame.display.set_mode((screen_width, screen_height))
+    image_width, image_height = direction_img.get_size()
+
+    # 화면 중앙 좌표 계산
+    center_x = (screen_width - image_width) // 2
+    center_y = (screen_height - image_height) //2
 
     # 색약 모드 설정
     option = Option(False)  # False: 일반 모드, True: 색약 모드
@@ -329,6 +341,12 @@ def singleplayer():
         hovered_card_index = find_hovered_card(player_hands[0], x, y, spacing, mouse_x, mouse_y)
 
         draw_cards_user(screen, player_hands[0], x, y, spacing, hovered_card_index)  # 플레이어의 카드를 그린다.
+
+        # direction 그리기
+        if direction == 1:
+            screen.blit(direction_img, (center_x, center_y))
+        elif direction == -1:
+            screen.blit(direction_reverse_img, (center_x, center_y))
 
         for i in range(len(player_hands) - 1):  # ai의 카드를 그린다.
             draw_cards_ai(screen, player_hands[i + 1], x2, y2 + (i * 200), max_per_row, spacing2, hovered_card_index2,
