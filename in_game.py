@@ -48,8 +48,8 @@ def singleplayer():
     clock = pygame.time.Clock()
 
     # 플레이어 수와 각 플레이어가 받을 카드 수 지정
-    player_count = 5
-    card_count = 7
+    player_count = 2
+    card_count = 1
 
     # 스크린 사이즈 및 폰트
     screen_width = 1800
@@ -192,13 +192,19 @@ def singleplayer():
     pause_button_rect.topleft = (100, 100)
     # 일시정지 초기값
     paused = False
+    # 게임 위너 메시지
+    winner_message = ""
+    # 게임 오버 초기값
+    game_over = False
+    # 리스타트 초기값
+    restart_game = False
+
     # 10초 제한 설정
     time_limit = 10000
     # 현재 시간 저장
     turn_start_time = pygame.time.get_ticks()
 
     while running:
-        screen.fill((111, 111, 111))  # 화면 초기화
 
         # 현재 플레이어 결정
         current_player = player_order[current_player_index]
@@ -210,197 +216,233 @@ def singleplayer():
             turn_start_time = pygame.time.get_ticks()  # 현재 시간 저장
         # 유저 턴 여부를 prev_user_turn에 저장
         prev_user_turn = user_turn
+        # 게임 승리조건 불만족일 경우
+        if not game_over:
+            screen.fill((111, 111, 111))  # 화면
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if pause_button_rect.collidepoint(mouse_x, mouse_y):
+                        paused = not paused
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        paused = not paused
+                elif event.type == pygame.QUIT:
+                    running = False
+            # 퍼즈가 아닐 경우
+            if not paused:
+                # 유저의 턴일 경우
+                if user_turn:
+                    if event.type == pygame.MOUSEBUTTONDOWN and user_turn:
+                        mouse_x, mouse_y = pygame.mouse.get_pos()
+                        clicked_card_index, clicked_card = get_clicked_card(player_hands[0], x, y, spacing, mouse_x,
+                                                                            mouse_y)
+                        # remain_cards 클릭 확인
+                        if clicked_card is None:
+                            remain_cards_rect = remain_cards[0].card_img_back.get_rect()
+                            remain_cards_rect.topleft = (screen.get_rect().centerx, screen.get_rect().centery)
+                            clicked_remain_cards = remain_cards_rect.collidepoint(mouse_x, mouse_y)
+                        else:
+                            clicked_remain_cards = False
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if pause_button_rect.collidepoint(mouse_x, mouse_y):
-                    paused = not paused
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    paused = not paused
-
-        # 퍼즈가 아닐 경우
-        if not paused:
-            # 유저의 턴일 경우
-            if user_turn:
-                if event.type == pygame.MOUSEBUTTONDOWN and user_turn:
-                    mouse_x, mouse_y = pygame.mouse.get_pos()
-                    clicked_card_index, clicked_card = get_clicked_card(player_hands[0], x, y, spacing, mouse_x,
-                                                                        mouse_y)
-                    # remain_cards 클릭 확인
-                    if clicked_card is None:
-                        remain_cards_rect = remain_cards[0].card_img_back.get_rect()
-                        remain_cards_rect.topleft = (screen.get_rect().centerx, screen.get_rect().centery)
-                        clicked_remain_cards = remain_cards_rect.collidepoint(mouse_x, mouse_y)
-                    else:
-                        clicked_remain_cards = False
-
-                    # 클릭된 카드가 실제로 존재하는지 확인하는 조건문. 클릭된 카드가 존재하면 내부 코드 실행
-                    if clicked_card is not None or clicked_remain_cards:
-                        top_card = get_top_card(board_card)
-                        # 카드를 드로우함
-                        user_draw_time = pygame.time.get_ticks()
-                        if clicked_remain_cards and not draw_requested:
-                            player_hands[0].append(remain_cards.pop())
-                            new_drawn_card = player_hands[0][-1]
-                            draw_requested = True
-                            print(player_hands[0])
-                            print("카드 드로우 성공")
-                        # 카드를 드로우 하고, 드로우한 카드를 내는 함수.
-                        elif draw_requested and new_drawn_card is not None and not clicked_remain_cards:
-                            if is_valid_move(new_drawn_card, top_card) and clicked_card == new_drawn_card:
-                                board_card.append(clicked_card)
-                                player_hands[0].pop(clicked_card_index)
-                                print("드로우한 카드를 냄")
-                                # 내는 카드가 special인 경우
-                                if clicked_card.is_special():
-                                    current_player_index, direction = apply_special_card_effects(clicked_card,
-                                                                                                 current_player_index,
-                                                                                                 current_player,
-                                                                                                 direction,
-                                                                                                 player_hands,
-                                                                                                 remain_cards,
-                                                                                                 player_count)
-                                    draw_requested = False
-                                    new_drawn_card = None
-                                    print("드로우한 스페셜카드 처리 성공")
-                                # 내는 카드가 special이 아닌 경우
-                                elif not clicked_card.is_special():
-                                    current_player_index = (current_player_index + direction) % player_count
-                                    draw_requested = False
-                                    new_drawn_card = None
-                                    print("스페셜 아닌 드로우한 카드 처리 성공")
-                            # 카드를 드로우 하고 턴을 넘기는 함수.
-                            elif draw_requested and new_drawn_card is not None and clicked_remain_cards:
-                                current_player_index = (current_player_index + direction) % player_count
-                                draw_requested = False
-                                new_drawn_card = None
-                                print("카드 드로우만 하고 턴 넘기기 성공")
-                        # 드로우를 하지 않고 유저 덱에서 카드를 낼 경우.
-                        elif not draw_requested:
+                        # 클릭된 카드가 실제로 존재하는지 확인하는 조건문. 클릭된 카드가 존재하면 내부 코드 실행
+                        if clicked_card is not None or clicked_remain_cards:
                             top_card = get_top_card(board_card)
-                            # 유효성 검사
-                            if clicked_card is not None and is_valid_move(clicked_card, top_card):
-                                board_card.append(clicked_card)
-                                player_hands[0].pop(clicked_card_index)
-                                # 내는 카드가 special인 경우
-                                if clicked_card.is_special():
-                                    current_player_index, direction = apply_special_card_effects(clicked_card,
-                                                                                                 current_player_index,
-                                                                                                 current_player,
-                                                                                                 direction,
-                                                                                                 player_hands,
-                                                                                                 remain_cards,
-                                                                                                 player_count)
-                                # 내는 카드가 special이 아닌 경우
-                                elif not clicked_card.is_special():
-                                    # 턴을 넘김
+                            # 카드를 드로우함
+                            user_draw_time = pygame.time.get_ticks()
+                            if clicked_remain_cards and not draw_requested:
+                                player_hands[0].append(remain_cards.pop())
+                                new_drawn_card = player_hands[0][-1]
+                                draw_requested = True
+                                print(player_hands[0])
+                                print("카드 드로우 성공")
+                            # 카드를 드로우 하고, 드로우한 카드를 내는 함수.
+                            elif draw_requested and new_drawn_card is not None and not clicked_remain_cards:
+                                if is_valid_move(new_drawn_card, top_card) and clicked_card == new_drawn_card:
+                                    board_card.append(clicked_card)
+                                    player_hands[0].pop(clicked_card_index)
+                                    print("드로우한 카드를 냄")
+                                    # 내는 카드가 special인 경우
+                                    if clicked_card.is_special():
+                                        current_player_index, direction = apply_special_card_effects(clicked_card,
+                                                                                                     current_player_index,
+                                                                                                     current_player,
+                                                                                                     direction,
+                                                                                                     player_hands,
+                                                                                                     remain_cards,
+                                                                                                     player_count)
+                                        draw_requested = False
+                                        new_drawn_card = None
+                                        print("드로우한 스페셜카드 처리 성공")
+                                    # 내는 카드가 special이 아닌 경우
+                                    elif not clicked_card.is_special():
+                                        current_player_index = (current_player_index + direction) % player_count
+                                        draw_requested = False
+                                        new_drawn_card = None
+                                        print("스페셜 아닌 드로우한 카드 처리 성공")
+                                # 카드를 드로우 하고 턴을 넘기는 함수.
+                                elif draw_requested and new_drawn_card is not None and clicked_remain_cards:
                                     current_player_index = (current_player_index + direction) % player_count
-            current_time = pygame.time.get_ticks()
+                                    draw_requested = False
+                                    new_drawn_card = None
+                                    print("카드 드로우만 하고 턴 넘기기 성공")
+                            # 드로우를 하지 않고 유저 덱에서 카드를 낼 경우.
+                            elif not draw_requested:
+                                top_card = get_top_card(board_card)
+                                # 유효성 검사
+                                if clicked_card is not None and is_valid_move(clicked_card, top_card):
+                                    board_card.append(clicked_card)
+                                    player_hands[0].pop(clicked_card_index)
+                                    # 내는 카드가 special인 경우
+                                    if clicked_card.is_special():
+                                        current_player_index, direction = apply_special_card_effects(clicked_card,
+                                                                                                     current_player_index,
+                                                                                                     current_player,
+                                                                                                     direction,
+                                                                                                     player_hands,
+                                                                                                     remain_cards,
+                                                                                                     player_count)
+                                    # 내는 카드가 special이 아닌 경우
+                                    elif not clicked_card.is_special():
+                                        # 턴을 넘김
+                                        current_player_index = (current_player_index + direction) % player_count
+                current_time = pygame.time.get_ticks()
 
-            # 유저의 턴일 때 시간이 초과되면 드로우하고 턴을 넘김
-            if not draw_requested:
-                if user_turn and current_time - turn_start_time >= time_limit:
-                    card = remain_cards.pop()
-                    player_hands[current_player].append(card)  # 카드를 드로우
-                    draw_requested = False
-                    new_drawn_card = None
-                    current_player_index = (current_player_index + direction) % player_count
-                    # 턴이 넘어갈 때 turn_start_time 업데이트
-                    turn_start_time = pygame.time.get_ticks()
-            # 유저가 드로우를 하고 시간이 초과되면 턴을 그냥 넘김
-            elif draw_requested:
-                if user_turn and current_time - user_draw_time >= time_limit:
-                    draw_requested = False
-                    new_drawn_card = None
-                    current_player_index = (current_player_index + direction) % player_count
+                # 유저의 턴일 때 시간이 초과되면 드로우하고 턴을 넘김
+                if not draw_requested:
+                    if user_turn and current_time - turn_start_time >= time_limit:
+                        card = remain_cards.pop()
+                        player_hands[current_player].append(card)  # 카드를 드로우
+                        draw_requested = False
+                        new_drawn_card = None
+                        current_player_index = (current_player_index + direction) % player_count
+                        # 턴이 넘어갈 때 turn_start_time 업데이트
+                        turn_start_time = pygame.time.get_ticks()
+                # 유저가 드로우를 하고 시간이 초과되면 턴을 그냥 넘김
+                elif draw_requested:
+                    if user_turn and current_time - user_draw_time >= time_limit:
+                        draw_requested = False
+                        new_drawn_card = None
+                        current_player_index = (current_player_index + direction) % player_count
 
-            # 컴퓨터 턴 처리
-            if not user_turn and not paused:
-                if computer_action_time is None:
-                    turn_start_time = pygame.time.get_ticks()
-                    delay_time = random.randint(1000, 3000)  # 1~3초 사이의 랜덤한 시간 생성
-                    delay_time2 = random.randint(1000, 2000)  # 1~2초 사이의 랜덤한 시간 생성
-                    computer_action_time = pygame.time.get_ticks() + delay_time  # 현재 시간에 랜덤한 지연 시간을 더함
+                # 컴퓨터 턴 처리
+                if not user_turn and not paused:
+                    if computer_action_time is None:
+                        turn_start_time = pygame.time.get_ticks()
+                        delay_time = random.randint(1000, 3000)  # 1~3초 사이의 랜덤한 시간 생성
+                        delay_time2 = random.randint(1000, 2000)  # 1~2초 사이의 랜덤한 시간 생성
+                        computer_action_time = pygame.time.get_ticks() + delay_time  # 현재 시간에 랜덤한 지연 시간을 더함
 
-                if pygame.time.get_ticks() >= computer_action_time:  # 설정한 시간이 되면 컴퓨터가 행동함
-                    if 1 <= current_player <= 5:
-                        current_player_index, direction = computer_turn(player_hands[current_player],
-                                                                        current_player_index, current_player,
-                                                                        board_card, remain_cards, player_count,
-                                                                        direction, player_hands, delay_time2)
-                    computer_action_time = None  # 행동을 완료한 후, 다음 행동 시간을 초기화 함.
+                    if pygame.time.get_ticks() >= computer_action_time:  # 설정한 시간이 되면 컴퓨터가 행동함
+                        if 1 <= current_player <= 5:
+                            current_player_index, direction = computer_turn(player_hands[current_player],
+                                                                            current_player_index, current_player,
+                                                                            board_card, remain_cards, player_count,
+                                                                            direction, player_hands, delay_time2)
+                        computer_action_time = None  # 행동을 완료한 후, 다음 행동 시간을 초기화 함.
 
-        # 게임 진행을 위해 board_card에서 카드를 추출 후, remain_cards에 넣고 섞음
-        if len(remain_cards) < 10:
-            print('카드 섞기 발생')
-            top_card = board_card[-1]
-            board_card = board_card[:-1]  # top_card를 제외한 나머지 카드를 가져옵니다.
+            # 게임 진행을 위해 board_card에서 카드를 추출 후, remain_cards에 넣고 섞음
+            if len(remain_cards) < 10:
+                print('카드 섞기 발생')
+                top_card = board_card[-1]
+                board_card = board_card[:-1]  # top_card를 제외한 나머지 카드를 가져옵니다.
 
-            remain_cards.extend(board_card)  # 가져온 카드를 remain_cards에 추가합니다.
-            board_card = [top_card]  # board_card를 top_card만 남겨둡니다.
+                remain_cards.extend(board_card)  # 가져온 카드를 remain_cards에 추가합니다.
+                board_card = [top_card]  # board_card를 top_card만 남겨둡니다.
 
-            shuffle_cards(remain_cards)  # remain_cards를 무작위로 섞습니다.
+                shuffle_cards(remain_cards)  # remain_cards를 무작위로 섞습니다.
 
-        # direction 그리기
-        if direction == 1:
-            screen.blit(direction_img, (center_x, center_y))
-        elif direction == -1:
-            screen.blit(direction_reverse_img, (center_x, center_y))
+            # direction 그리기
+            if direction == 1:
+                screen.blit(direction_img, (center_x, center_y))
+            elif direction == -1:
+                screen.blit(direction_reverse_img, (center_x, center_y))
 
-        if user_turn:
-            screen.blit(turn_arrow_img, (x3, y3))
-        elif current_player == 1:
-            screen.blit(turn_arrow_img, (x4, y4 + spacing4))
-        elif current_player == 2:
-            screen.blit(turn_arrow_img, (x4, y4 + spacing4 * 2))
-        elif current_player == 3:
-            screen.blit(turn_arrow_img, (x4, y4 + spacing4 * 3))
-        elif current_player == 4:
-            screen.blit(turn_arrow_img, (x4, y4 + spacing4 * 4))
+            if user_turn:
+                screen.blit(turn_arrow_img, (x3, y3))
+            elif current_player == 1:
+                screen.blit(turn_arrow_img, (x4, y4 + spacing4))
+            elif current_player == 2:
+                screen.blit(turn_arrow_img, (x4, y4 + spacing4 * 2))
+            elif current_player == 3:
+                screen.blit(turn_arrow_img, (x4, y4 + spacing4 * 3))
+            elif current_player == 4:
+                screen.blit(turn_arrow_img, (x4, y4 + spacing4 * 4))
 
-        mouse_x, mouse_y = pygame.mouse.get_pos()  # 마우스의 위치를 가져옴
-        hovered_card_index = find_hovered_card(player_hands[0], x, y, spacing, mouse_x, mouse_y)
+            mouse_x, mouse_y = pygame.mouse.get_pos()  # 마우스의 위치를 가져옴
+            hovered_card_index = find_hovered_card(player_hands[0], x, y, spacing, mouse_x, mouse_y)
 
-        draw_cards_user(screen, player_hands[0], x, y, spacing, hovered_card_index)  # 플레이어의 카드를 그린다.
+            draw_cards_user(screen, player_hands[0], x, y, spacing, hovered_card_index)  # 플레이어의 카드를 그린다.
 
-        for i in range(len(player_hands) - 1):  # ai의 카드를 그린다.
-            draw_cards_ai(screen, player_hands[i + 1], x2, y2 + (i * spacing4), max_per_row, spacing2, hovered_card_index2,
-                          show_back=False)  # 추후 True로 바꾼다.
+            for i in range(len(player_hands) - 1):  # ai의 카드를 그린다.
+                draw_cards_ai(screen, player_hands[i + 1], x2, y2 + (i * spacing4), max_per_row, spacing2, hovered_card_index2,
+                              show_back=False)  # 추후 True로 바꾼다.
 
-        # 남은 카드 더미 그리기
-        if remain_cards:
-            screen.blit(remain_cards[0].card_img_back, (screen.get_rect().centerx, screen.get_rect().centery))
+            # 남은 카드 더미 그리기
+            if remain_cards:
+                screen.blit(remain_cards[0].card_img_back, (screen.get_rect().centerx, screen.get_rect().centery))
 
-        top_card = get_top_card(board_card)
-        draw_top_card(screen, top_card, remain_cards_x_position, remain_cards_y_position)
+            top_card = get_top_card(board_card)
+            draw_top_card(screen, top_card, remain_cards_x_position, remain_cards_y_position)
 
-        # 드로우 요청 시 버튼 표시
-        if draw_requested and is_valid_move(new_drawn_card, top_card):
-            play_drawn_card_button.topleft = (screen.get_rect().centerx + 100, screen.get_rect().centery)
-            draw_button(screen, "Click on the remaining deck to turn.\n Or If you want to submit a drawn card,"
-                                "\nclick on the drawn card.", font, (255, 255, 255), play_drawn_card_button)
-        elif draw_requested and not is_valid_move(new_drawn_card, top_card):
-            play_drawn_card_button.topleft = (screen.get_rect().centerx + 100, screen.get_rect().centery)
-            draw_button(screen, "Click on the remaining deck to turn.", font, (255, 255, 255),
-                        play_drawn_card_button)
+            # 드로우 요청 시 버튼 표시
+            if draw_requested and is_valid_move(new_drawn_card, top_card):
+                play_drawn_card_button.topleft = (screen.get_rect().centerx + 100, screen.get_rect().centery)
+                draw_button(screen, "Click on the remaining deck to turn.\n Or If you want to submit a drawn card,"
+                                    "\nclick on the drawn card.", font, (255, 255, 255), play_drawn_card_button)
+            elif draw_requested and not is_valid_move(new_drawn_card, top_card):
+                play_drawn_card_button.topleft = (screen.get_rect().centerx + 100, screen.get_rect().centery)
+                draw_button(screen, "Click on the remaining deck to turn.", font, (255, 255, 255),
+                            play_drawn_card_button)
 
-        # 퍼즈버튼 그리기(그리는 이미지, 작동되는 함수)
-        if not paused:
-            screen.blit(pause_button_img, pause_button_rect)
-        else:
-            screen.blit(resume_button_img, pause_button_rect)
+            # 퍼즈버튼 그리기(그리는 이미지, 작동되는 함수)
+            if not paused:
+                screen.blit(pause_button_img, pause_button_rect)
+            else:
+                screen.blit(resume_button_img, pause_button_rect)
 
-        # 게임 종료 조건 확인 및 메시지 출력
-        if len(player_hands[0]) == 0:
-            draw_text(screen, "user wins!", font_big, (255, 255, 255), screen.get_rect().centerx, 100)
-            pygame.time.delay(3000)
-            running = False
-        elif any(len(player_hand) == 0 for player_hand in player_hands[1:]):
-            draw_text(screen, "Computer wins!", font_big, (255, 255, 255), screen.get_rect().centerx, 100)
-            pygame.time.delay(3000)
-            running = False
-        pygame.display.flip()
-        clock.tick(FPS)  # FPS를 조절하여 루프 속도를 제한한다.
+            if len(player_hands[0]) == 0:
+                winner_message = "User Wins!"
+                game_over = True
+            elif any(len(player_hand) == 0 for player_hand in player_hands[1:]):
+                winner_message = "Computer wins!"
+                game_over = True
+
+            pygame.display.flip()
+            clock.tick(FPS)  # FPS를 조절하여 루프 속도를 제한한다.
+
+        # 게임이 끝났을 때,
+        elif game_over:
+            # 게임 오버 화면 표시
+            screen.fill((0, 0, 0))
+            draw_text(screen, winner_message, font_big, (255, 255, 255), screen.get_rect().centerx, 100)
+            draw_text(screen, "Press 'r' to restart or 'e' to exit", font_big, (255, 255, 255),
+                      screen.get_rect().centerx, 300)
+            pygame.display.flip()
+
+            # 사용자가 키를 누를 때까지 기다림
+            while True:
+                event = pygame.event.wait()
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r:
+                        # 게임을 다시 시작
+                        restart_game = True
+                        break
+                    elif event.key == pygame.K_e:
+                        break
+                elif event.type == pygame.QUIT:
+                    break
+
+            # 파이게임 종료 여부 결정
+            if restart_game:
+                singleplayer()
+                return
+            elif not restart_game:
+                return False
+
+
+if __name__ == "__main__":
+    quit_game = singleplayer()
+    if not quit_game:
+        pygame.quit()
