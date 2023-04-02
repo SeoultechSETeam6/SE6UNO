@@ -43,7 +43,7 @@ def game():
 
 def singleplayer():
     pygame.init()
-    global FPS
+    global FPS, event
     computer_action_time = None
     clock = pygame.time.Clock()
 
@@ -118,6 +118,10 @@ def singleplayer():
     screen.blit(player_background, (1485, 0))
     pygame.display.flip()
 
+    # 게임 이미지를 로드
+    pause_button_img = pygame.image.load("resources/Image/button_images/pause.png").convert_alpha()
+    resume_button_img = pygame.image.load("resources/Image/button_images/resume.png").convert_alpha()
+
     # 색약 모드 설정
     option = Option(False)  # False: 일반 모드, True: 색약 모드
 
@@ -161,10 +165,18 @@ def singleplayer():
     prev_user_turn = False
     draw_requested = False
     new_drawn_card = None
+    # remain카드
     remain_cards_rect = remain_cards[0].card_img_back.get_rect()
     remain_cards_rect.topleft = (remain_cards_x_position, remain_cards_y_position)
-    time_limit = 10000  # 10초 제한 설정
-    turn_start_time = pygame.time.get_ticks()  # 현재 시간 저장
+    # pause버튼
+    pause_button_rect = pause_button_img.get_rect()
+    pause_button_rect.topleft = (100, 100)
+    # 일시정지 초기값
+    paused = False
+    # 10초 제한 설정
+    time_limit = 10000
+    # 현재 시간 저장
+    turn_start_time = pygame.time.get_ticks()
 
     while running:
         screen.fill((111, 111, 111))  # 화면 초기화
@@ -183,10 +195,17 @@ def singleplayer():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if pause_button_rect.collidepoint(mouse_x, mouse_y):
+                    paused = not paused
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    paused = not paused
+
+        # 퍼즈가 아닐 경우
+        if not paused:
             # 유저의 턴일 경우
             if user_turn:
-                # print(board_card[-1], player_hands)
-                # print("user_turn")
                 if event.type == pygame.MOUSEBUTTONDOWN and user_turn:
                     mouse_x, mouse_y = pygame.mouse.get_pos()
                     clicked_card_index, clicked_card = get_clicked_card(player_hands[0], x, y, spacing, mouse_x,
@@ -260,40 +279,40 @@ def singleplayer():
                                 elif not clicked_card.is_special():
                                     # 턴을 넘김
                                     current_player_index = (current_player_index + direction) % player_count
-        current_time = pygame.time.get_ticks()
+            current_time = pygame.time.get_ticks()
 
-        # 유저의 턴일 때 시간이 초과되면 드로우하고 턴을 넘김
-        if not draw_requested:
-            if user_turn and current_time - turn_start_time >= time_limit:
-                card = remain_cards.pop()
-                player_hands[current_player].append(card)  # 카드를 드로우
-                draw_requested = False
-                new_drawn_card = None
-                current_player_index = (current_player_index + direction) % player_count
-                # 턴이 넘어갈 때 turn_start_time 업데이트
-                turn_start_time = pygame.time.get_ticks()
-        # 유저가 드로우를 하고 시간이 초과되면 턴을 그냥 넘김
-        elif draw_requested:
-            if user_turn and current_time - user_draw_time >= time_limit:
-                draw_requested = False
-                new_drawn_card = None
-                current_player_index = (current_player_index + direction) % player_count
+            # 유저의 턴일 때 시간이 초과되면 드로우하고 턴을 넘김
+            if not draw_requested:
+                if user_turn and current_time - turn_start_time >= time_limit:
+                    card = remain_cards.pop()
+                    player_hands[current_player].append(card)  # 카드를 드로우
+                    draw_requested = False
+                    new_drawn_card = None
+                    current_player_index = (current_player_index + direction) % player_count
+                    # 턴이 넘어갈 때 turn_start_time 업데이트
+                    turn_start_time = pygame.time.get_ticks()
+            # 유저가 드로우를 하고 시간이 초과되면 턴을 그냥 넘김
+            elif draw_requested:
+                if user_turn and current_time - user_draw_time >= time_limit:
+                    draw_requested = False
+                    new_drawn_card = None
+                    current_player_index = (current_player_index + direction) % player_count
 
-        # 컴퓨터 턴 처리
-        if not user_turn:
-            if computer_action_time is None:
-                turn_start_time = pygame.time.get_ticks()
-                delay_time = random.randint(1000, 3000)  # 1~3초 사이의 랜덤한 시간 생성
-                delay_time2 = random.randint(1000, 2000)  # 1~2초 사이의 랜덤한 시간 생성
-                computer_action_time = pygame.time.get_ticks() + delay_time  # 현재 시간에 랜덤한 지연 시간을 더함
+            # 컴퓨터 턴 처리
+            if not user_turn and not paused:
+                if computer_action_time is None:
+                    turn_start_time = pygame.time.get_ticks()
+                    delay_time = random.randint(1000, 3000)  # 1~3초 사이의 랜덤한 시간 생성
+                    delay_time2 = random.randint(1000, 2000)  # 1~2초 사이의 랜덤한 시간 생성
+                    computer_action_time = pygame.time.get_ticks() + delay_time  # 현재 시간에 랜덤한 지연 시간을 더함
 
-            if pygame.time.get_ticks() >= computer_action_time:  # 설정한 시간이 되면 컴퓨터가 행동함
-                if 1 <= current_player <= 5:
-                    current_player_index, direction = computer_turn(player_hands[current_player],
-                                                                    current_player_index, current_player,
-                                                                    board_card, remain_cards, player_count,
-                                                                    direction, player_hands, delay_time2)
-                computer_action_time = None  # 행동을 완료한 후, 다음 행동 시간을 초기화 함.
+                if pygame.time.get_ticks() >= computer_action_time:  # 설정한 시간이 되면 컴퓨터가 행동함
+                    if 1 <= current_player <= 5:
+                        current_player_index, direction = computer_turn(player_hands[current_player],
+                                                                        current_player_index, current_player,
+                                                                        board_card, remain_cards, player_count,
+                                                                        direction, player_hands, delay_time2)
+                    computer_action_time = None  # 행동을 완료한 후, 다음 행동 시간을 초기화 함.
 
         # 게임 진행을 위해 board_card에서 카드를 추출 후, remain_cards에 넣고 섞음
         if len(remain_cards) < 10:
@@ -332,6 +351,12 @@ def singleplayer():
             draw_button(screen, "Click on the remaining deck to turn.", font, (255, 255, 255),
                         play_drawn_card_button)
 
+        # 퍼즈버튼 그리기(그리는 이미지, 작동되는 함수)
+        if not paused:
+            screen.blit(pause_button_img, pause_button_rect)
+        else:
+            screen.blit(resume_button_img, pause_button_rect)
+
         # 게임 종료 조건 확인 및 메시지 출력
         if len(player_hands[0]) == 0:
             draw_text(screen, "user wins!", font_big, (255, 255, 255), screen.get_rect().centerx, 100)
@@ -341,6 +366,6 @@ def singleplayer():
             draw_text(screen, "Computer wins!", font_big, (255, 255, 255), screen.get_rect().centerx, 100)
             pygame.time.delay(3000)
             running = False
-
+        print(paused)
         pygame.display.flip()
         clock.tick(FPS)  # FPS를 조절하여 루프 속도를 제한한다.
