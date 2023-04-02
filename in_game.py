@@ -48,7 +48,7 @@ def singleplayer():
     clock = pygame.time.Clock()
 
     # 플레이어 수와 각 플레이어가 받을 카드 수 지정
-    player_count = 3
+    player_count = 5
     card_count = 7
 
     # 스크린 사이즈 및 폰트
@@ -125,6 +125,7 @@ def singleplayer():
     resume_button_img = pygame.image.load("resources/Image/button_images/resume.png").convert_alpha()
     direction_img = pygame.image.load("resources/Image/direction_images/direction.png").convert_alpha()
     direction_reverse_img = pygame.image.load("resources/Image/direction_images/direction_reverse.png").convert_alpha()
+    turn_arrow_img = pygame.image.load("resources/Image/direction_images/turn_arrow.png").convert_alpha()
 
     # 이미지 크기 계산, 화면 크기 계싼
     screen = pygame.display.set_mode((screen_width, screen_height))
@@ -169,6 +170,12 @@ def singleplayer():
     y2 = screen_height * 0.08
     spacing2 = screen_height * 0.04
     max_per_row = 7
+    # turn_arrow_img의 위치를 계산. (x3, y3)는 유저 좌표, (x3, y3, spacing3)는 AI의 좌표
+    x3 = screen_width/9 - 100
+    y3 = screen_height* 0.65
+    x4 = screen_width * 0.63
+    y4 = screen_height * 0.07 - screen_height * 0.3
+    spacing4 = screen_height * 0.2
 
     # 플레이어들이 카드를 뽑고 남은 카드들의 위치를 잡는데 사용
     remain_cards_x_position = screen.get_rect().centerx - 100
@@ -343,13 +350,24 @@ def singleplayer():
         elif direction == -1:
             screen.blit(direction_reverse_img, (center_x, center_y))
 
+        if user_turn:
+            screen.blit(turn_arrow_img, (x3, y3))
+        elif current_player == 1:
+            screen.blit(turn_arrow_img, (x4, y4 + spacing4))
+        elif current_player == 2:
+            screen.blit(turn_arrow_img, (x4, y4 + spacing4 * 2))
+        elif current_player == 3:
+            screen.blit(turn_arrow_img, (x4, y4 + spacing4 * 3))
+        elif current_player == 4:
+            screen.blit(turn_arrow_img, (x4, y4 + spacing4 * 4))
+
         mouse_x, mouse_y = pygame.mouse.get_pos()  # 마우스의 위치를 가져옴
         hovered_card_index = find_hovered_card(player_hands[0], x, y, spacing, mouse_x, mouse_y)
 
         draw_cards_user(screen, player_hands[0], x, y, spacing, hovered_card_index)  # 플레이어의 카드를 그린다.
 
         for i in range(len(player_hands) - 1):  # ai의 카드를 그린다.
-            draw_cards_ai(screen, player_hands[i + 1], x2, y2 + (i * 200), max_per_row, spacing2, hovered_card_index2,
+            draw_cards_ai(screen, player_hands[i + 1], x2, y2 + (i * spacing4), max_per_row, spacing2, hovered_card_index2,
                           show_back=False)  # 추후 True로 바꾼다.
 
         # 남은 카드 더미 그리기
