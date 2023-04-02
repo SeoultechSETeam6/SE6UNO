@@ -2,6 +2,7 @@ import pygame
 import sys
 import pickle
 import in_game
+from campaign_map import CampaignMap
 from button import Button
 from option import basic_option as basic
 from option.setting_option import Option
@@ -28,6 +29,12 @@ class Main:
         pygame.init()
         self.running = True
         self.clock = pygame.time.Clock()
+
+    def campaign_button_click_event(self):
+        basic.mouse_event_remove()
+        print('캠페인 버튼 클릭됨')
+        campaign = CampaignMap()
+        campaign.run()
 
     def settings_button_click_event(self):
         basic.mouse_event_remove()
@@ -84,7 +91,7 @@ class Main:
         # 버튼
         self.buttons = [
             Button(self.display_size[0] // 2, self.display_size[1] // 2, self.button_size[0],
-                   self.button_size[1], '캠페인', in_game.game, self.font_size[1]),
+                   self.button_size[1], '캠페인', self.campaign_button_click_event, self.font_size[1]),
             Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.2, self.button_size[0],
                    self.button_size[1], '싱글 플레이', in_game.game, self.font_size[1]),
             Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.4, self.button_size[0],

@@ -1,4 +1,9 @@
 import pygame
+import json
+import pickle
+from button import ButtonWithImg
+from button import Button
+from option import basic_option as basic
 
 
 class CampaignMap:
@@ -9,29 +14,36 @@ class CampaignMap:
         self.key_setting = None
         self.font_size = None
         self.button_size = None
-        self.logo_size = None
         self.screen = None
         self.buttons = []
         self.selected_button_index = 0
-        self.logo = None
-        self.logo_rect = None
         self.font = None
-        self.key_setting_up = None
-        self.key_setting_down = None
-        self.key_setting_enter = None
         pygame.init()
         self.running = True
         self.clock = pygame.time.Clock()
 
-    def settings_button_click_event(self):
-        basic.mouse_event_remove()
-        print('설정 버튼 클릭됨')
-        option = Option()
-        option.run()
-        self.setting()
+        self.file_path = "./game_data.json"
+        try:
+            with open(self.file_path) as fr:
+                self.clear_data = json.load(fr)["campaign_cleared_status"]
+        except FileNotFoundError:
+            clear_data = {
+                "campaign_cleared_status": {
+                    "1st": 0,
+                    "2nd": 0,
+                    "3rd": 0,
+                    "4th": 0
+                }
+            }
+            with open(self.file_path, 'w') as fw:
+                json.dump(clear_data, fw, indent=4)
 
-    def exit_button_click_event(self):
-        print('나가기 버튼 클릭됨')
+    def button_click_event(self):
+        print('버튼 클릭됨')
+
+    def exit_event(self):
+        print('캠페인 맵 메뉴에서 나가기 버튼 클릭 됨')
+        basic.mouse_event_remove()
         self.running = False
 
     def setting(self):
@@ -49,56 +61,57 @@ class CampaignMap:
         if self.display_size[0] == 1920:
             self.font_size = basic.font_size[0]
             self.button_size = basic.button_size[0]
-            self.logo_size = basic.logo_size[0]
+            self.campaign_map_button_size = basic.campaign_map_button_size[0]
         elif self.display_size[0] == 1600:
             self.font_size = basic.font_size[1]
             self.button_size = basic.button_size[1]
-            self.logo_size = basic.logo_size[1]
+            self.campaign_map_button_size = basic.campaign_map_button_size[1]
         else:
             self.font_size = basic.font_size[2]
             self.button_size = basic.button_size[2]
-            self.logo_size = basic.logo_size[2]
+            self.campaign_map_button_size = basic.campaign_map_button_size[2]
 
         # 화면 표시
         self.screen = pygame.display.set_mode(self.display_size)
         pygame.display.set_caption(basic.game_title)
 
-        # 로고 표시
-        self.logo = pygame.image.load("resources/Image/logo.jpg")
-        self.logo = pygame.transform.scale(self.logo, self.logo_size)
-        self.logo_rect = self.logo.get_rect()
-        self.logo_rect.center = (self.display_size[0] // 2, self.logo_rect.height // 2)
-
         # 버튼 조작 키 표시
         self.font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[1])
-        self.key_setting_up = self.font.render("UP: " + pygame.key.name(self.key_setting['up']), True, (255, 255, 255))
-        self.key_setting_down = self.font.render("DOWN: " + pygame.key.name(self.key_setting['down']), True, (255, 255, 255))
-        self.key_setting_enter = self.font.render("Enter: " + pygame.key.name(self.key_setting['enter']), True, (255, 255, 255))
 
         # 버튼
-        self.buttons = [
-            Button(self.display_size[0] // 2, self.display_size[1] // 2, self.button_size[0],
-                   self.button_size[1], '캠페인', in_game.game, self.font_size[1]),
-            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.2, self.button_size[0],
-                   self.button_size[1], '싱글 플레이', in_game.game, self.font_size[1]),
-            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.4, self.button_size[0],
-                   self.button_size[1], '설정', self.settings_button_click_event, self.font_size[1]),
-            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.6, self.button_size[0],
-                   self.button_size[1], '나가기', self.exit_button_click_event, self.font_size[1])]
+        self.buttons = [Button(self.display_size[0] * 0.07, self.display_size[1] * 0.04, self.button_size[0],
+                               self.button_size[1], "뒤로 가기", self.exit_event, self.font_size[1]),
+                        ButtonWithImg(self.display_size[0] * 0.3, self.display_size[1] * 0.05,
+                                      self.campaign_map_button_size[0],
+                                      self.campaign_map_button_size[1], "resources/image/story_image/storygym_1.jpg",
+                                      self.button_click_event)]
+        if self.clear_data["1st"] > 0:
+            self.buttons.append(ButtonWithImg(self.display_size[0] * 0.35, self.display_size[1] * 0.5,
+                                self.campaign_map_button_size[0],
+                                self.campaign_map_button_size[1], "resources/image/story_image/storygym_2.jpg",
+                                self.button_click_event))
+        if self.clear_data["2nd"] > 0:
+            self.buttons.append(ButtonWithImg(self.display_size[0] * 0.7, self.display_size[1] * 0.15,
+                                self.campaign_map_button_size[0],
+                                self.campaign_map_button_size[1], "resources/image/story_image/storygym_3.jpg",
+                                self.button_click_event))
+        if self.clear_data["3rd"] > 0:
+            self.buttons.append(ButtonWithImg(self.display_size[0] * 0.75, self.display_size[1] * 0.6,
+                                self.campaign_map_button_size[0],
+                                self.campaign_map_button_size[1], "resources/image/story_image/storygym_4.jpg",
+                                self.button_click_event))
 
         self.selected_button_index = 0
         self.buttons[self.selected_button_index].selected = True
 
     def draw(self):
         # 배경 색상
-        self.screen.fill((20, 20, 20))
-        # 버튼 조작 키 업데이트
-        self.screen.blit(self.key_setting_up, (50, self.screen.get_height() // 30 * 26))
-        self.screen.blit(self.key_setting_down, (50, self.screen.get_height() // 30 * 27))
-        self.screen.blit(self.key_setting_enter, (50, self.screen.get_height() // 30 * 28))
-        self.screen.blit(self.logo, self.logo_rect)
+        self.screen.fill((255, 255, 255))
+
         for button in self.buttons:
             button.process()
+            if isinstance(button, ButtonWithImg):
+                self.screen.blit(button.image, button.img_rect)
             self.screen.blit(button.surface, button.rect)
 
         # 매 프레임마다 화면 업데이트
@@ -117,6 +130,28 @@ class CampaignMap:
                     self.buttons[self.selected_button_index].selected = False
                     self.selected_button_index = (self.selected_button_index + 1) % len(self.buttons)
                     self.buttons[self.selected_button_index].selected = True
+                elif event.key == self.key_setting['left']:
+                    self.buttons[self.selected_button_index].selected = False
+                    if self.selected_button_index == 0:
+                        self.selected_button_index -= 1
+                    elif self.selected_button_index == 1:
+                        self.selected_button_index = 0
+                    elif self.selected_button_index == 2:
+                        self.selected_button_index = 3
+                    else:
+                        self.selected_button_index = (self.selected_button_index - 2) % len(self.buttons)
+                    self.buttons[self.selected_button_index].selected = True
+                elif event.key == self.key_setting['right']:
+                    self.buttons[self.selected_button_index].selected = False
+                    if self.selected_button_index == 0:
+                        self.selected_button_index = 1
+                    elif self.selected_button_index == 3:
+                        self.selected_button_index = 2
+                    elif self.selected_button_index == 4:
+                        self.selected_button_index = 0
+                    else:
+                        self.selected_button_index = (self.selected_button_index + 2) % len(self.buttons)
+                    self.buttons[self.selected_button_index].selected = True
                 elif event.key == self.key_setting['enter']:
                     self.buttons[self.selected_button_index].on_click_function()
 
@@ -127,10 +162,3 @@ class CampaignMap:
             self.clock.tick(basic.fps)
             self.event()
             self.draw()
-        # 나가기
-        pygame.quit()
-        sys.exit()
-
-
-main = Main()
-main.run()
