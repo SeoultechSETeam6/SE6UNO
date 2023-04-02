@@ -1,13 +1,7 @@
 import pygame
-import sys
-import pickle
-import in_game
-from button import Button
-from option import basic_option as basic
-from option.setting_option import Option
 
 
-class Main:
+class CampaignMap:
     def __init__(self):
         # Pygame 초기화
         self.display_size = None
