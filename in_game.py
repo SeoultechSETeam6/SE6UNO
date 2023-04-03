@@ -48,8 +48,8 @@ def singleplayer():
     clock = pygame.time.Clock()
 
     # 플레이어 수와 각 플레이어가 받을 카드 수 지정
-    player_count = 2
-    card_count = 1
+    player_count = 5
+    card_count = 7
 
     # 스크린 사이즈 및 폰트
     screen_width = 1800
@@ -148,9 +148,10 @@ def singleplayer():
     print(remain_cards)
     # 플레이어 순서 결정
     player_order = list(range(player_count))
-    # random.shuffle(player_order) (추후 필요하면 on)
-    current_player_index = 0  # 초기 플레이어 순서를 위한 설정 값.
-    direction = 1  # 플레이어 순서 (1: 정방향, -1: 역방향)
+    # 초기 플레이어 순서를 위한 설정 값.
+    current_player_index = (random.randint(0, len(player_order) - 1))
+    # 플레이어 순서 (1: 정방향, -1: 역방향)
+    direction = 1
 
     # 보드에 뒤집힌 카드 설정 (카드 한 장을 뽑아서 남은 카드 덱 옆에 보이게 놓기)
     board_card = [remain_cards.pop()]
