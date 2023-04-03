@@ -19,10 +19,9 @@ class Card:
     def __init__(self, color, value, card_img, card_img_back):
         self.color = color  # 색
         self.value = value  # 숫자
-        self.card_img_big = card_img  # 플레이어가 볼 자신의 카드 이미지
-        self.card_img_back_big = card_img_back  # 상대방 에게 보여질 카드 뒷면
-        self.card_img = resize_image(card_img, 10)
-        self.card_img_back = resize_image(card_img_back, 10)
+        self.card_img = card_img  # 플레이어가 볼 자신의 카드 이미지
+        self.card_img_back = card_img_back  # 상대방 에게 보여질 카드 뒷면
+
     def __str__(self):
         return f"{self.color} {self.value}"
 
@@ -32,12 +31,12 @@ class Card:
     def is_special(self):
         return self.value in ["skip", "reverse", "draw_2", "bomb", "one_more", "shield", "change"]
 
-
+'''
 def resize_image(image, scale_percent):
     width = int(image.get_width() * scale_percent / 100)
     height = int(image.get_height() * scale_percent / 100)
     return pygame.transform.scale(image, (width, height))
-
+'''
 
 def generate_cards():
     cards = []

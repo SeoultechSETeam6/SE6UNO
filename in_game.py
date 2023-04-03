@@ -127,6 +127,8 @@ def singleplayer():
     direction_reverse_img = pygame.image.load("resources/Image/direction_images/direction_reverse.png").convert_alpha()
     turn_arrow_img = pygame.image.load("resources/Image/direction_images/turn_arrow.png").convert_alpha()
     next_turn_button_img = pygame.image.load("resources/Image/button_images/next_turn.png").convert_alpha()
+    uno_button_img = pygame.image.load("resources/Image/button_images/uno_button.png").convert_alpha()
+    uno_button_inactive_img = pygame.image.load("resources/Image/button_images/uno_button_inactive.png").convert_alpha()
 
     # 이미지 크기 계산, 화면 크기 계싼
     screen = pygame.display.set_mode((screen_width, screen_height))
@@ -165,35 +167,36 @@ def singleplayer():
     hovered_card_index2 = None
 
     # 각 카드들의 위치 설정, (x, y, spacing)는 유저의 카드, (x2, y2, spacing2, max_per_row)는 AI의 카드 위치를 잡는다.
-    x = screen_width/9
-    y = screen_height*4 / 5
+    x = screen_width/10
+    y = screen_height * 0.8
     spacing = screen_height * 0.08
     x2 = screen_width * 0.72
     y2 = screen_height * 0.08
     spacing2 = screen_height * 0.04
     max_per_row = 7
-    # turn_arrow_img의 위치를 계산. (x3, y3)는 유저 좌표, (x3, y3, spacing3)는 AI의 좌표
-    x3 = screen_width/9 - 100
-    y3 = screen_height * 0.65
+    # turn_arrow_img의 위치를 계산. (x3, y3)는 유저 좌표, (x4, y4, spacing4)는 AI의 좌표
+    x3 = screen_width/10 - 150
+    y3 = screen_height * 0.8 - 100
     x4 = screen_width * 0.63
-    y4 = screen_height * 0.07 - screen_height * 0.3
+    y4 = screen_height * 0.07 - 100
     spacing4 = screen_height * 0.2
     # 플레이어들이 카드를 뽑고 남은 카드들의 위치를 잡는데 사용
     remain_cards_x_position = (screen.get_rect().centerx - 100)
     remain_cards_y_position = (screen.get_rect().centery - 50)
-
-    prev_user_turn = False
-    draw_requested = False
-    new_drawn_card = None
     # remain카드
     remain_cards_rect = remain_cards[0].card_img_back.get_rect()
     remain_cards_rect.topleft = (remain_cards_x_position, remain_cards_y_position)
     # pause버튼
     pause_button_rect = pause_button_img.get_rect()
-    pause_button_rect.topleft = (140, 25)
+    pause_button_rect.topleft = (25, 25)
     # next_turn버튼
     next_turn_button_rect = next_turn_button_img.get_rect()
     next_turn_button_rect.topleft = (x, y - 150)
+    # uno_button
+    uno_button_rect = uno_button_img.get_rect()
+    uno_button_rect.topleft = (150, screen_height * 0.5)
+    uno_button_inactive_rect = uno_button_inactive_img.get_rect()
+    uno_button_inactive_rect.topleft = (150, screen_height * 0.5)
     # 일시정지 초기값
     paused = False
     # 게임 위너 메시지
@@ -202,6 +205,12 @@ def singleplayer():
     game_over = False
     # 리스타트 초기값
     restart_game = False
+    # 전에 유저 턴이었는지 확인하는 초기값
+    prev_user_turn = False
+    # 유저가 draw 했는지 확인하는 초기값
+    draw_requested = False
+    # draw한 카드가 어떤 카드인가의 초기값
+    new_drawn_card = None
 
     # 10초 제한 설정
     time_limit = 10000
@@ -351,17 +360,11 @@ def singleplayer():
                 screen.blit(direction_img, (center_x, center_y))
             elif direction == -1:
                 screen.blit(direction_reverse_img, (center_x, center_y))
-
+            # 누구 턴인지 표시하는 화살표 그리기
             if user_turn:
                 screen.blit(turn_arrow_img, (x3, y3))
-            elif current_player == 1:
-                screen.blit(turn_arrow_img, (x4, y4 + spacing4))
-            elif current_player == 2:
-                screen.blit(turn_arrow_img, (x4, y4 + spacing4 * 2))
-            elif current_player == 3:
-                screen.blit(turn_arrow_img, (x4, y4 + spacing4 * 3))
-            elif current_player == 4:
-                screen.blit(turn_arrow_img, (x4, y4 + spacing4 * 4))
+            else:
+                screen.blit(turn_arrow_img, (x4, y4 + spacing4 * (current_player - 1)))
 
             # 유저턴일때 표시될 사항. (시간제한, 턴 넘기기 버튼)
             if user_turn and not draw_requested:
@@ -400,6 +403,12 @@ def singleplayer():
                 play_drawn_card_button.topleft = (screen.get_rect().centerx + 100, screen.get_rect().centery)
                 draw_button(screen, "Click NEXT TURN button to turn.", font, (255, 255, 255),
                             play_drawn_card_button)
+
+            # 우노 버튼 표시
+            if any(len(player_hand) == 1 for player_hand in player_hands):
+                screen.blit(uno_button_img, uno_button_rect)
+            else:
+                screen.blit(uno_button_inactive_img, uno_button_inactive_rect)
 
             # 퍼즈버튼 그리기(그리는 이미지, 작동되는 함수)
             if not paused:
