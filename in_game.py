@@ -189,7 +189,7 @@ def singleplayer():
     remain_cards_rect.topleft = (remain_cards_x_position, remain_cards_y_position)
     # pause버튼
     pause_button_rect = pause_button_img.get_rect()
-    pause_button_rect.topleft = (100, 100)
+    pause_button_rect.topleft = (140, 25)
     # 일시정지 초기값
     paused = False
     # 게임 위너 메시지
@@ -325,7 +325,7 @@ def singleplayer():
                         current_player_index = (current_player_index + direction) % player_count
 
                 # 컴퓨터 턴 처리
-                if not user_turn and not paused:
+                if not user_turn:
                     if computer_action_time is None:
                         turn_start_time = pygame.time.get_ticks()
                         delay_time = random.randint(1000, 3000)  # 1~3초 사이의 랜덤한 시간 생성
@@ -367,6 +367,11 @@ def singleplayer():
                 screen.blit(turn_arrow_img, (x4, y4 + spacing4 * 3))
             elif current_player == 4:
                 screen.blit(turn_arrow_img, (x4, y4 + spacing4 * 4))
+
+            if user_turn:
+                remaining_time = time_limit - (current_time - (turn_start_time))
+                remaining_time_text = f"남은 시간: {remaining_time // 1000}초"
+                draw_text(screen, remaining_time_text, font, (255, 255, 255), screen.get_rect().centerx, 30)
 
             mouse_x, mouse_y = pygame.mouse.get_pos()  # 마우스의 위치를 가져옴
             hovered_card_index = find_hovered_card(player_hands[0], x, y, spacing, mouse_x, mouse_y)
