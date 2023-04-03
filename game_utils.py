@@ -79,7 +79,7 @@ def get_top_card(deck):
 
 
 # 카드 한 장 뽑아옴
-def draw_top_card(screen, card, x, y):
+def draw_board_card(screen, card, x, y):
     if card:
         screen.blit(card.card_img, (x, y))
 
