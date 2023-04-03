@@ -2,6 +2,7 @@ import pygame
 import sys
 import pickle
 import in_game
+from mouse import Mouse
 from button import Button
 from option import basic_option as basic
 from option.setting_option import Option
@@ -28,9 +29,13 @@ class Main:
         pygame.init()
         self.running = True
         self.clock = pygame.time.Clock()
+        self.background_music = pygame.mixer.Sound("./resources/Music/main.ogg")
+        self.sound_volume = None
+        self.background_volume = None
+        self.effect_volume = None
 
     def settings_button_click_event(self):
-        basic.mouse_event_remove()
+        self.background_music.stop()
         print('설정 버튼 클릭됨')
         option = Option()
         option.run()
@@ -47,10 +52,16 @@ class Main:
                 self.display_size = pickle.load(f)
                 self.color_weakness = pickle.load(f)
                 self.key_setting = pickle.load(f)
+                self.sound_volume = pickle.load(f)
+                self.background_volume = pickle.load(f)
+                self.effect_volume = pickle.load(f)
         except EOFError:
             self.display_size = basic.display_size
             self.color_weakness = basic.color_weakness
             self.key_setting = basic.key_setting
+            self.sound_volume = basic.sound_volume
+            self.background_volume = basic.background_volume
+            self.effect_volume = basic.effect_volume
 
         if self.display_size[0] == 1920:
             self.font_size = basic.font_size[0]
@@ -64,6 +75,9 @@ class Main:
             self.font_size = basic.font_size[2]
             self.button_size = basic.button_size[2]
             self.logo_size = basic.logo_size[2]
+
+        self.background_music.set_volume(self.sound_volume * self.background_volume)
+        self.background_music.play(-1)
 
         # 화면 표시
         self.screen = pygame.display.set_mode(self.display_size)
@@ -91,7 +105,7 @@ class Main:
                    self.button_size[1], '나가기', self.exit_button_click_event, self.font_size[1])]
 
         self.selected_button_index = 0
-        self.buttons[self.selected_button_index].selected = True
+        self.buttons[self.selected_button_index].keyboard_selected = True
 
     def draw(self):
         # 배경 색상
@@ -114,13 +128,13 @@ class Main:
                 self.running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == self.key_setting['up']:
-                    self.buttons[self.selected_button_index].selected = False
+                    self.buttons[self.selected_button_index].keyboard_selected = False
                     self.selected_button_index = (self.selected_button_index - 1) % len(self.buttons)
-                    self.buttons[self.selected_button_index].selected = True
+                    self.buttons[self.selected_button_index].keyboard_selected = True
                 elif event.key == self.key_setting['down']:
-                    self.buttons[self.selected_button_index].selected = False
+                    self.buttons[self.selected_button_index].keyboard_selected = False
                     self.selected_button_index = (self.selected_button_index + 1) % len(self.buttons)
-                    self.buttons[self.selected_button_index].selected = True
+                    self.buttons[self.selected_button_index].keyboard_selected = True
                 elif event.key == self.key_setting['enter']:
                     self.buttons[self.selected_button_index].on_click_function()
 
@@ -128,6 +142,7 @@ class Main:
         self.setting()
         # 메인 화면 표시
         while self.running:
+            Mouse.updateMouseState()
             self.clock.tick(basic.fps)
             self.event()
             self.draw()
