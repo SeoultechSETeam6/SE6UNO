@@ -116,9 +116,9 @@ class Option:
                    self.key_enter_event, self.font_size[1])]
 
         # 볼륨 조절 slider
-        self.volume_slider = [Slider(self.screen, self.screen.get_width() // 3 * 2, self.screen.get_height() * 4 // 8, self.screen.get_width() // 3, self.screen.get_height() // 40, self.sound_volume),
-                              Slider(self.screen, self.screen.get_width() // 3 * 2, self.screen.get_height() * 5 // 8, self.screen.get_width() // 3, self.screen.get_height() // 40, self.background_volume),
-                              Slider(self.screen, self.screen.get_width() // 3 * 2, self.screen.get_height() * 6 // 8, self.screen.get_width() // 3, self.screen.get_height() // 40, self.effect_volume)]
+        self.volume_slider = [Slider(self.screen, self.screen.get_width() // 3 * 2, self.screen.get_height() * 4 // 8, self.screen.get_width() // 3, self.screen.get_height() // 40, self.sound_volume, self.font_size[1]),
+                              Slider(self.screen, self.screen.get_width() // 3 * 2, self.screen.get_height() * 5 // 8, self.screen.get_width() // 3, self.screen.get_height() // 40, self.background_volume, self.font_size[1]),
+                              Slider(self.screen, self.screen.get_width() // 3 * 2, self.screen.get_height() * 6 // 8, self.screen.get_width() // 3, self.screen.get_height() // 40, self.effect_volume, self.font_size[1])]
 
         # 설정 저장 초기화 버튼
         self.reset_setting = Button(self.screen.get_width() // 4, self.screen.get_height() // 8 * 7,
@@ -248,6 +248,9 @@ class Option:
                 elif isinstance(obj, Slider):
                     obj.draw()
                     obj.process()
+
+        self.screen.blit(self.setting_obj_list[self.selected_object_vertical_index][self.selected_object_horizon_index].selected_image,
+                         (self.setting_obj_list[self.selected_object_vertical_index][self.selected_object_horizon_index].rect.x, self.setting_obj_list[self.selected_object_vertical_index][self.selected_object_horizon_index].rect.y - self.font_size[1]))
         pygame.display.flip()
 
     def event(self):

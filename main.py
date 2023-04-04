@@ -104,7 +104,6 @@ class Main:
             Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.6, self.button_size[0],
                    self.button_size[1], '나가기', self.exit_button_click_event, self.font_size[1])]
 
-        self.selected_button_index = 0
         self.buttons[self.selected_button_index].keyboard_selected = True
 
     def draw(self):
@@ -119,6 +118,8 @@ class Main:
             button.process()
             self.screen.blit(button.surface, button.rect)
 
+        self.screen.blit(self.buttons[self.selected_button_index].selected_image,
+                         (self.buttons[self.selected_button_index].rect.x, self.buttons[self.selected_button_index].rect.y - self.font_size[1]))
         # 매 프레임마다 화면 업데이트
         pygame.display.flip()
 

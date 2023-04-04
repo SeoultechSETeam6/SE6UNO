@@ -4,7 +4,7 @@ from mouse import Mouse, MouseState
 
 
 class Slider:
-    def __init__(self, screen, x, y, width, height, value=1):
+    def __init__(self, screen, x, y, width, height, value=1, image_size=25):
         self.selected = False
         self.keyboard_selected = False
         self.screen = screen
@@ -28,7 +28,11 @@ class Slider:
         self.radius = self.height // 2
         self.handleRadius = int(self.height / 1.3)
 
+        self.selected_image = pygame.image.load("./resources/Image/selected_check.png")
+        self.selected_image = pygame.transform.scale(self.selected_image, (image_size * 1.5, image_size * 1.5))
+
         self.circle = (int(self.x + (self.value - self.min) / (self.max - self.min) * self.width), self.y + self.height // 2)
+        self.rect = pygame.Rect(self.x - image_size * 2, self.y, self.width, self.height)
 
     def on_click_function(self):
         pass
@@ -56,8 +60,6 @@ class Slider:
             self.handleColour = '#666666'
             self.value = self.round((x - self.x) / self.width * self.max + self.min)
             self.value = max(min(self.value, self.max), self.min)
-        elif self.keyboard_selected:
-            self.handleColour = '#666666'
         else:
             self.handleColour = (255, 255, 255)
 

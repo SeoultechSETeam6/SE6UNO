@@ -19,6 +19,8 @@ class Button:
         self.on_click_function = on_click_function
         self.alreadyPressed = False
         self.font = pygame.font.Font("./resources/maplestory_font.ttf", font_size)
+        self.selected_image = pygame.image.load("./resources/Image/selected_check.png")
+        self.selected_image = pygame.transform.scale(self.selected_image, (font_size * 1.5, font_size * 1.5))
 
         self.fill_colors = {
             'normal': '#ffffff',
@@ -41,7 +43,7 @@ class Button:
         self.surface.fill(self.fill_colors['normal'])
 
         # 마우스 갖다댈 시
-        if self.rect.collidepoint(mouse_pos) or self.keyboard_selected:
+        if self.rect.collidepoint(mouse_pos):
             self.surface.fill(self.fill_colors['hover'])
 
             # 버튼 누를 때
