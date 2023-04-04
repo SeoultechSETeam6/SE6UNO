@@ -131,15 +131,17 @@ class Option:
                                    self.button_size[0], self.button_size[1],
                                    "설정 나가기", self.exit_event, self.font_size[1])
 
-        self.button_list = [[], [self.color_weakness_button], [],
-                            [self.reset_setting, self.save_setting, self.quit_setting]]
-        for i in self.screen_size_button:
-            self.button_list[0].append(i)
-        for i in self.key_setting_button:
-            self.button_list[2].append(i)
-        self.selected_button_vertical_index = 0
-        self.selected_button_horizon_index = 0
-        self.button_list[self.selected_button_vertical_index][self.selected_button_horizon_index].keyboard_selected = True
+        self.setting_obj_list = []
+        self.setting_obj_list.append(self.screen_size_button)
+        self.setting_obj_list.append([self.color_weakness_button])
+        self.setting_obj_list.append(self.key_setting_button)
+        for i in self.volume_slider:
+            self.setting_obj_list.append([i])
+        self.setting_obj_list.append([self.reset_setting, self.save_setting, self.quit_setting])
+
+        self.selected_object_vertical_index = 0
+        self.selected_object_horizon_index = 0
+        self.setting_obj_list[self.selected_object_vertical_index][self.selected_object_horizon_index].keyboard_selected = True
 
     # 버튼 클릭시 메소드 구현
     def size_1920_event(self):
@@ -238,15 +240,14 @@ class Option:
         self.screen.blit(self.background_volume_setting, (self.screen.get_width() // 7, self.screen.get_height() // 8 * 5))
         self.screen.blit(self.effect_volume_setting, (self.screen.get_width() // 7, self.screen.get_height() // 8 * 6))
 
-        for buttons in self.button_list:
-            for button in buttons:
-                button.process()
-                self.screen.blit(button.surface, button.rect)
-
-        for slider in self.volume_slider:
-            slider.draw()
-            slider.process()
-
+        for objects in self.setting_obj_list:
+            for obj in objects:
+                if isinstance(obj, Button):
+                    obj.process()
+                    self.screen.blit(obj.surface, obj.rect)
+                elif isinstance(obj, Slider):
+                    obj.draw()
+                    obj.process()
         pygame.display.flip()
 
     def event(self):
@@ -255,40 +256,64 @@ class Option:
                 self.running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == self.key_setting['up']:
-                    self.button_list[self.selected_button_vertical_index][
-                        self.selected_button_horizon_index].keyboard_selected = False
-                    self.selected_button_vertical_index = (self.selected_button_vertical_index - 1) % len(
-                        self.button_list)
-                    self.selected_button_horizon_index = math.ceil(len(
-                        self.button_list[self.selected_button_vertical_index]) / 2) - 1
-                    self.button_list[self.selected_button_vertical_index][
-                        self.selected_button_horizon_index].keyboard_selected = True
+                    self.setting_obj_list[self.selected_object_vertical_index][
+                        self.selected_object_horizon_index].keyboard_selected = False
+                    self.selected_object_vertical_index = (self.selected_object_vertical_index - 1) % len(
+                        self.setting_obj_list)
+                    self.selected_object_horizon_index = math.ceil(len(
+                        self.setting_obj_list[self.selected_object_vertical_index]) / 2) - 1
+                    self.setting_obj_list[self.selected_object_vertical_index][
+                        self.selected_object_horizon_index].keyboard_selected = True
                 elif event.key == self.key_setting['down']:
-                    self.button_list[self.selected_button_vertical_index][
-                        self.selected_button_horizon_index].keyboard_selected = False
-                    self.selected_button_vertical_index = (self.selected_button_vertical_index + 1) % len(
-                        self.button_list)
-                    self.selected_button_horizon_index = math.ceil(len(
-                        self.button_list[self.selected_button_vertical_index]) / 2) - 1
-                    self.button_list[self.selected_button_vertical_index][
-                        self.selected_button_horizon_index].keyboard_selected = True
+                    self.setting_obj_list[self.selected_object_vertical_index][
+                        self.selected_object_horizon_index].keyboard_selected = False
+                    self.selected_object_vertical_index = (self.selected_object_vertical_index + 1) % len(
+                        self.setting_obj_list)
+                    self.selected_object_horizon_index = math.ceil(len(
+                        self.setting_obj_list[self.selected_object_vertical_index]) / 2) - 1
+                    self.setting_obj_list[self.selected_object_vertical_index][
+                        self.selected_object_horizon_index].keyboard_selected = True
                 elif event.key == self.key_setting['left']:
-                    self.button_list[self.selected_button_vertical_index][
-                        self.selected_button_horizon_index].keyboard_selected = False
-                    self.selected_button_horizon_index = (self.selected_button_horizon_index - 1) % len(
-                        self.button_list[self.selected_button_vertical_index])
-                    self.button_list[self.selected_button_vertical_index][
-                        self.selected_button_horizon_index].keyboard_selected = True
+                    if isinstance(self.setting_obj_list[self.selected_object_vertical_index][self.selected_object_horizon_index], Button):
+                        self.setting_obj_list[self.selected_object_vertical_index][
+                            self.selected_object_horizon_index].keyboard_selected = False
+                        self.selected_object_horizon_index = (self.selected_object_horizon_index - 1) % len(
+                            self.setting_obj_list[self.selected_object_vertical_index])
+                        self.setting_obj_list[self.selected_object_vertical_index][
+                            self.selected_object_horizon_index].keyboard_selected = True
+                    elif isinstance(self.setting_obj_list[self.selected_object_vertical_index][self.selected_object_horizon_index], Slider):
+                        self.setting_obj_list[self.selected_object_vertical_index][self.selected_object_horizon_index].value = self.setting_obj_list[self.selected_object_vertical_index][self.selected_object_horizon_index].value - 0.05
+                        self.setting_obj_list[self.selected_object_vertical_index][
+                            self.selected_object_horizon_index].value = max(min(self.setting_obj_list[self.selected_object_vertical_index][
+                                self.selected_object_horizon_index].value, self.setting_obj_list[self.selected_object_vertical_index][
+                                    self.selected_object_horizon_index].max), self.setting_obj_list[self.selected_object_vertical_index][
+                                        self.selected_object_horizon_index].min)
                 elif event.key == self.key_setting['right']:
-                    self.button_list[self.selected_button_vertical_index][
-                        self.selected_button_horizon_index].keyboard_selected = False
-                    self.selected_button_horizon_index = (self.selected_button_horizon_index + 1) % len(
-                        self.button_list[self.selected_button_vertical_index])
-                    self.button_list[self.selected_button_vertical_index][
-                        self.selected_button_horizon_index].keyboard_selected = True
+                    if isinstance(self.setting_obj_list[self.selected_object_vertical_index][
+                                      self.selected_object_horizon_index], Button):
+                        self.setting_obj_list[self.selected_object_vertical_index][
+                            self.selected_object_horizon_index].keyboard_selected = False
+                        self.selected_object_horizon_index = (self.selected_object_horizon_index + 1) % len(
+                            self.setting_obj_list[self.selected_object_vertical_index])
+                        self.setting_obj_list[self.selected_object_vertical_index][
+                            self.selected_object_horizon_index].keyboard_selected = True
+                    elif isinstance(self.setting_obj_list[self.selected_object_vertical_index][
+                                        self.selected_object_horizon_index], Slider):
+                        self.setting_obj_list[self.selected_object_vertical_index][
+                            self.selected_object_horizon_index].value = \
+                                self.setting_obj_list[self.selected_object_vertical_index][
+                                    self.selected_object_horizon_index].value + 0.05
+                        self.setting_obj_list[self.selected_object_vertical_index][
+                            self.selected_object_horizon_index].value = max(
+                            min(self.setting_obj_list[self.selected_object_vertical_index][
+                                    self.selected_object_horizon_index].value,
+                                self.setting_obj_list[self.selected_object_vertical_index][
+                                    self.selected_object_horizon_index].max),
+                            self.setting_obj_list[self.selected_object_vertical_index][
+                                self.selected_object_horizon_index].min)
                 elif event.key == self.key_setting['enter']:
-                    self.button_list[self.selected_button_vertical_index][
-                        self.selected_button_horizon_index].on_click_function()
+                    self.setting_obj_list[self.selected_object_vertical_index][
+                        self.selected_object_horizon_index].on_click_function()
 
     def run(self):
         while self.running:

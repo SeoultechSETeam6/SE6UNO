@@ -6,6 +6,7 @@ from mouse import Mouse, MouseState
 class Slider:
     def __init__(self, screen, x, y, width, height, value=1):
         self.selected = False
+        self.keyboard_selected = False
         self.screen = screen
         self.x = x - width // 2
         self.y = y + height // 1.5
@@ -29,6 +30,9 @@ class Slider:
 
         self.circle = (int(self.x + (self.value - self.min) / (self.max - self.min) * self.width), self.y + self.height // 2)
 
+    def on_click_function(self):
+        pass
+
     def draw(self):
         pygame.draw.rect(self.screen, self.colour, (self.x, self.y, self.width, self.height))
         pygame.draw.circle(self.screen, self.colour, (self.x, self.y + self.height // 2), self.radius)
@@ -49,8 +53,13 @@ class Slider:
             self.selected = False
 
         if self.selected:
+            self.handleColour = '#666666'
             self.value = self.round((x - self.x) / self.width * self.max + self.min)
             self.value = max(min(self.value, self.max), self.min)
+        elif self.keyboard_selected:
+            self.handleColour = '#666666'
+        else:
+            self.handleColour = (255, 255, 255)
 
     def contains(self, x, y):
         handleX = int(self.x + (self.value - self.min) / (self.max - self.min) * self.width)
