@@ -13,7 +13,8 @@ from game_utils import (
     draw_board_card,
     is_valid_move,
     check_uno,
-    computer_turn,
+    computer_playable_card,
+    com_is_uno,
     apply_special_card_effects
 )
 
@@ -50,7 +51,7 @@ def singleplayer():
 
     # 플레이어 수와 각 플레이어가 받을 카드 수 지정
     player_count = 3
-    card_count = 2
+    card_count = 7
 
     # 스크린 사이즈 및 폰트
     screen_width = 1800
@@ -211,12 +212,18 @@ def singleplayer():
     prev_user_turn = False
     # 유저가 draw 했는지 확인하는 초기값
     draw_requested = False
+    # 컴퓨터가 draw 했는지 확인하는 초기값
+    com_draw_requested = False
     # draw한 카드가 어떤 카드인가의 초기값
     new_drawn_card = None
+    # 컴퓨터가 뽑은 카드 초기값
+    com_pop_card = None
     # uno 초기값
     uno_clicked = False
     user_uno_clicked = False
     computer_uno_clicked = False
+    com_drawn_card = None
+    com_uno_check = False
     one_flags = [False, False, False, False, False]
 
     # 10초 제한 설정
@@ -275,7 +282,7 @@ def singleplayer():
                                 new_drawn_card = player_hands[0][-1]
                                 draw_requested = True
                             # 카드를 드로우 하고 턴을 넘기는 함수.
-                            elif draw_requested and new_drawn_card is not None and clicked_next_turn_button:
+                            elif draw_requested and new_drawn_card is not None and clicked_next_turn_button and pop_card is None:
                                 current_player_index = (current_player_index + direction) % player_count
                                 draw_requested = False
                                 new_drawn_card = None
@@ -300,15 +307,20 @@ def singleplayer():
                                     player_hands[0].pop(clicked_card_index)
                                     pop_card = clicked_card
                                     user_uno_check = check_uno(player_hands[0])
+                                    print(310)
                                     if user_uno_check:
+                                        print(312)
                                         one_flags[0] = True
+                                        print(314)
                                         uno_current_time = pygame.time.get_ticks()
-                                        uno_delay_time = random.randint(700, 1200)
+                                        uno_delay_time = random.randint(2000, 3000)
                                         print("check!", uno_current_time, uno_delay_time)
                             # 카드를 냈을 때,
                             elif pop_card is not None:
+                                print("카드를 냄")
                                 # 우노일 경우
                                 if user_uno_check:
+                                    print("우노발동")
                                     uno_clicked = True
                                     print("click uno", uno_current_time, uno_delay_time, one_flags)
                                     if user_uno_clicked:
@@ -317,13 +329,10 @@ def singleplayer():
                                         # 내는 카드가 special인 경우
                                         print("user_uno_click", one_flags)
                                         if pop_card.is_special():
-                                            current_player_index, direction, uno_current_player_index = apply_special_card_effects(pop_card,
-                                                                                                         current_player_index,
-                                                                                                         current_player,
-                                                                                                         direction,
-                                                                                                         player_hands,
-                                                                                                         remain_cards,
-                                                                                                         player_count)
+                                            current_player_index, direction, uno_current_player_index = \
+                                                apply_special_card_effects(pop_card, current_player_index,
+                                                                           current_player, direction, player_hands,
+                                                                           remain_cards, player_count)
                                             pop_card = None  # 낸 카드 초기화
                                             draw_requested = False
                                             new_drawn_card = None
@@ -336,6 +345,7 @@ def singleplayer():
                                             new_drawn_card = None
                                             user_uno_check = False  # 낸 카드 초기화
                                 else:
+                                    print("우노발동안함")
                                     # 내는 카드가 special인 경우
                                     if pop_card.is_special():
                                         current_player_index, direction, uno_current_player_index = apply_special_card_effects(pop_card,
@@ -359,19 +369,14 @@ def singleplayer():
                 current_time = pygame.time.get_ticks()
 
                 # 유저의 턴일 때 시간이 초과되면 드로우하고 턴을 넘김
-                if pop_card is not None and one_flags[0]:
+                if pop_card is not None and one_flags[0] and user_turn:
                     if current_time - uno_current_time >= uno_delay_time:
                         uno_drawn_card = remain_cards.pop()
                         player_hands[0].append(uno_drawn_card)
                         # 내는 카드가 special인 경우
                         if pop_card.is_special():
                             current_player_index, direction, uno_current_player_index = apply_special_card_effects(
-                                pop_card,
-                                current_player_index,
-                                current_player,
-                                direction,
-                                player_hands,
-                                remain_cards,
+                                pop_card, current_player_index, current_player, direction, player_hands, remain_cards,
                                 player_count)
                             pop_card = None  # 낸 카드 초기화
                             draw_requested = False
@@ -405,24 +410,125 @@ def singleplayer():
                         draw_requested = False
                         new_drawn_card = None
                         current_player_index = (current_player_index + direction) % player_count
-                # UNO버튼 안누를 시, 한장 뽑고 턴을 넘김
-
 
                 # 컴퓨터 턴 처리
                 if not user_turn:
                     if computer_action_time is None:
                         turn_start_time = pygame.time.get_ticks()
-                        delay_time = random.randint(1100, 3000)  # 1~3초 사이의 랜덤한 시간 생성
-                        delay_time2 = random.randint(1100, 2000)  # 1~2초 사이의 랜덤한 시간 생성
+                        delay_time = random.randint(1700, 1900)  # 랜덤한 시간 생성
                         computer_action_time = pygame.time.get_ticks() + delay_time  # 현재 시간에 랜덤한 지연 시간을 더함
                     if pygame.time.get_ticks() >= computer_action_time:  # 설정한 시간이 되면 컴퓨터가 행동함
+                        delay_time2 = random.randint(900, 2000)  # 랜덤한 시간 생성
                         if 1 <= current_player <= 5:
-                            current_player_index, direction, uno_clicked, one_flags = computer_turn(player_hands[current_player],
-                                                                            current_player_index, current_player,
-                                                                            board_card, remain_cards, player_count,
-                                                                            direction, player_hands, delay_time2,
-                                                                            one_flags, user_uno_clicked)
-                        computer_action_time = None  # 행동을 완료한 후, 다음 행동 시간을 초기화 함.
+                            # 처음 유효성 검사
+                            if not com_draw_requested and com_pop_card is None:
+                                playable, com_pop_card_index = computer_playable_card(player_hands[current_player],
+                                                                                      board_card)
+                            # 카드를 낼 수 있을 때,
+                            if playable and not com_draw_requested and com_pop_card is None:
+                                print("컴퓨터 카드 낼 수 있을 때")
+                                com_pop_card = player_hands[current_player][com_pop_card_index]
+                                player_hands[current_player].pop(com_pop_card_index)
+                                board_card.append(com_pop_card)
+                                com_uno_check = check_uno(player_hands[current_player])
+                                if com_uno_check:
+                                    one_flags, uno_current_time, uno_delay_time = com_is_uno(one_flags, current_player)
+                                computer_action_time = None
+                            # 카드를 낼 수 없을 때 드로우 한다.
+                            elif not playable and not com_draw_requested and com_pop_card is None:
+                                print("카드를 낼 수 없을 때")
+                                pygame.time.delay(delay_time2)
+                                com_draw_requested = True
+                                com_drawn_card = remain_cards.pop()
+                                player_hands[current_player].append(com_drawn_card)
+                                computer_action_time = None
+                            # 드로우한 카드가 낼 수 있는 경우
+                            elif com_draw_requested and is_valid_move(com_drawn_card, top_card) and com_pop_card is None:
+                                print("드로우한 카드를 낼 수 있을 때")
+                                pygame.time.delay(delay_time2)
+                                com_pop_card = com_drawn_card
+                                com_pop_card_index = player_hands[current_player].index(com_pop_card)
+                                player_hands[current_player].pop(com_pop_card_index)
+                                board_card.append(com_pop_card)
+                                com_uno_check = check_uno(player_hands[current_player])
+                                if com_uno_check:
+                                    one_flags, uno_current_time, uno_delay_time = com_is_uno(one_flags, current_player)
+                                computer_action_time = None
+                            # 드로우한 카드를 낼 수 없는 경우
+                            elif com_draw_requested and not is_valid_move(com_drawn_card, top_card) and com_pop_card is None:
+                                print("드로우한 카드를 낼 수 없는 경우")
+                                current_player_index = (current_player_index + direction) % player_count
+                                com_pop_card = None  # 컴퓨터가 낸 카드 초기화
+                                com_draw_requested = False
+                                com_drawn_card = None
+                                com_uno_check = False
+                                computer_action_time = None
+                            elif com_pop_card is not None:
+                                print("카드 내고 다음 상황 진행")
+                                if com_uno_check:
+                                    uno_clicked = True
+                                    if user_uno_clicked:
+                                        one_flags[current_player] = False
+                                        uno_clicked = False
+                                        com_uno_drawn_card = remain_cards.pop()
+                                        player_hands[current_player].pop(com_uno_drawn_card)
+                                        # 컴퓨터가 낸 카드가 special일 경우
+                                        if com_pop_card.is_special():
+                                            current_player_index, direction, uno_current_player_index = \
+                                                apply_special_card_effects(pop_card, current_player_index,
+                                                                           current_player, direction, player_hands,
+                                                                           remain_cards, player_count)
+                                            com_pop_card = None  # 컴퓨터가 낸 카드 초기화
+                                            com_draw_requested = False
+                                            com_drawn_card = None
+                                            com_uno_check = False
+                                        # 컴퓨터가 낸 카드가 special이 아닌 경우
+                                        else:
+                                            current_player_index = (current_player_index + direction) % player_count
+                                            com_pop_card = None  # 컴퓨터가 낸 카드 초기화
+                                            com_draw_requested = False
+                                            com_drawn_card = None
+                                            com_uno_check = False
+                                else:
+                                    #내는 카드가 special일 경우
+                                    if com_pop_card.is_special():
+                                        current_player_index, direction, uno_current_player_index = apply_special_card_effects(
+                                            pop_card, current_player_index, current_player, direction, player_hands,
+                                            remain_cards, player_count)
+                                        com_pop_card = None  # 컴퓨터가 낸 카드 초기화
+                                        com_draw_requested = False
+                                        com_drawn_card = None
+                                        com_uno_check = False
+                                    # 내는 카드가 special이 아닌 경우
+                                    else:
+                                        current_player_index = (current_player_index + direction) % player_count
+                                        com_pop_card = None  # 컴퓨터가 낸 카드 초기화
+                                        com_draw_requested = False
+                                        com_drawn_card = None
+                                        com_uno_check = False
+                current_time = pygame.time.get_ticks()
+
+                # 컴퓨터의 턴일 때 시간이 초과되면 우노를 넘긴다.
+                if com_pop_card is not None and any(one_flags[1:]) and not user_turn:
+                    if current_time - uno_current_time >= uno_delay_time:
+                        one_flags[current_player_index] = False
+                        # 내는 카드가 special인 경우
+                        if com_pop_card.is_special():
+                            current_player_index, direction, uno_current_player_index = apply_special_card_effects(
+                                pop_card, current_player_index, current_player, direction, player_hands,
+                                remain_cards,
+                                player_count)
+                            com_pop_card = None  # 컴퓨터가 낸 카드 초기화
+                            com_draw_requested = False
+                            com_drawn_card = None
+                            com_uno_check = False
+                        # 내는 카드가 special이 아닌 경우
+                        else:
+                            current_player_index = (current_player_index + direction) % player_count
+                            com_pop_card = None  # 컴퓨터가 낸 카드 초기화
+                            com_draw_requested = False
+                            com_drawn_card = None
+                            com_uno_check = False
 
             # 게임 진행을 위해 board_card에서 카드를 추출 후, remain_cards에 넣고 섞음
             if len(remain_cards) < 10:
@@ -447,21 +553,26 @@ def singleplayer():
                 screen.blit(turn_arrow_img, (x4, y4 + spacing4 * (current_player - 1)))
 
             # 유저턴일때 표시될 사항. (시간제한, 턴 넘기기 버튼)
-            if user_turn and not draw_requested:
+            if user_turn and not draw_requested and not one_flags[0]:
                 remaining_time = time_limit - (current_time - turn_start_time)
-                remaining_time_text = f"남은 시간: {remaining_time // 1000}초"
+                remaining_time_text = f"a남은 시간: {remaining_time // 1000}초"
                 draw_text(screen, remaining_time_text, font, (255, 255, 255), screen.get_rect().centerx, 30)
             # draw후 시간제한,턴 넘기기는 draw를 해야지 나옴.
-            elif user_turn and draw_requested:
+            elif user_turn and draw_requested and not one_flags[0]:
                 after_draw_remaining_time = time_limit - (current_time - user_draw_time)
-                after_draw_remaining_time_text = f"남은 시간: {after_draw_remaining_time // 1000}초"
+                after_draw_remaining_time_text = f"b남은 시간: {after_draw_remaining_time // 1000}초"
                 draw_text(screen, after_draw_remaining_time_text, font, (255, 255, 255), screen.get_rect().centerx, 30)
                 # 턴 넘기기는 버튼
                 screen.blit(next_turn_button_img, next_turn_button_rect)
+            # uno버튼 시간
             elif user_turn and one_flags[0]:
                 uno_remaining_time = uno_delay_time - (current_time - uno_current_time)
-                uno_remaining_time_text = f"남은 시간: {uno_remaining_time // 1000}초"
+                uno_remaining_time_text = f"c남은 시간: {uno_remaining_time // 1000}초"
                 draw_text(screen, uno_remaining_time_text, font, (255, 255, 255), screen.get_rect().centerx, 30)
+            elif not user_turn and any(one_flags[1:]):
+                com_uno_remaining_time = uno_delay_time - (current_time - uno_current_time)
+                com_uno_remaining_time_text = f"d남은 시간: {com_uno_remaining_time // 1000}초"
+                draw_text(screen, com_uno_remaining_time_text, font, (255, 255, 255), screen.get_rect().centerx, 30)
 
             # 유저 카드에 마우스 대면 위로 작동, 퍼즈일때는 작동 안함
             if not paused:
@@ -487,6 +598,7 @@ def singleplayer():
                 play_drawn_card_button.topleft = (screen.get_rect().centerx + 100, screen.get_rect().centery)
                 draw_button(screen, "Click NEXT TURN button to turn.", font, (255, 255, 255),
                             play_drawn_card_button)
+
             # 우노 버튼 표시
             if any(one_flags):
                 screen.blit(uno_button_img, uno_button_rect)
