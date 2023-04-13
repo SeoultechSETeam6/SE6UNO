@@ -93,7 +93,7 @@ def is_valid_move(card, top_card):
 
 # ai 턴
 def computer_turn(now_player_hands, current_player_index, current_player, board_card, remain_cards, player_count,
-                  direction, player_hands, delay_time2):
+                  direction, player_hands, delay_time2, one_flags):
     top_card = get_top_card(board_card)
     playable_cards = [card for card in now_player_hands if is_valid_move(card, top_card)]
 
@@ -102,16 +102,29 @@ def computer_turn(now_player_hands, current_player_index, current_player, board_
         selected_card = random.choice(playable_cards)
         board_card.append(selected_card)
         now_player_hands.remove(selected_card)
-
+        if len(now_player_hands) == 1:
+            uno_clicked = True
+            one_flags[current_player_index] = True
+            # 특수 카드 처리
+            if selected_card.is_special():
+                current_player_index, direction = apply_special_card_effects(selected_card, current_player_index,
+                                                                             current_player, direction, player_hands,
+                                                                             remain_cards, player_count)
+                return current_player_index, direction, True, one_flags
+            else:
+                current_player_index = (current_player_index + direction) % player_count
+                return current_player_index, direction, True, one_flags
         # 특수 카드 처리
         if selected_card.is_special():
             current_player_index, direction = apply_special_card_effects(selected_card, current_player_index,
-                                                                         current_player, direction, player_hands,
+                                                                         current_player, direction,
+                                                                         player_hands,
                                                                          remain_cards, player_count)
-            return current_player_index, direction
+            return current_player_index, direction, False, one_flags
         else:
             current_player_index = (current_player_index + direction) % player_count
-            return current_player_index, direction
+            return current_player_index, direction, False, one_flags
+
     # 컴퓨터가 놓을 수 있는 카드가 없는 경우
     else:
         if remain_cards:
@@ -123,26 +136,39 @@ def computer_turn(now_player_hands, current_player_index, current_player, board_
                 drawn_card_index = now_player_hands.index(drawn_card)
                 now_player_hands.pop(drawn_card_index)
                 board_card.append(drawn_card)
-                # board_card.append(drawn_card) 오류 구문 해결
-                # now_player_hands.pop(drawn_card) 오류 구문 해결
+                if len(now_player_hands) == 1:
+                    uno_clicked = True
+                    one_flags[current_player_index] = True
+                    # 뽑은 카드가 special일 때,
+                    if drawn_card.is_special():
+                        current_player_index, direction = apply_special_card_effects(drawn_card, current_player_index,
+                                                                                     current_player, direction, player_hands
+                                                                                     , remain_cards, player_count)
+                        return current_player_index, direction, True, one_flags
+                    # 뽑은 카드가 special이 아닐때,
+                    else:
+                        current_player_index = (current_player_index + direction) % player_count
+                        return current_player_index, direction, True, one_flags
                 # 뽑은 카드가 special일 때,
                 if drawn_card.is_special():
-                    current_player_index, direction = apply_special_card_effects(drawn_card, current_player_index,
-                                                                                 current_player, direction, player_hands
+                    current_player_index, direction = apply_special_card_effects(drawn_card,
+                                                                                 current_player_index,
+                                                                                 current_player, direction,
+                                                                                 player_hands
                                                                                  , remain_cards, player_count)
-                    return current_player_index, direction
+                    return current_player_index, direction, False, one_flags
                 # 뽑은 카드가 special이 아닐때,
                 else:
                     current_player_index = (current_player_index + direction) % player_count
-                    return current_player_index, direction
+                    return current_player_index, direction, False, one_flags
             # 낼 수 없으면, 턴을 넘긴다.
             else:
                 current_player_index = (current_player_index + direction) % player_count
-                return current_player_index, direction
+                return current_player_index, direction, False, one_flags
         else:
             # 작동하지 않는 함수. 혹시몰라서 넣어둠. 이 함수는 remain_cards에 남은 카드가 없을 때 발동함.
             current_player_index = (current_player_index + direction) % player_count
-            return current_player_index, direction
+            return current_player_index, direction, False, one_flags
 
 
 # 스페셜 카드 적용
