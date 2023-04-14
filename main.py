@@ -96,7 +96,7 @@ class Main:
         pygame.display.set_caption(basic.game_title)
 
         # 로고 표시
-        self.logo = pygame.image.load("resources/Image/logo.jpg")
+        self.logo = pygame.image.load("resources/Image/logo.png")
         self.logo = pygame.transform.scale(self.logo, self.logo_size)
         self.logo_rect = self.logo.get_rect()
         self.logo_rect.center = (self.display_size[0] // 2, self.logo_rect.height // 2)

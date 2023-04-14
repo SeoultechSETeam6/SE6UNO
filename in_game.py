@@ -463,8 +463,10 @@ def singleplayer():
                                     if user_uno_clicked:
                                         print("유저우노클릭")
                                         one_flags[current_player] = False
+                                        print('플래그 false')
                                         uno_clicked = False
                                         com_uno_drawn_card = remain_cards.pop()
+                                        print("카드 뽑기")
                                         player_hands[current_player].append(com_uno_drawn_card)
                                         # 컴퓨터가 낸 카드가 special일 경우
                                         if com_pop_card.is_special():
