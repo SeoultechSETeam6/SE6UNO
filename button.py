@@ -1,4 +1,5 @@
 import pygame
+from mouse import Mouse, MouseState
 
 
 class Button:
@@ -9,8 +10,8 @@ class Button:
     **button_text**: 버튼에 적힐 글자\n
     **on_click_funtion**: 버튼 클릭 시 일어날 이벤트 메서드
     """
-    def __init__(self, x, y, width, height, text='Sample', on_click_function=None, font_size=25, selected=False):
-        self.selected = selected
+    def __init__(self, x, y, width, height, text='Sample', on_click_function=None, font_size=25, keyboard_selected=False):
+        self.keyboard_selected = keyboard_selected
         self.x = x - width // 2
         self.y = y
         self.width = width
@@ -18,6 +19,8 @@ class Button:
         self.on_click_function = on_click_function
         self.alreadyPressed = False
         self.font = pygame.font.Font("./resources/maplestory_font.ttf", font_size)
+        self.selected_image = pygame.image.load("./resources/Image/selected_check.png")
+        self.selected_image = pygame.transform.scale(self.selected_image, (font_size * 1.5, font_size * 1.5))
 
         self.fill_colors = {
             'normal': '#ffffff',
@@ -40,15 +43,15 @@ class Button:
         self.surface.fill(self.fill_colors['normal'])
 
         # 마우스 갖다댈 시
-        if self.rect.collidepoint(mouse_pos) or self.selected:
+        if self.rect.collidepoint(mouse_pos):
             self.surface.fill(self.fill_colors['hover'])
 
             # 버튼 누를 때
-            if self.rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed(num_buttons=3)[0]:
+            if self.rect.collidepoint(mouse_pos) and Mouse.getMouseState() == MouseState.CLICK:
                 self.surface.fill(self.fill_colors['pressed'])
-
+                Mouse.updateMouseState()
                 # 클릭 판정을 위해 클릭 된 상태라면 더 이상 이벤트를 발생시키지 않음
-                if not self.alreadyPressed:
+                if not self.alreadyPressed and Mouse.getMouseState() == MouseState.DRAG:
                     self.on_click_function()
                     self.alreadyPressed = True
             else:
