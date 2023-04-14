@@ -51,7 +51,7 @@ def singleplayer():
 
     # 플레이어 수와 각 플레이어가 받을 카드 수 지정
     player_count = 3
-    card_count = 7
+    card_count = 2
 
     # 스크린 사이즈 및 폰트
     screen_width = 1800
@@ -307,27 +307,20 @@ def singleplayer():
                                     player_hands[0].pop(clicked_card_index)
                                     pop_card = clicked_card
                                     user_uno_check = check_uno(player_hands[0])
-                                    print(310)
                                     if user_uno_check:
-                                        print(312)
                                         one_flags[0] = True
-                                        print(314)
                                         uno_current_time = pygame.time.get_ticks()
                                         uno_delay_time = random.randint(2000, 3000)
                                         print("check!", uno_current_time, uno_delay_time)
                             # 카드를 냈을 때,
                             elif pop_card is not None:
-                                print("카드를 냄")
                                 # 우노일 경우
                                 if user_uno_check:
-                                    print("우노발동")
                                     uno_clicked = True
-                                    print("click uno", uno_current_time, uno_delay_time, one_flags)
                                     if user_uno_clicked:
                                         one_flags[0] = False
                                         uno_clicked = False
                                         # 내는 카드가 special인 경우
-                                        print("user_uno_click", one_flags)
                                         if pop_card.is_special():
                                             current_player_index, direction, uno_current_player_index = \
                                                 apply_special_card_effects(pop_card, current_player_index,
@@ -345,7 +338,6 @@ def singleplayer():
                                             new_drawn_card = None
                                             user_uno_check = False  # 낸 카드 초기화
                                 else:
-                                    print("우노발동안함")
                                     # 내는 카드가 special인 경우
                                     if pop_card.is_special():
                                         current_player_index, direction, uno_current_player_index = apply_special_card_effects(pop_card,
@@ -475,7 +467,7 @@ def singleplayer():
                                         # 컴퓨터가 낸 카드가 special일 경우
                                         if com_pop_card.is_special():
                                             current_player_index, direction, uno_current_player_index = \
-                                                apply_special_card_effects(pop_card, current_player_index,
+                                                apply_special_card_effects(com_pop_card, current_player_index,
                                                                            current_player, direction, player_hands,
                                                                            remain_cards, player_count)
                                             com_pop_card = None  # 컴퓨터가 낸 카드 초기화
@@ -493,7 +485,7 @@ def singleplayer():
                                     #내는 카드가 special일 경우
                                     if com_pop_card.is_special():
                                         current_player_index, direction, uno_current_player_index = apply_special_card_effects(
-                                            pop_card, current_player_index, current_player, direction, player_hands,
+                                            com_pop_card, current_player_index, current_player, direction, player_hands,
                                             remain_cards, player_count)
                                         com_pop_card = None  # 컴퓨터가 낸 카드 초기화
                                         com_draw_requested = False
