@@ -1,8 +1,10 @@
 import pygame
 
-# 색 카드 추가를 위한 리승트
+# 색 카드 추가를 위한 리스트
 colors = ['red', 'green', 'blue', 'yellow']
 values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'skip', 'reverse', 'draw_2', 'bomb', 'one_more']
+change_colors = ['red', 'green', 'blue', 'yellow']
+change_value = None
 
 
 # 색약 모드 옵션을 위한 임시값 (추후 삭제)
@@ -38,6 +40,7 @@ def resize_image(image, scale_percent):
     return pygame.transform.scale(image, (width, height))
 '''
 
+
 def generate_cards():
     cards = []
     card_back_image = pygame.image.load("resources/Image/card_images/card_back.png")
@@ -67,6 +70,36 @@ def generate_cards():
         card = Card('none', 'change', card_image_resized, card_back_image)
         cards.append(card)
     return cards
+'''
+
+
+# 체인지카드 발동시 유저한테 보여질 카드.
+def generate_for_change_cards():
+    for_change_cards = []
+    card_folder = "resources/image/for_change_cards"
+    card_back_image = pygame.image.load("resources/Image/card_images/card_back.png")
+
+    for i in range(5):
+        for color in change_colors:
+            card_image = pygame.image.load(f"{card_folder}/{color}_{change_value}.png")
+            for_change_card = Card(color, change_value, card_image, card_back_image)
+            for_change_cards.append(for_change_card)
+    return for_change_cards
+
+
+for_change_cards = generate_for_change_cards()
+
+'''
+# 체인지를 위한 카드 살펴보기(추후 삭제)
+def print_change_cards(for_change_cards):
+    for card in for_change_cards:
+        print(f"Color: {card.color}, Value: {card.value}, Card Image: {card.card_img}, Back: "f"{card.card_img_back}")
+
+
+if __name__ == "__main__":
+    change_cards = generate_for_change_cards()
+    print_change_cards(change_cards)
+    print(change_cards)
 '''
 
 '''

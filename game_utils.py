@@ -303,3 +303,12 @@ def apply_special_card_effects(card, current_player_index, current_player, direc
         current_player_index = (current_player_index + direction) % player_count
         print(current_player_index, direction)
         return current_player_index, direction, uno_current_player_index
+
+    # 체인지 카드(카드색 바꿈)
+    elif card.value == "change":
+        uno_current_player_index = current_player_index
+        if current_player_index == 0:
+            print("유저 change카드 발동")
+        elif current_player_index != 0:
+            print("컴퓨터 change카드 발동")
+        return current_player_index, direction, uno_current_player_index
