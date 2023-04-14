@@ -254,6 +254,7 @@ def singleplayer():
                         paused = not paused
                     if uno_button_rect.collidepoint(mouse_x, mouse_y) and len(player_hands[current_player]) == 1:
                         user_uno_clicked = True
+                        print('우노클릭발생')
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         paused = not paused
@@ -460,10 +461,11 @@ def singleplayer():
                                 if com_uno_check:
                                     uno_clicked = True
                                     if user_uno_clicked:
+                                        print("유저우노클릭")
                                         one_flags[current_player] = False
                                         uno_clicked = False
                                         com_uno_drawn_card = remain_cards.pop()
-                                        player_hands[current_player].pop(com_uno_drawn_card)
+                                        player_hands[current_player].append(com_uno_drawn_card)
                                         # 컴퓨터가 낸 카드가 special일 경우
                                         if com_pop_card.is_special():
                                             current_player_index, direction, uno_current_player_index = \
@@ -507,7 +509,7 @@ def singleplayer():
                         # 내는 카드가 special인 경우
                         if com_pop_card.is_special():
                             current_player_index, direction, uno_current_player_index = apply_special_card_effects(
-                                pop_card, current_player_index, current_player, direction, player_hands,
+                                com_pop_card, current_player_index, current_player, direction, player_hands,
                                 remain_cards,
                                 player_count)
                             com_pop_card = None  # 컴퓨터가 낸 카드 초기화
