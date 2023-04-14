@@ -124,7 +124,7 @@ def computer_playable_card(now_player_hands, board_card):
 def com_is_uno(one_flags, current_player):
     one_flags[current_player] = True
     uno_current_time = pygame.time.get_ticks()
-    uno_delay_time = random.randint(900, 2000)
+    uno_delay_time = random.randint(2000, 4000)
     return one_flags, uno_current_time, uno_delay_time
 
 

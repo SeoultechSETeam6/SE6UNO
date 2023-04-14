@@ -413,6 +413,7 @@ def singleplayer():
                     if pygame.time.get_ticks() >= computer_action_time:  # 설정한 시간이 되면 컴퓨터가 행동함
                         delay_time2 = random.randint(900, 2000)  # 랜덤한 시간 생성
                         if 1 <= current_player <= 5:
+                            print(1234)
                             # 처음 유효성 검사
                             if not com_draw_requested and com_pop_card is None:
                                 playable, com_pop_card_index = computer_playable_card(player_hands[current_player],
@@ -456,52 +457,52 @@ def singleplayer():
                                 com_drawn_card = None
                                 com_uno_check = False
                                 computer_action_time = None
-                            elif com_pop_card is not None:
-                                print("카드 내고 다음 상황 진행")
-                                if com_uno_check:
-                                    uno_clicked = True
-                                    if user_uno_clicked:
-                                        print("유저우노클릭")
-                                        one_flags[current_player] = False
-                                        print('플래그 false')
-                                        uno_clicked = False
-                                        com_uno_drawn_card = remain_cards.pop()
-                                        print("카드 뽑기")
-                                        player_hands[current_player].append(com_uno_drawn_card)
-                                        # 컴퓨터가 낸 카드가 special일 경우
-                                        if com_pop_card.is_special():
-                                            current_player_index, direction, uno_current_player_index = \
-                                                apply_special_card_effects(com_pop_card, current_player_index,
-                                                                           current_player, direction, player_hands,
-                                                                           remain_cards, player_count)
-                                            com_pop_card = None  # 컴퓨터가 낸 카드 초기화
-                                            com_draw_requested = False
-                                            com_drawn_card = None
-                                            com_uno_check = False
-                                        # 컴퓨터가 낸 카드가 special이 아닌 경우
-                                        else:
-                                            current_player_index = (current_player_index + direction) % player_count
-                                            com_pop_card = None  # 컴퓨터가 낸 카드 초기화
-                                            com_draw_requested = False
-                                            com_drawn_card = None
-                                            com_uno_check = False
+                            elif com_uno_check and not user_uno_clicked and com_pop_card is not None:
+                                uno_clicked = True
+                                print("우노체크, 유저클릭안함")
+                            elif com_uno_check and user_uno_clicked and com_pop_card is not None:
+                                uno_clicked = True
+                                print("우노체크. 유저우노클릭")
+                                one_flags[current_player] = False
+                                print('플래그 false')
+                                uno_clicked = False
+                                com_uno_drawn_card = remain_cards.pop()
+                                print("카드 뽑기")
+                                player_hands[current_player].append(com_uno_drawn_card)
+                                # 컴퓨터가 낸 카드가 special일 경우
+                                if com_pop_card.is_special():
+                                    current_player_index, direction, uno_current_player_index = \
+                                        apply_special_card_effects(com_pop_card, current_player_index,
+                                                                   current_player, direction, player_hands,
+                                                                   remain_cards, player_count)
+                                    com_pop_card = None  # 컴퓨터가 낸 카드 초기화
+                                    com_draw_requested = False
+                                    com_drawn_card = None
+                                    com_uno_check = False
+                                # 컴퓨터가 낸 카드가 special이 아닌 경우
                                 else:
-                                    #내는 카드가 special일 경우
-                                    if com_pop_card.is_special():
-                                        current_player_index, direction, uno_current_player_index = apply_special_card_effects(
-                                            com_pop_card, current_player_index, current_player, direction, player_hands,
-                                            remain_cards, player_count)
-                                        com_pop_card = None  # 컴퓨터가 낸 카드 초기화
-                                        com_draw_requested = False
-                                        com_drawn_card = None
-                                        com_uno_check = False
-                                    # 내는 카드가 special이 아닌 경우
-                                    else:
-                                        current_player_index = (current_player_index + direction) % player_count
-                                        com_pop_card = None  # 컴퓨터가 낸 카드 초기화
-                                        com_draw_requested = False
-                                        com_drawn_card = None
-                                        com_uno_check = False
+                                    current_player_index = (current_player_index + direction) % player_count
+                                    com_pop_card = None  # 컴퓨터가 낸 카드 초기화
+                                    com_draw_requested = False
+                                    com_drawn_card = None
+                                    com_uno_check = False
+                            elif not com_uno_check and com_pop_card is not None:
+                                #내는 카드가 special일 경우
+                                if com_pop_card.is_special():
+                                    current_player_index, direction, uno_current_player_index = apply_special_card_effects(
+                                        com_pop_card, current_player_index, current_player, direction, player_hands,
+                                        remain_cards, player_count)
+                                    com_pop_card = None  # 컴퓨터가 낸 카드 초기화
+                                    com_draw_requested = False
+                                    com_drawn_card = None
+                                    com_uno_check = False
+                                # 내는 카드가 special이 아닌 경우
+                                else:
+                                    current_player_index = (current_player_index + direction) % player_count
+                                    com_pop_card = None  # 컴퓨터가 낸 카드 초기화
+                                    com_draw_requested = False
+                                    com_drawn_card = None
+                                    com_uno_check = False
                 current_time = pygame.time.get_ticks()
 
                 # 컴퓨터의 턴일 때 시간이 초과되면 우노를 넘긴다.
