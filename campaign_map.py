@@ -47,7 +47,7 @@ class CampaignMap:
         self.running = False
 
     def setting(self):
-        # 설정 불러오기
+        # 창 관련 설정 불러오기
         try:
             with open("./option/save_option.pickle", "rb") as f:
                 self.display_size = pickle.load(f)
@@ -75,7 +75,7 @@ class CampaignMap:
         self.screen = pygame.display.set_mode(self.display_size)
         pygame.display.set_caption(basic.game_title)
 
-        # 버튼 조작 키 표시
+        # 폰트 설정
         self.font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[1])
 
         # 버튼
@@ -85,6 +85,8 @@ class CampaignMap:
                                       self.campaign_map_button_size[0],
                                       self.campaign_map_button_size[1], "resources/image/story_image/storygym_1.jpg",
                                       self.button_click_event)]
+
+        # 클리어 체크 후 버튼 표시
         if self.clear_data["1st"] > 0:
             self.buttons.append(ButtonWithImg(self.display_size[0] * 0.35, self.display_size[1] * 0.5,
                                 self.campaign_map_button_size[0],
@@ -108,8 +110,10 @@ class CampaignMap:
         # 배경 색상
         self.screen.fill((255, 255, 255))
 
+        # 버튼 표시
         for button in self.buttons:
             button.process()
+            # 이미지 버튼일 경우 img_rect 사용
             if isinstance(button, ButtonWithImg):
                 self.screen.blit(button.image, button.img_rect)
             self.screen.blit(button.surface, button.rect)
@@ -130,28 +134,29 @@ class CampaignMap:
                     self.buttons[self.selected_button_index].selected = False
                     self.selected_button_index = (self.selected_button_index + 1) % len(self.buttons)
                     self.buttons[self.selected_button_index].selected = True
-                elif event.key == self.key_setting['left']:
-                    self.buttons[self.selected_button_index].selected = False
-                    if self.selected_button_index == 0:
-                        self.selected_button_index -= 1
-                    elif self.selected_button_index == 1:
-                        self.selected_button_index = 0
-                    elif self.selected_button_index == 2:
-                        self.selected_button_index = 3
-                    else:
-                        self.selected_button_index = (self.selected_button_index - 2) % len(self.buttons)
-                    self.buttons[self.selected_button_index].selected = True
-                elif event.key == self.key_setting['right']:
-                    self.buttons[self.selected_button_index].selected = False
-                    if self.selected_button_index == 0:
-                        self.selected_button_index = 1
-                    elif self.selected_button_index == 3:
-                        self.selected_button_index = 2
-                    elif self.selected_button_index == 4:
-                        self.selected_button_index = 0
-                    else:
-                        self.selected_button_index = (self.selected_button_index + 2) % len(self.buttons)
-                    self.buttons[self.selected_button_index].selected = True
+
+                ## 좌우 방향키 키보드 조작
+                # elif event.key == self.key_setting['left']:
+                #     self.buttons[self.selected_button_index].selected = False
+                #     if self.selected_button_index == 0 or 1:
+                #         self.selected_button_index -= 1
+                #     elif self.selected_button_index == 2:
+                #         self.selected_button_index += 1
+                #     else:
+                #         self.selected_button_index = (self.selected_button_index - 2) % len(self.buttons)
+                #     self.buttons[self.selected_button_index].selected = True
+                # elif event.key == self.key_setting['right']:
+                #     self.buttons[self.selected_button_index].selected = False
+                #     if self.selected_button_index == 0:
+                #         self.selected_button_index = 1
+                #     elif self.selected_button_index == 3:
+                #         self.selected_button_index = 2
+                #     elif self.selected_button_index == 4:
+                #         self.selected_button_index = 0
+                #     else:
+                #         self.selected_button_index = (self.selected_button_index + 2) % len(self.buttons)
+                #     self.buttons[self.selected_button_index].selected = True
+
                 elif event.key == self.key_setting['enter']:
                     self.buttons[self.selected_button_index].on_click_function()
 
