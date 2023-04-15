@@ -50,8 +50,8 @@ def singleplayer():
     clock = pygame.time.Clock()
 
     # 플레이어 수와 각 플레이어가 받을 카드 수 지정
-    player_count = 3
-    card_count = 4
+    player_count = 2
+    card_count = 10
 
     # 스크린 사이즈 및 폰트
     screen_width = 1800
@@ -272,8 +272,6 @@ def singleplayer():
             # 퍼즈가 아닐 경우
             if not paused:
                 current_time = pygame.time.get_ticks()
-                print(uno_click_time)
-                print(clicked_card, clicked_next_turn_button, user_uno_clicked)
                 # 유저의 턴일 경우
                 if user_turn:
                     if event.type == pygame.MOUSEBUTTONDOWN:

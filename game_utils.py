@@ -260,10 +260,11 @@ def apply_special_card_effects(card, current_player_index, current_player, direc
         uno_current_player_index = current_player_index
         next_player_index = (current_player_index + direction) % player_count
         # has_shield = any(check_card.value == "shield" for check_card in player_hands[next_player_index])
-        has_shield = next((check_card for check_card in player_hands[next_player_index] if card.value == "shield"),
-                          None)
+        has_shield = next((check_card for check_card in player_hands[next_player_index] if check_card.value == "shield")
+                          , None)
         # shield 카드가 없으면 2장 뽑고, 턴 넘기기
         if not has_shield:
+            print("실드카드가 없군요!")
             for _ in range(2):
                 add_card = remain_cards.pop()
                 player_hands[next_player_index].append(add_card)
@@ -272,7 +273,8 @@ def apply_special_card_effects(card, current_player_index, current_player, direc
             return current_player_index, direction, uno_current_player_index
         # shield 카드가 있으면 사용후, 턴 넘기기
         else:
-            shield_card = next(check_card for check_card in player_hands[next_player_index] if card.value == "shield")
+            print("실드카드가 있군요!")
+            shield_card = next(check_card for check_card in player_hands[next_player_index] if check_card.value == "shield")
             player_hands[next_player_index].remove(shield_card)
             current_player_index = (current_player_index + (direction * 2)) % player_count
             print(current_player_index, direction)
@@ -289,9 +291,8 @@ def apply_special_card_effects(card, current_player_index, current_player, direc
         uno_current_player_index = current_player_index
         for i, hand in enumerate(player_hands):
             if i != current_player:
-                for _ in range(2):
-                    add_card = remain_cards.pop()
-                    hand.append(add_card)
+                add_card = remain_cards.pop()
+                hand.append(add_card)
         current_player_index = (current_player_index + direction) % player_count
         print(current_player_index, direction)
         return current_player_index, direction, uno_current_player_index
