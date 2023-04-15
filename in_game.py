@@ -43,20 +43,19 @@ def game():
     pygame.quit()
 
 
-def singleplayer():
+def singleplayer(display_size):
+    screen_width, screen_height = display_size[0], display_size[1]
     pygame.init()
     global FPS, event
     computer_action_time = None
     clock = pygame.time.Clock()
 
     # 플레이어 수와 각 플레이어가 받을 카드 수 지정
-    player_count = 2
-    card_count = 10
+    player_count = 4
+    card_count = 7
 
     # 스크린 사이즈 및 폰트
-    screen_width = 1800
-    screen_height = 1000
-    screen = pygame.display.set_mode((screen_width, screen_height))
+    screen = pygame.display.set_mode(display_size)
     pygame.display.set_caption("UNO Game - Single")
     font = pygame.font.Font("resources/maplestory_font.ttf", 20)
     font_big = pygame.font.Font("resources/maplestory_font.ttf", 40)
@@ -133,7 +132,7 @@ def singleplayer():
     uno_button_inactive_img = pygame.image.load("resources/Image/button_images/uno_button_inactive.png").convert_alpha()
 
     # 이미지 크기 계산, 화면 크기 계싼
-    screen = pygame.display.set_mode((screen_width, screen_height))
+    screen = pygame.display.set_mode(display_size)
     image_width, image_height = direction_img.get_size()
 
     # 화면 중앙 좌표 계산
@@ -232,7 +231,7 @@ def singleplayer():
     computer_uno_clicked = False
     com_drawn_card = None
     com_uno_check = False
-    one_flags = [False, False, False, False, False]
+    one_flags = [False, False, False, False, False, False]
 
     # 10초 제한 설정
     time_limit = 10000

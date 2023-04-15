@@ -54,7 +54,7 @@ class Main:
 
     def in_game_button_click_event(self):
         print('싱글 플레이 버튼 클릭됨')
-        in_game.singleplayer()
+        in_game.singleplayer(self.display_size)
 
     def setting(self):
         # 설정 불러오기
