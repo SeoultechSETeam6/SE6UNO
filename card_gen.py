@@ -33,19 +33,12 @@ class Card:
     def is_special(self):
         return self.value in ["skip", "reverse", "draw_2", "bomb", "one_more", "shield", "change"]
 
-'''
-def resize_image(image, scale_percent):
-    width = int(image.get_width() * scale_percent / 100)
-    height = int(image.get_height() * scale_percent / 100)
-    return pygame.transform.scale(image, (width, height))
-'''
 
-
-def generate_cards():
+def generate_cards(color_weakness):
     cards = []
     card_back_image = pygame.image.load("resources/Image/card_images/card_back.png")
 
-    card_folder = "resources/image/cw_card_images" if option.color_weakness else "resources/image/card_images"
+    card_folder = "resources/image/cw_card_images" if color_weakness else "resources/image/card_images"
     # 색약 모드와 경로 차별화
 
     for i in range(2):
@@ -62,7 +55,7 @@ def generate_cards():
         cards.append(card)
 
     # 색 없는 색변경 카드를 추가
-    for i in range(2):
+    for i in range(10):
         card_image = pygame.image.load(f"resources/Image/card_images/none_change.png")
         card = Card('none', 'change', card_image, card_back_image)
         cards.append(card)
@@ -70,19 +63,18 @@ def generate_cards():
 
 
 # 체인지카드 발동시 유저한테 보여질 카드.
-def generate_for_change_cards():
+def generate_for_change_cards(color_weakness):
     for_change_cards = []
-    card_folder = "resources/image/for_change_cards"
+    change_card_folder = "resources/image/cw_for_change_cards" if color_weakness else "resources/image/for_change_cards"
     card_back_image = pygame.image.load("resources/Image/card_images/card_back.png")
 
     for color in change_colors:
-        card_image = pygame.image.load(f"{card_folder}/{color}_{change_value}.png")
+        card_image = pygame.image.load(f"{change_card_folder}/{color}_{change_value}.png")
         for_change_card = Card(color, change_value, card_image, card_back_image)
         for_change_cards.append(for_change_card)
     return for_change_cards
 
 
-for_change_cards = generate_for_change_cards()
 
 '''
 # 체인지를 위한 카드 살펴보기(추후 삭제)

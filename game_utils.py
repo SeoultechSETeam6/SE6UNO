@@ -168,14 +168,13 @@ def apply_special_card_effects(card, current_player_index, current_player, direc
             print("reverse카드 이벤트 발생")
             direction *= -1
             current_player_index = (current_player_index + direction) % player_count
-            print(current_player_index, direction)
             return current_player_index, direction
 
         # 스킵 카드
         elif card.value == "skip":
             print("skip카드 이벤트 발생")
+            pygame.time.delay(100)
             current_player_index = (current_player_index + direction + direction) % player_count
-            print(current_player_index, direction)
             return current_player_index, direction
 
         # 2장 드로우 공격
@@ -193,7 +192,7 @@ def apply_special_card_effects(card, current_player_index, current_player, direc
                     add_card = remain_cards.pop()
                     player_hands[next_player_index].append(add_card)
                 current_player_index = (current_player_index + (direction * 2)) % player_count
-                print(current_player_index, direction)
+                pygame.time.delay(100)
                 return current_player_index, direction
             # shield 카드가 있으면 사용후, 턴 넘기기
             else:
@@ -201,11 +200,11 @@ def apply_special_card_effects(card, current_player_index, current_player, direc
                 shield_card = next(check_card for check_card in player_hands[next_player_index] if check_card.value == "shield")
                 player_hands[next_player_index].remove(shield_card)
                 current_player_index = (current_player_index + (direction * 2)) % player_count
-                print(current_player_index, direction)
+                pygame.time.delay(100)
                 return current_player_index, direction
 
         elif card.value == "one_more":
-            print("one_more카드 이벤트 발생")
+            pygame.time.delay(100)
             return current_player_index, direction
 
         # 폭탄 카드
@@ -232,3 +231,16 @@ def apply_special_card_effects(card, current_player_index, current_player, direc
         change_delay_time = random.randint(2000, 5000)  # 컴퓨터 시간
         current_player_index = (current_player_index + direction) % player_count
         return current_player_index, direction
+
+
+def card_reshuffle(board_card, remain_cards):
+    top_card = board_card[-1]
+    board_card = board_card[:-1]  # top_card를 제외한 나머지 카드를 가져옵니다.
+
+    remain_cards.extend(board_card)  # 가져온 카드를 remain_cards에 추가합니다.
+    board_card = [top_card]  # board_card를 top_card만 남겨둡니다.
+
+    # 카드 change 항목을 제거한다.
+    remain_cards = [card for card in remain_cards if card.value is not None]
+    random.shuffle(remain_cards)  # remain_cards를 무작위로 섞습니다.
+    return board_card, remain_cards
