@@ -38,7 +38,7 @@ class CampaignMap:
             with open(self.file_path, 'w') as fw:
                 json.dump(clear_data, fw, indent=4)
 
-    def button_click_event(self):
+    def button_click_event(self, campaign_num):
         print('버튼 클릭됨')
 
     def exit_event(self):
@@ -81,24 +81,24 @@ class CampaignMap:
         # 버튼
         self.buttons = [Button(self.display_size[0] * 0.07, self.display_size[1] * 0.04, self.button_size[0],
                                self.button_size[1], "뒤로 가기", self.exit_event, self.font_size[1]),
-                        ButtonWithImg(self.display_size[0] * 0.3, self.display_size[1] * 0.05,
+                        ButtonWithImg(self.display_size[0] * 0.15, self.display_size[1] * 0.18,
                                       self.campaign_map_button_size[0],
                                       self.campaign_map_button_size[1], "resources/image/story_image/storygym_1.jpg",
                                       self.button_click_event)]
 
         # 클리어 체크 후 버튼 표시
         if self.clear_data["1st"] > 0:
-            self.buttons.append(ButtonWithImg(self.display_size[0] * 0.35, self.display_size[1] * 0.5,
+            self.buttons.append(ButtonWithImg(self.display_size[0] * 0.2, self.display_size[1] * 0.54,
                                 self.campaign_map_button_size[0],
                                 self.campaign_map_button_size[1], "resources/image/story_image/storygym_2.jpg",
                                 self.button_click_event))
         if self.clear_data["2nd"] > 0:
-            self.buttons.append(ButtonWithImg(self.display_size[0] * 0.7, self.display_size[1] * 0.15,
+            self.buttons.append(ButtonWithImg(self.display_size[0] * 0.45, self.display_size[1] * 0.23,
                                 self.campaign_map_button_size[0],
                                 self.campaign_map_button_size[1], "resources/image/story_image/storygym_3.jpg",
                                 self.button_click_event))
         if self.clear_data["3rd"] > 0:
-            self.buttons.append(ButtonWithImg(self.display_size[0] * 0.75, self.display_size[1] * 0.6,
+            self.buttons.append(ButtonWithImg(self.display_size[0] * 0.5, self.display_size[1] * 0.59,
                                 self.campaign_map_button_size[0],
                                 self.campaign_map_button_size[1], "resources/image/story_image/storygym_4.jpg",
                                 self.button_click_event))
@@ -113,7 +113,7 @@ class CampaignMap:
         # 버튼 표시
         for button in self.buttons:
             button.process()
-            # 이미지 버튼일 경우 img_rect 사용
+            # 이미지 버튼일 경우 img_rect도 포함
             if isinstance(button, ButtonWithImg):
                 self.screen.blit(button.image, button.img_rect)
             self.screen.blit(button.surface, button.rect)
@@ -135,7 +135,8 @@ class CampaignMap:
                     self.selected_button_index = (self.selected_button_index + 1) % len(self.buttons)
                     self.buttons[self.selected_button_index].selected = True
 
-                ## 좌우 방향키 키보드 조작
+                # 좌우 방향키 키보드 조작
+
                 # elif event.key == self.key_setting['left']:
                 #     self.buttons[self.selected_button_index].selected = False
                 #     if self.selected_button_index == 0 or 1:
