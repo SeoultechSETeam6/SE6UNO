@@ -55,7 +55,7 @@ def generate_cards(color_weakness):
         cards.append(card)
 
     # 색 없는 색변경 카드를 추가
-    for i in range(10):
+    for i in range(2):
         card_image = pygame.image.load(f"resources/Image/card_images/none_change.png")
         card = Card('none', 'change', card_image, card_back_image)
         cards.append(card)
