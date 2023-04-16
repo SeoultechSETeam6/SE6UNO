@@ -5,9 +5,12 @@ from card_shuffle import shuffle_cards, distribute_cards
 from game_utils import (
     draw_cards_user,
     draw_cards_ai,
+    draw_change_card,
     find_hovered_card,
+    find_hovered_change,
     draw_text,
     get_clicked_card,
+    get_clicked_change,
     draw_button,
     get_top_card,
     draw_board_card,
@@ -51,8 +54,8 @@ def singleplayer(display_size):
     clock = pygame.time.Clock()
 
     # 플레이어 수와 각 플레이어가 받을 카드 수 지정
-    player_count = 4
-    card_count = 7
+    player_count = 2
+    card_count = 2
 
     # 스크린 사이즈 및 폰트
     screen = pygame.display.set_mode(display_size)
@@ -165,9 +168,10 @@ def singleplayer(display_size):
     # 게임 루프
     running = True
 
-    # 카드 약간 띄우는 초기값 index는 플레이어, index2는 ai
+    # 카드 약간 띄우는 초기값 index는 플레이어, index2는 ai,
     hovered_card_index = None
     hovered_card_index2 = None
+    hovered_change_index = None
 
     # 각 카드들의 위치 설정, (x, y, spacing)는 유저의 카드, (x2, y2, spacing2, max_per_row)는 AI의 카드 위치를 잡는다.
     x = screen_width/10
@@ -183,6 +187,10 @@ def singleplayer(display_size):
     x4 = screen_width * 0.63
     y4 = screen_height * 0.07 - 100
     spacing4 = screen_height * 0.2
+    # change카드 좌표, spacing은 공백
+    x5 = 100
+    y5 = 100
+    spacing5 = 200
     # 플레이어들이 카드를 뽑고 남은 카드들의 위치를 잡는데 사용
     remain_cards_x_position = (screen.get_rect().centerx - 100)
     remain_cards_y_position = (screen.get_rect().centery - 50)
@@ -232,6 +240,8 @@ def singleplayer(display_size):
     com_drawn_card = None
     com_uno_check = False
     one_flags = [False, False, False, False, False, False]
+    change_card = False
+    clicked_change_index = None
 
     # 10초 제한 설정
     time_limit = 10000
@@ -246,7 +256,6 @@ def singleplayer(display_size):
 
         # 현재 플레이어가 유저인지 확인
         user_turn = (current_player == 0)
-
         if user_turn and not prev_user_turn:
             turn_start_time = pygame.time.get_ticks()  # 현재 시간 저장
             pop_card = None  # 카드를 냈는지 확인
@@ -281,6 +290,11 @@ def singleplayer(display_size):
                         clicked_remain_cards = remain_cards_rect.collidepoint(mouse_x, mouse_y)
                         # next_turn_button 클릭 확인
                         clicked_next_turn_button = next_turn_button_rect.collidepoint(mouse_x, mouse_y)
+                        # change 클릭 확인
+                        clicked_change_index, clicked_change = get_clicked_change(change, x5, y5, spacing5, mouse_x,
+                                                                                  mouse_y)
+                    if clicked_change_index is not None:
+                        print(clicked_change_index)
 
                     # 클릭된 카드가 실제로 존재하는지 확인하는 조건문. 클릭된 카드가 존재하면 내부 코드 실행
                     if clicked_card is not None or clicked_remain_cards or clicked_next_turn_button or user_uno_clicked:
@@ -337,9 +351,8 @@ def singleplayer(display_size):
                                 one_flags[0] = False
                                 uno_clicked = False
                                 # 내는 카드가 special인 경우
-                                if pop_card.is_special():
-                                    current_player_index, direction, uno_current_player_index = \
-                                        apply_special_card_effects(pop_card, current_player_index,
+                                if pop_card.is_special() and pop_card.value != "change":
+                                    current_player_index, direction = apply_special_card_effects(pop_card, current_player_index,
                                                                    current_player, direction, player_hands,
                                                                    remain_cards, player_count)
                                     pop_card = None  # 낸 카드 초기화
@@ -350,9 +363,26 @@ def singleplayer(display_size):
                                     clicked_card = None
                                     clicked_remain_cards = False
                                     clicked_next_turn_button = False
-                                    user_uno_clicked = False
+                                elif pop_card.is_special() and pop_card.value == "change":
+                                    change_card = True
+                                    if clicked_change_index is not None:
+                                        color_change = change[clicked_change_index]
+                                        current_player_index, direction = apply_special_card_effects(
+                                            pop_card, current_player_index, current_player, direction, player_hands,
+                                            remain_cards, player_count)
+                                        board_card.append(color_change)
+                                        pop_card = None  # 낸 카드 초기화
+                                        draw_requested = False
+                                        new_drawn_card = None
+                                        user_uno_check = False
+                                        user_uno_clicked = False
+                                        clicked_card = None
+                                        clicked_remain_cards = False
+                                        clicked_next_turn_button = False
+                                        clicked_change_index = None
+                                        change_card = False
                                 # 내는 카드가 special이 아닌 경우
-                                else:
+                                elif not pop_card.is_special():
                                     current_player_index = (current_player_index + direction) % player_count
                                     pop_card = None  # 낸 카드 초기화
                                     draw_requested = False
@@ -362,11 +392,11 @@ def singleplayer(display_size):
                                     clicked_card = None
                                     clicked_remain_cards = False
                                     clicked_next_turn_button = False
-                                    user_uno_clicked = False
+                                    clicked_change_index = None
                         else:
-                            # 내는 카드가 special인 경우
-                            if pop_card.is_special():
-                                current_player_index, direction, uno_current_player_index = apply_special_card_effects(pop_card,
+                            # 내는 카드가 special이고 change가 아닐 때,
+                            if pop_card.is_special() and pop_card.value != "change":
+                                current_player_index, direction = apply_special_card_effects(pop_card,
                                                                                              current_player_index,
                                                                                              current_player,
                                                                                              direction,
@@ -377,10 +407,27 @@ def singleplayer(display_size):
                                 draw_requested = False
                                 new_drawn_card = None
                                 user_uno_check = False
+                                user_uno_clicked = False
                                 clicked_card = None
                                 clicked_remain_cards = False
                                 clicked_next_turn_button = False
-                                user_uno_clicked = False
+                            # 내는 카드가 special이고, change인 경우
+                            elif pop_card.is_special() and pop_card.value == "change":
+                                change_card = True
+                                if clicked_change_index is not None:
+                                    color_change = change[clicked_change_index]
+                                    current_player_index, direction = apply_special_card_effects(pop_card, current_player_index, current_player, direction, player_hands, remain_cards, player_count)
+                                    board_card.append(color_change)
+                                    pop_card = None  # 낸 카드 초기화
+                                    draw_requested = False
+                                    new_drawn_card = None
+                                    user_uno_check = False
+                                    user_uno_clicked = False
+                                    clicked_card = None
+                                    clicked_remain_cards = False
+                                    clicked_next_turn_button = False
+                                    clicked_change_index = None
+                                    change_card = False
                             # 내는 카드가 special이 아닌 경우
                             else:
                                 current_player_index = (current_player_index + direction) % player_count
@@ -388,19 +435,20 @@ def singleplayer(display_size):
                                 draw_requested = False
                                 new_drawn_card = None
                                 user_uno_check = False
+                                user_uno_clicked = False
                                 clicked_card = None
                                 clicked_remain_cards = False
                                 clicked_next_turn_button = False
-                                user_uno_clicked = False
 
-                # 유저의 턴일 때 시간이 초과되면 드로우하고 턴을 넘김
+                # 우노 시간 넘기면 발동
                 if pop_card is not None and one_flags[0] and user_turn:
                     if current_time - uno_current_time >= uno_delay_time:
                         uno_drawn_card = remain_cards.pop()
                         player_hands[0].append(uno_drawn_card)
-                        # 내는 카드가 special인 경우
-                        if pop_card.is_special():
-                            current_player_index, direction, uno_current_player_index = apply_special_card_effects(
+                        # 내는 카드가 special이고, change가 아닐 경우
+                        if pop_card.is_special() and pop_card.value == "change":
+                            print("popcard가 체인지이고 제한시간 넘김")
+                            current_player_index, direction = apply_special_card_effects(
                                 pop_card, current_player_index, current_player, direction, player_hands, remain_cards,
                                 player_count)
                             pop_card = None  # 낸 카드 초기화
@@ -408,22 +456,40 @@ def singleplayer(display_size):
                             new_drawn_card = None
                             one_flags[0] = False
                             user_uno_check = False
+                            user_uno_clicked = False
                             clicked_card = None
                             clicked_remain_cards = False
                             clicked_next_turn_button = False
+                            change_card = False
+                        elif pop_card.is_special() and pop_card.value != "change":
+                            print("popcard가 체인지아니고 제한시간 넘김")
+                            current_player_index, direction = apply_special_card_effects(
+                                pop_card, current_player_index, current_player, direction, player_hands, remain_cards,
+                                player_count)
+                            pop_card = None  # 낸 카드 초기화
+                            draw_requested = False
+                            new_drawn_card = None
+                            one_flags[0] = False
+                            user_uno_check = False
                             user_uno_clicked = False
+                            clicked_card = None
+                            clicked_remain_cards = False
+                            clicked_next_turn_button = False
+                            change_card = False
                         # 내는 카드가 special이 아닌 경우
-                        else:
+                        elif not pop_card.is_special():
                             current_player_index = (current_player_index + direction) % player_count
                             pop_card = None
                             draw_requested = False
                             new_drawn_card = None
                             one_flags[0] = False
                             user_uno_check = False
+                            user_uno_clicked = False
                             clicked_card = None
                             clicked_remain_cards = False
                             clicked_next_turn_button = False
-                            user_uno_clicked = False
+                            change_card = False
+                # 유저의 턴일 때 시간이 초과되면 드로우하고 턴을 넘김
                 elif not draw_requested:
                     if user_turn and current_time - turn_start_time >= time_limit:
                         card = remain_cards.pop()
@@ -434,6 +500,7 @@ def singleplayer(display_size):
                         clicked_card = None
                         clicked_remain_cards = False
                         clicked_next_turn_button = False
+                        change_card = False
                         user_uno_clicked = False
                         current_player_index = (current_player_index + direction) % player_count
                         # 턴이 넘어갈 때 turn_start_time 업데이트
@@ -444,6 +511,11 @@ def singleplayer(display_size):
                         pop_card = None
                         draw_requested = False
                         new_drawn_card = None
+                        clicked_card = None
+                        clicked_remain_cards = False
+                        clicked_next_turn_button = False
+                        change_card = False
+                        user_uno_clicked = False
                         current_player_index = (current_player_index + direction) % player_count
 
                 # 컴퓨터 턴 처리
@@ -511,8 +583,8 @@ def singleplayer(display_size):
                                     player_hands[current_player].append(com_uno_drawn_card)
                                     # 컴퓨터가 낸 카드가 special일 경우
                                     if com_pop_card.is_special():
-                                        current_player_index, direction, uno_current_player_index = \
-                                            apply_special_card_effects(com_pop_card, current_player_index,
+                                        current_player_index, direction = apply_special_card_effects(com_pop_card,
+                                                                                                     current_player_index,
                                                                        current_player, direction, player_hands,
                                                                        remain_cards, player_count)
                                         com_pop_card = None  # 컴퓨터가 낸 카드 초기화
@@ -534,8 +606,7 @@ def singleplayer(display_size):
                             elif not com_uno_check and com_pop_card is not None:
                                 #내는 카드가 special일 경우
                                 if com_pop_card.is_special():
-                                    current_player_index, direction, uno_current_player_index = apply_special_card_effects(
-                                        com_pop_card, current_player_index, current_player, direction, player_hands,
+                                    current_player_index, direction = apply_special_card_effects(com_pop_card, current_player_index, current_player, direction, player_hands,
                                         remain_cards, player_count)
                                     com_pop_card = None  # 컴퓨터가 낸 카드 초기화
                                     com_draw_requested = False
@@ -556,8 +627,17 @@ def singleplayer(display_size):
                     if current_time - uno_current_time >= uno_delay_time:
                         one_flags[current_player_index] = False
                         # 내는 카드가 special인 경우
-                        if com_pop_card.is_special():
-                            current_player_index, direction, uno_current_player_index = apply_special_card_effects(
+                        if com_pop_card.is_special() and not change_card:
+                            current_player_index, direction = apply_special_card_effects(
+                                com_pop_card, current_player_index, current_player, direction, player_hands,
+                                remain_cards,
+                                player_count)
+                            com_pop_card = None  # 컴퓨터가 낸 카드 초기화
+                            com_draw_requested = False
+                            com_drawn_card = None
+                            com_uno_check = False
+                        elif com_pop_card.is_special() and change_card:
+                            current_player_index, direction = apply_special_card_effects(
                                 com_pop_card, current_player_index, current_player, direction, player_hands,
                                 remain_cards,
                                 player_count)
@@ -566,7 +646,7 @@ def singleplayer(display_size):
                             com_drawn_card = None
                             com_uno_check = False
                         # 내는 카드가 special이 아닌 경우
-                        else:
+                        elif not com_pop_card.is_special():
                             current_player_index = (current_player_index + direction) % player_count
                             com_pop_card = None  # 컴퓨터가 낸 카드 초기화
                             com_draw_requested = False
@@ -620,8 +700,11 @@ def singleplayer(display_size):
             # 유저 카드에 마우스 대면 위로 작동, 퍼즈일때는 작동 안함
             if not paused:
                 hovered_card_index = find_hovered_card(player_hands[0], x, y, spacing, mouse_x, mouse_y)
+                hovered_change_index = find_hovered_change(change, x5, y5, spacing5, mouse_x, mouse_y)
 
             draw_cards_user(screen, player_hands[0], x, y, spacing, hovered_card_index)  # 플레이어의 카드를 그린다.
+            if user_turn and change_card:
+                draw_change_card(screen, change, x5, y5, spacing5, hovered_change_index)  # 체인지 카드 그림
 
             for i in range(len(player_hands) - 1):  # ai의 카드를 그린다.
                 draw_cards_ai(screen, player_hands[i + 1], x2, y2 + (i * spacing4), max_per_row, spacing2, hovered_card_index2,

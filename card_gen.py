@@ -60,17 +60,13 @@ def generate_cards():
         card_image = pygame.image.load(f"resources/Image/card_images/none_shield.png")
         card = Card('none', 'shield', card_image, card_back_image)
         cards.append(card)
-    return cards # change추가시 삭제.
 
-'''
     # 색 없는 색변경 카드를 추가
     for i in range(2):
         card_image = pygame.image.load(f"resources/Image/card_images/none_change.png")
-        card_image_resized = resize_image(card_image, 10)  # 이미지 크기를 5%로 조정합니다.
-        card = Card('none', 'change', card_image_resized, card_back_image)
+        card = Card('none', 'change', card_image, card_back_image)
         cards.append(card)
     return cards
-'''
 
 
 # 체인지카드 발동시 유저한테 보여질 카드.
@@ -79,11 +75,10 @@ def generate_for_change_cards():
     card_folder = "resources/image/for_change_cards"
     card_back_image = pygame.image.load("resources/Image/card_images/card_back.png")
 
-    for i in range(5):
-        for color in change_colors:
-            card_image = pygame.image.load(f"{card_folder}/{color}_{change_value}.png")
-            for_change_card = Card(color, change_value, card_image, card_back_image)
-            for_change_cards.append(for_change_card)
+    for color in change_colors:
+        card_image = pygame.image.load(f"{card_folder}/{color}_{change_value}.png")
+        for_change_card = Card(color, change_value, card_image, card_back_image)
+        for_change_cards.append(for_change_card)
     return for_change_cards
 
 
