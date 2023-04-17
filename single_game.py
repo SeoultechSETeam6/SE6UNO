@@ -73,11 +73,29 @@ class SingleGame():
         self.clock = pygame.time.Clock()
         self.running = True
 
-
         # single_game 변수
-        self.player_count = 5  # 플레이어 수
+        self.player_count = 1  # 플레이어 수
         self.card_count = 7  # 처음 시작하는 카드 수
         self.winner_message = ""  # 승리 메세지
+
+        # 로비에서 가져온 정보
+        self.computer_attends = computer_attends
+        for i in range(len(self.computer_attends)):
+            if self.computer_attends[i]:
+                self.player_count += 1
+
+        self.computer_coordinate = []
+        if self.computer_attends[0]:
+            self.computer_coordinate.append([self.display_size[0] * 0.72, self.display_size[1] * 0.08])
+        if self.computer_attends[1]:
+            self.computer_coordinate.append([self.display_size[0] * 0.72, (self.display_size[1] * 0.08) + self.display_size[1] * 0.2])
+        if self.computer_attends[2]:
+            self.computer_coordinate.append([self.display_size[0] * 0.72, (self.display_size[1] * 0.08) + (self.display_size[1] * 0.4)])
+        if self.computer_attends[3]:
+            self.computer_coordinate.append([self.display_size[0] * 0.72, (self.display_size[1] * 0.08) + (self.display_size[1] * 0.6)])
+        if self.computer_attends[4]:
+            self.computer_coordinate.append([self.display_size[0] * 0.72, (self.display_size[1] * 0.08) + (self.display_size[1] * 0.8)])
+        self.max_per_row = 7
 
         # 게임 이미지를 로드
         self.pause_button_img = pygame.image.load("./resources/Image/button_images/pause.png").convert_alpha()
@@ -107,7 +125,7 @@ class SingleGame():
         # 플레이어 순서 결정
         self.player_order = list(range(self.player_count))
         # 초기 플레이어 순서를 위한 설정 값.
-        self.current_player = 0 # (random.randint(0, self.player_count - 1))
+        self.current_player = (random.randint(0, self.player_count - 1))
         # 게임 순서 방향 (1: 정방향, -1: 역방향)
         self.game_direction = 1
 
@@ -154,8 +172,8 @@ class SingleGame():
 
         # 턴 시간
         self.time_limit = 10000  # 유저의 턴 시간 제한
-        self.current_time = None  # 현재 시간
-        self.turn_start_time = None  # 턴 시작 시간
+        self.current_time = pygame.time.get_ticks()  # 현재 시간
+        self.turn_start_time = pygame.time.get_ticks()  # 턴 시작 시간
         self.delay_time = random.randint(1000, 2000)  # 컴퓨터 딜레이 타임1
         self.delay_time2 = self.delay_time + random.randint(900, 2000)  # 컴퓨터 딜레이 타임2
         self.delay_time3 = self.delay_time2 + random.randint(900, 2000)  # 컴퓨터 딜레이 타임3
@@ -169,14 +187,10 @@ class SingleGame():
         self.com_uno_remaining_time = None  # 컴퓨터턴 남은 우노 시간
         self.com_uno_remaining_time_text = None  # 컴퓨터턴 남은 우노 시간 텍스트
 
-        # 각 카드들의 위치 설정, (x, y, spacing)는 유저의 카드, (x2, y2, spacing2, max_per_row)는 AI의 카드 위치를 잡는다.
+        # 각 카드들의 위치 설정, (x, y, spacing)는 유저의 카드
         self.x = self.display_size[0] / 10
         self.y = self.display_size[1] * 0.8
         self.spacing = self.display_size[1] * 0.08
-        self.x2 = self.display_size[0] * 0.72
-        self.y2 = self.display_size[1] * 0.08
-        self.spacing2 = self.display_size[1] * 0.04
-        self.max_per_row = 7
         # turn_arrow_img의 위치를 계산. (x3, y3)는 유저 좌표, (x4, y4, spacing4)는 AI의 좌표
         self.x3 = self.display_size[0] / 10 - 150
         self.y3 = self.display_size[1] * 0.8 - 100
@@ -574,8 +588,16 @@ class SingleGame():
         # 누구 턴인지 표시하는 화살표 그리기
         if self.user_turn:
             self.screen.blit(self.turn_arrow_img, (self.x3, self.y3))
-        else:
-            self.screen.blit(self.turn_arrow_img, (self.x4, self.y4 + self.spacing4 * (self.current_player - 1)))
+        elif self.current_player == 1:
+            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[0][0]-150, self.computer_coordinate[0][1]-80))
+        elif self.current_player == 2:
+            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[1][0]-150, self.computer_coordinate[1][1]-80))
+        elif self.current_player == 3:
+            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[2][0]-150, self.computer_coordinate[2][1]-80))
+        elif self.current_player == 4:
+            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[3][0]-150, self.computer_coordinate[3][1]-80))
+        elif self.current_player == 5:
+            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[4][0]-150, self.computer_coordinate[4][1]-80))
 
         # 남은 카드 더미 그리기
         self.screen.blit(self.remain_cards[0].card_img_back, (self.remain_cards_x_position, self.remain_cards_y_position))
@@ -584,9 +606,11 @@ class SingleGame():
         # 유저 카드 그리기
         draw_cards_user(self.screen, self.player_hands[0], self.x, self.y, self.spacing, self.hovered_card_index)
         # ai의 카드를 그린다.
+        # ai의 카드를 그린다.
         for i in range(len(self.player_hands) - 1):
-            draw_cards_ai(self.screen, self.player_hands[i + 1], self.x2, self.y2 + (i * self.spacing4),
-                          self.max_per_row, self.spacing2,
+            draw_cards_ai(self.screen, self.player_hands[i + 1], self.computer_coordinate[i][0],
+                          self.computer_coordinate[i][1],
+                          self.max_per_row, self.display_size[1] * 0.04,
                           self.hovered_card_index2,
                           show_back=False)  # 추후 True로 바꾼다.
 
@@ -623,6 +647,7 @@ class SingleGame():
             self.after_draw_remaining_time = self.time_limit - (self.current_time - self.user_draw_time)
             self.after_draw_remaining_time_text = f"턴 남은 시간: {self.after_draw_remaining_time // 1000}초"
             draw_text(self.screen, self.after_draw_remaining_time_text, self.font, (255, 255, 255), self.screen.get_rect().centerx, 30)
+        '''
         # 유저 턴일때, uno버튼 시간
         elif self.user_turn and self.one_flags[0]:
             self.uno_remaining_time = self.uno_delay_time - (self.current_time - self.uno_current_time)
@@ -633,6 +658,7 @@ class SingleGame():
             self.com_uno_remaining_time = self.uno_delay_time - (self.current_time - self.uno_current_time)
             self.com_uno_remaining_time_text = f"우노버튼 남은 시간: {self.com_uno_remaining_time // 1000}초"
             draw_text(self.screen, self.com_uno_remaining_time_text, self.font, (255, 255, 255), self.screen.get_rect().centerx, 30)
+        '''
 
         if len(self.player_hands[0]) == 0:
             self.winner_message = "User Wins!"
