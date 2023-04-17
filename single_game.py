@@ -347,16 +347,6 @@ class SingleGame:
         self.clock = pygame.time.Clock()
         self.running = True
 
-        # single_game 변수
-        self.player_count = 1  # 플레이어 수
-        self.card_count = 2  # 처음 시작하는 카드 수
-        self.winner_message = ""  # 승리 메세지
-
-        # 로비에서 가져온 정보
-        for i in range(len(self.computer_attends)):
-            if self.computer_attends[i]:
-                self.player_count += 1
-
         self.computer_color = ["red", "blue", "green", "yellow"]
 
         # 컴퓨터 초기 좌표와 카드 색 선호도.
@@ -460,88 +450,10 @@ class SingleGame:
             "./resources/Image/button_images/uno_button_inactive.png").convert_alpha(), self.size_change)
         self.card_back_image = pygame.transform.scale_by(pygame.image.load("resources/Image/card_images/card_back.png"), self.size_change)
 
-        # 게임 음악 로드
-        self.background_music.set_volume(self.sound_volume * self.background_volume)
-        self.background_music.play(-1)
-        self.card_shuffle_music = pygame.mixer.Sound("./resources/SoundEffect/cardshuffle_sound.ogg")
-
         # 화면 중앙 좌표 계산
         self.image_width, self.image_height = self.direction_img.get_size()
         self.center_x = (self.display_size[0] - self.image_width) // 2
         self.center_y = (self.display_size[1] - self.image_height) // 2
-
-        # 카드 생성 및 셔플
-        self.cards = generate_cards(self.color_weakness, self.size_change)
-        self.shuffled_cards = shuffle_cards(self.cards)
-
-        # 카드 분배, 유저는 player_hands[0]이고, 나머지는 인공지능으로 설정한다. change는 카드 체인지를 위한 카드들.
-        self.player_hands, self.remain_cards = distribute_cards(self.shuffled_cards, self.player_count, self.card_count)
-        self.change_color_list = generate_for_change_cards(self.color_weakness, self.size_change)
-
-        # 플레이어 순서 결정
-        self.player_order = list(range(self.player_count))
-        # 초기 플레이어 순서를 위한 설정 값.
-        self.current_player = (random.randint(0, self.player_count - 1))
-        # 게임 순서 방향 (1: 정방향, -1: 역방향)
-        self.game_direction = 1
-
-        # 보드에 뒤집힌 카드 설정 (카드 한 장을 뽑아서 남은 카드 덱 옆에 보이게 놓기)
-        self.board_card = [self.remain_cards.pop()]
-
-        # 선택한 카드 위로 띄우기 해야함
-        # 카드 약간 띄우는 초기값 index는 플레이어, index2는 ai,
-        self.hovered_card_index = None
-        self.hovered_card_index2 = None
-        self.hovered_change_index = None
-
-        self.paused = False  # 일시정지 초기값
-        self.game_over = False  # 게임 오버 초기값
-        self.user_turn = None  # 유저 턴 여부 초기값
-
-        self.top_card = None  # board카드 맨 위
-        self.pop_card = None  # 뽑은 카드 초기값
-        self.pop_card_index = None  # 뽑은 카드 인덱스 숫자 초기값
-        self.draw_requested = False  # draw 했는지 확인하는 초기값
-        self.new_drawn_card = None  # draw한 카드가 어떤 카드인가의 초기값
-
-        self.clicked_card = None  # 클릭 카드 초기값
-        self.clicked_remain_cards = False  # remain_cards 클릭 여부 초기값
-        self.clicked_next_turn_button = False  # 다음턴 클릭여부 초기값
-
-        # uno 초기값
-        self.uno_check = False
-        self.uno_current_time = None
-        self.uno_delay_time = None
-        self.uno_click_time = None
-        self.user_uno_clicked = False
-        self.one_flags = [False, False, False, False, False, False]
-        self.change_card = False
-        self.clicked_card_index = None
-        self.clicked_change_index = None
-        self.change_index = None
-        self.playable = False
-        self.clicked_change = False
-        self.user_draw_time = None
-        self.uno_drawn_card = None
-        self.color_change = None
-        self.change_uno_expire = False
-
-        # 턴 시간
-        self.time_limit = 10000  # 유저의 턴 시간 제한
-        self.current_time = pygame.time.get_ticks()  # 현재 시간
-        self.turn_start_time = pygame.time.get_ticks()  # 턴 시작 시간
-        self.delay_time = random.randint(1000, 2000)  # 컴퓨터 딜레이 타임1
-        self.delay_time2 = self.delay_time + random.randint(900, 2000)  # 컴퓨터 딜레이 타임2
-        self.delay_time3 = self.delay_time2 + random.randint(900, 2000)  # 컴퓨터 딜레이 타임3
-        self.computer_action_time = pygame.time.get_ticks() + self.delay_time  # 현재 시간에 랜덤한 지연 시간을 더함
-        self.remaining_time = None  # 유저 턴 시간제한
-        self.remaining_time_text = None  # 유저 턴 시간제한 텍스트
-        self.after_draw_remaining_time = None  # 드로우 후 유저 턴 시간제한
-        self.after_draw_remaining_time_text = None  # 드로우 후 유저 턴 시간제한 텍스트
-        self.uno_remaining_time = None  # 유저턴 남은 우노 시간
-        self.uno_remaining_time_text = None  # 유저턴 남은 우노 시간 텍스트
-        self.com_uno_remaining_time = None  # 컴퓨터턴 남은 우노 시간
-        self.com_uno_remaining_time_text = None  # 컴퓨터턴 남은 우노 시간 텍스트
 
         # change카드 좌표, spacing은 공백
         self.x5 = 100
@@ -566,9 +478,6 @@ class SingleGame:
         self.uno_button_inactive_rect = self.uno_button_inactive_img.get_rect()
         self.uno_button_inactive_rect.topleft = (150, self.display_size[1] * 0.5)
         self.play_drawn_card_button = pygame.Rect(0, 0, 430, 110)
-        # animation 메소드 모음
-        self.animation_method = {"reverse": self.reverse_animation, "skip": self.skip_animation, "draw_2": self.draw_2_animation, "bomb": self.bomb_animation,
-                                 "shield": self.shield_animation, "change": self.change_animation, "one_more": self.one_more_animation}
 
         # Pause Button Check
         self.alreadyPressed = False
@@ -988,10 +897,14 @@ class SingleGame:
         self.paused = False
 
     def pause_popup_exit_button_event(self):
+        self.background_music.stop()
+        self.card_shuffle_music.stop()
         print('게임 종료 버튼 클릭')
         self.running = False
 
     def pause_popup_settings_button_event(self):
+        self.background_music.stop()
+        self.card_shuffle_music.stop()
         print('설정 버튼 클릭됨')
         option = Option()
         option.run()
@@ -1006,6 +919,8 @@ class SingleGame:
                 Mouse.updateMouseState()
                 # 클릭 판정을 위해 클릭 된 상태라면 더 이상 이벤트를 발생시키지 않음
                 if not self.alreadyPressed and Mouse.getMouseState() == MouseState.DRAG:
+                    self.background_music.stop()
+                    self.card_shuffle_music.stop()
                     self.pause_start_time = pygame.time.get_ticks()
                     self.paused = True
                     self.alreadyPressed = True
@@ -1082,37 +997,31 @@ class SingleGame:
         self.screen.blit(pygame.transform.scale_by(pygame.image.load("./resources/Image/animation/bomb.png"), self.size_change), (self.center_x, self.center_y))
         pygame.display.flip()
         time.sleep(0.7)
-        remain_pos = [pygame.Vector2(self.remain_cards_x_position, self.screen.get_rect().centery - 100) for _ in range(6)]
+        remain_pos = [pygame.Vector2(self.remain_cards_x_position, self.screen.get_rect().centery - 100)]
         self.card_place_music.set_volume(self.sound_volume * self.effect_volume)
         self.card_place_music.play(1)
         pos = [pygame.Vector2(self.user_coordinate[0] - self.turn_coordinate[0],
-                              self.user_coordinate[1] - self.turn_coordinate[1]),
-               pygame.Vector2(self.computer_coordinate[0][0] - self.turn_coordinate[2],
-                              self.computer_coordinate[0][1] - self.turn_coordinate[3]),
-               pygame.Vector2(self.computer_coordinate[1][0] - self.turn_coordinate[2],
-                              self.computer_coordinate[1][1] - self.turn_coordinate[3]),
-               pygame.Vector2(self.computer_coordinate[2][0] - self.turn_coordinate[2],
-                              self.computer_coordinate[2][1] - self.turn_coordinate[3]),
-               pygame.Vector2(self.computer_coordinate[3][0] - self.turn_coordinate[2],
-                              self.computer_coordinate[3][1] - self.turn_coordinate[3]),
-               pygame.Vector2(self.computer_coordinate[4][0] - self.turn_coordinate[2],
-                              self.computer_coordinate[4][1] - self.turn_coordinate[3])]
+                              self.user_coordinate[1] - self.turn_coordinate[1])]
+        j = 0
+        for i in range(0, 5):
+            if self.computer_attends[i]:
+                pos.append(pygame.Vector2(self.computer_coordinate[j][0] - self.turn_coordinate[2],
+                                          self.computer_coordinate[j][1] - self.turn_coordinate[3]))
+                remain_pos.append(pygame.Vector2(self.remain_cards_x_position, self.screen.get_rect().centery - 100))
+                j = j + 1
         while True:
             self.clock.tick(basic.fps)
             if remain_pos[0].distance_to(pos[0]) < 1:
                 break
-            remain_pos[0] = remain_pos[0].lerp(pos[0], 0.1)
-            remain_pos[1] = remain_pos[1].lerp(pos[1], 0.1)
-            remain_pos[2] = remain_pos[2].lerp(pos[2], 0.1)
-            remain_pos[3] = remain_pos[3].lerp(pos[3], 0.1)
-            remain_pos[4] = remain_pos[4].lerp(pos[4], 0.1)
-            remain_pos[5] = remain_pos[5].lerp(pos[5], 0.1)
+            for i in range(len(remain_pos)):
+                remain_pos[i] = remain_pos[i].lerp(pos[i], 0.1)
             self.draw()
             if self.game_direction > 0:
-                for i in range(0, self.player_count - 1):
+                for i in range(self.player_count - 1):
                     self.screen.blit(self.card_back_image, remain_pos[(index + i) % self.player_count])
+                print()
             else:
-                for i in range(0, self.player_count - 1):
+                for i in range(self.player_count - 1):
                     self.screen.blit(self.card_back_image, remain_pos[(index - i) % self.player_count])
             pygame.display.flip()
 
@@ -1298,6 +1207,8 @@ class SingleGame:
 
     def run(self):
         self.setting()
+        self.background_music.set_volume(self.sound_volume * self.background_volume)
+        self.background_music.play(-1)
         self.card_shuffle_music.set_volume(self.sound_volume * self.background_volume)
         self.card_shuffle_music.play(1)
         while self.running:
