@@ -204,6 +204,9 @@ class CampaignMap:
                              self.clear_flags[i].get_rect(x=self.buttons[i + 1].x * 1.05,
                                                           y=self.buttons[i + 1].y * 1.1))
 
+        self.screen.blit(self.buttons[self.selected_button_index].selected_image,
+                         self.buttons[self.selected_button_index].rect)
+
         # 선택되면 팝업 띄우고 바깥은 비활성화
         if self.popup.pop:
             self.screen.blit(self.popup.surface, self.popup.rect)
@@ -214,8 +217,6 @@ class CampaignMap:
             self.screen.blit(self.popup.close_button.surface, self.popup.close_button.rect)
             self.popup.open()
 
-        self.screen.blit(self.buttons[self.selected_button_index].selected_image,
-                         self.buttons[self.selected_button_index].rect)
         # 매 프레임마다 화면 업데이트
         pygame.display.flip()
 
