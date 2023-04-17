@@ -1,12 +1,6 @@
 import pygame
 from button import Button
 
-pygame.init()
-
-# 창 크기 설정
-screen_width = 800
-screen_height = 600
-screen = pygame.display.set_mode((screen_width, screen_height))
 
 # 색상 설정
 white = (255, 255, 255)

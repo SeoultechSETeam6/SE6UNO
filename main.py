@@ -48,7 +48,7 @@ class Main:
         self.running = False
 
     def setting(self):
-        # 설정 불러오기
+        # 게임 설정 불러오기
         try:
             with open("./option/save_option.pickle", "rb") as f:
                 self.display_size = pickle.load(f)
@@ -59,6 +59,7 @@ class Main:
             self.color_weakness = basic.color_weakness
             self.key_setting = basic.key_setting
 
+        # 해상도에 맞게 크기 비율 조정
         if self.display_size[0] == 1920:
             self.font_size = basic.font_size[0]
             self.button_size = basic.button_size[0]

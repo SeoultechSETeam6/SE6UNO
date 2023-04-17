@@ -131,8 +131,8 @@ class CampaignMap:
                                       self.check_event)]
 
         clear_flag = pygame.transform.scale(
-                (pygame.image.load("resources/image/story_image/clear_mark.png")),
-                (self.campaign_map_button_size[0] * 0.95, self.campaign_map_button_size[1] * 0.5))
+            (pygame.image.load("resources/image/story_image/clear_mark.png")),
+            (self.campaign_map_button_size[0] * 0.95, self.campaign_map_button_size[1] * 0.5))
 
         # 클리어 체크 후 버튼 표시 및 클리어 여부 표시
         if self.clear_data["1st"] > 0:
@@ -159,6 +159,7 @@ class CampaignMap:
         if self.clear_data["4th"] > 0:
             self.clear_flags.append(clear_flag)
 
+        # 키보드로 선택한 버튼 index 저장
         self.selected_button_index = 0
         self.buttons[self.selected_button_index].selected = True
 
@@ -166,31 +167,26 @@ class CampaignMap:
         # 배경 색상
         self.screen.fill((255, 255, 255))
 
-        # 설명창
+        # 설명창 영역
         description_section = pygame.Surface((self.display_size[0] * 0.35, self.display_size[1]))
         description_section.fill((50, 50, 50))
-        description_text = ['내 이름은 김우노. 우노 마스터가 되기 위해서\n'
-                            '4개의 도장을 차례로 격파하기위해 여행을 다니고 있어!',
-                            '1. 기술 도장: 상대방이 나보다 더 기술카드를 더 많이\n'
-                            '가져가고 기술카드를 조합해서 콤보를 사용을 할 수 있어서 조심해야해!',
-                            '2. 카드 러쉬 도장: 이 도장에서는 3명과 싸워야하고\n'
-                            '첫 카드를 제외하고 모든 카드를 같은 수만큼 플레이어들에게\n'
-                            '분배가 돼. 이 도장에서는 카드를 빨리 소모하는 것이 승리의 관건이야.',
-                            '3. 색깔 도장: 2명의 상대와 대전하고 5턴마다 낼 수 있는\n'
-                            '카드의 색상이 무작위로 변경되야해서 주의해야해!',
-                            '4. 난투 도장: 이 곳에서는 쉴드 카드를 사용할 수 없게 되고,\n'
-                            ' 새로운 공격카드가 추가되고 카드가 일정 매수가 넘어가면\n'
-                            '게임오버가 되니까 주의해야 해!']
-
-        description = [self.font.render(description_text[0], True, (255, 255, 255)),
-                       self.font.render(description_text[1], True, (255, 255, 255)),
-                       self.font.render(description_text[2], True, (255, 255, 255)),
-                       self.font.render(description_text[3], True, (255, 255, 255)),
-                       self.font.render(description_text[4], True, (255, 255, 255))]
         self.screen.blit(description_section, (self.display_size[0] * 0.65, 0))
-        self.screen.blit(description[self.selected_button_index], [
-            self.display_size[0] * 0.8 - description[self.selected_button_index].get_rect().width / 2,
-            self.display_size[1] * 0.5 - description[self.selected_button_index].get_rect().height / 2])
+
+        # 스테이지 이름
+        title_font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[1] * 3)
+        title_text = ['캠페인 모드', '1. 기술 도장', '2. 카드러시 도장', '3. 무지개 도장', '4. 난투 도장']
+        title = title_font.render(title_text[self.selected_button_index], True, pygame.Color('white'))
+        self.screen.blit(title, (self.display_size[0] * 0.67, self.display_size[1] * 0.2))
+
+        # 스테이지 설명
+        description_font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[1] * 2)
+        description = ['내 이름은 김우노. 우노 마스터가 되기 위해서 4개의 도장을 차례로 격파하기위해 여행을 다니고 있어!',
+                       '상대방이 나보다 더 기술카드를 더 많이 가져가고 기술카드를 조합해서 콤보를 사용을 할 수 있어서 조심해야해!',
+                       '이 도장에서는 3명과 싸워야하고 첫 카드를 제외하고 모든 카드를 같은 수만큼 플레이어들에게 분배가 돼. 이 도장에서는 카드를 빨리 소모하는 것이 승리의 관건이야.',
+                       '2명의 상대와 대전하고 5턴마다 낼 수 있는 카드의 색상이 무작위로 변경되야해서 주의해야해!',
+                       '이 곳에서는 쉴드 카드를 사용할 수 없게 되고, 새로운 공격카드가 추가되고 카드가 일정 매수가 넘어가면 게임오버가 되니까 주의해야 해!']
+        self.blit_text(self.screen, description[self.selected_button_index],
+                       (self.display_size[0] * 0.67, self.display_size[1] * 0.4), description_font, pygame.Color('white'))
 
         # 버튼 표시
         for button in self.buttons:
@@ -206,7 +202,8 @@ class CampaignMap:
         # 클리어 스테이지 표시
         for i in range(0, len(self.clear_flags)):
             self.screen.blit(self.clear_flags[i],
-                             self.clear_flags[i].get_rect(x=self.buttons[i + 1].x * 1.05, y=self.buttons[i + 1].y * 1.1))
+                             self.clear_flags[i].get_rect(x=self.buttons[i + 1].x * 1.05,
+                                                          y=self.buttons[i + 1].y * 1.1))
 
         # 선택되면 팝업 띄우고 바깥은 비활성화
         if self.popup.pop:
@@ -221,6 +218,7 @@ class CampaignMap:
         # 매 프레임마다 화면 업데이트
         pygame.display.flip()
 
+    # 자동 개행 text 함수
     def blit_text(self, surface, text, pos, font, color=pygame.Color('black')):
         words = [word.split(' ') for word in text.splitlines()]  # 2D array where each row is a list of words.
         space = font.size(' ')[0]  # The width of a space.
@@ -228,15 +226,15 @@ class CampaignMap:
         x, y = pos
         for line in words:
             for word in line:
-                word_surface = font.render(word, 0, color)
+                word_surface = font.render(word, True, color)
                 word_width, word_height = word_surface.get_size()
                 if x + word_width >= max_width:
-                    x = pos[0]  # Reset the x.
-                    y += word_height  # Start on new row.
+                    x = pos[0]
+                    y += word_height
                 surface.blit(word_surface, (x, y))
                 x += word_width + space
             x = pos[0]  # Reset the x.
-            y += word_height  # Start on new row.
+            y += word_height
 
     def event(self):
         for event in pygame.event.get():
