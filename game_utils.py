@@ -86,6 +86,7 @@ def get_clicked_change(change_cards, x, y, spacing, mouse_x, mouse_y):
             return i, card
     return None, None
 
+
 # 드로우 할 수 있을 때 나타나는 문구
 def draw_button(screen, text, font, color, rect):
     pygame.draw.rect(screen, (255, 255, 255), rect, 2)
@@ -116,22 +117,21 @@ def draw_board_card(screen, card, x, y):
 
 # 내는 카드 유효성 검사
 def is_valid_move(card, top_card):
-    if card.color == top_card.color or card.value == top_card.value or card.color == "none" or top_card.color == "none":
+    if card.color == "none" or top_card.color == "none" or card.color == top_card.color or card.value == top_card.value:
         return True
     return False
 
 
 # 우노 인지 체크
 def check_uno(now_player_hands):
-    print(len(now_player_hands), "우노체크")
     if len(now_player_hands) == 1:
         return True
     else:
         return False
 
 
-def computer_uno(one_flags, uno_current_player_index):
-    one_flags[uno_current_player_index] = True
+def computer_uno(one_flags, uno_current_player):
+    one_flags[uno_current_player] = True
     com_uno_current_time = pygame.time.get_ticks()
     com_uno_delay_time = random.randint(2000, 3000)
     return one_flags, com_uno_current_time, com_uno_delay_time
@@ -151,86 +151,86 @@ def computer_playable_card(now_player_hands, board_card):
     return playable, card_index
 
 
-def com_is_uno(one_flags, current_player):
+def is_uno(one_flags, current_player):
     one_flags[current_player] = True
     uno_current_time = pygame.time.get_ticks()
     uno_delay_time = random.randint(2000, 4000)
     return one_flags, uno_current_time, uno_delay_time
 
 
+def user_submit_card(card, card_index, board_card, now_player_hand):
+    board_card.append(card)
+    now_player_hand.pop(card_index)
+    pop_card = card
+    return board_card, now_player_hand, pop_card
+
+
+def com_submit_card(card, card_index, board_card, now_player_hand):
+    board_card.append(card)
+    now_player_hand.pop(card_index)
+    return board_card, now_player_hand
+
+
 # 스페셜 카드 적용
-def apply_special_card_effects(card, current_player_index, current_player, direction, player_hands, remain_cards,
+def apply_special_card_effects(card, current_player, direction, player_hands, remain_cards,
                                player_count):
 
-    if card.value != "change":
-        # 역방향 카드
-        if card.value == "reverse":
-            print("reverse카드 이벤트 발생")
-            direction *= -1
-            current_player_index = (current_player_index + direction) % player_count
-            return current_player_index, direction
+    # 역방향 카드
+    if card.value == "reverse":
+        direction *= -1
+        current_player = (current_player + direction) % player_count
+        return current_player, direction
 
-        # 스킵 카드
-        elif card.value == "skip":
-            print("skip카드 이벤트 발생")
+    # 스킵 카드
+    elif card.value == "skip":
+        pygame.time.delay(100)
+        current_player = (current_player + direction + direction) % player_count
+        return current_player, direction
+
+    # 2장 드로우 공격
+    elif card.value == "draw_2":
+        change_card = False
+        next_player = (current_player + direction) % player_count
+        has_shield = next((check_card for check_card in player_hands[next_player] if check_card.value == "shield")
+                          , None)
+        # shield 카드가 없으면 2장 뽑고, 턴 넘기기
+        if not has_shield:
+            for _ in range(2):
+                add_card = remain_cards.pop()
+                player_hands[next_player].append(add_card)
+            current_player = (current_player + (direction * 2)) % player_count
             pygame.time.delay(100)
-            current_player_index = (current_player_index + direction + direction) % player_count
-            return current_player_index, direction
-
-        # 2장 드로우 공격
-        elif card.value == "draw_2":
-            print("draw_2카드 이벤트 발생")
-            change_card = False
-            next_player_index = (current_player_index + direction) % player_count
-            # has_shield = any(check_card.value == "shield" for check_card in player_hands[next_player_index])
-            has_shield = next((check_card for check_card in player_hands[next_player_index] if check_card.value == "shield")
-                              , None)
-            # shield 카드가 없으면 2장 뽑고, 턴 넘기기
-            if not has_shield:
-                print("실드카드가 없군요!")
-                for _ in range(2):
-                    add_card = remain_cards.pop()
-                    player_hands[next_player_index].append(add_card)
-                current_player_index = (current_player_index + (direction * 2)) % player_count
-                pygame.time.delay(100)
-                return current_player_index, direction
-            # shield 카드가 있으면 사용후, 턴 넘기기
-            else:
-                print("실드카드가 있군요!")
-                shield_card = next(check_card for check_card in player_hands[next_player_index] if check_card.value == "shield")
-                player_hands[next_player_index].remove(shield_card)
-                current_player_index = (current_player_index + (direction * 2)) % player_count
-                pygame.time.delay(100)
-                return current_player_index, direction
-
-        elif card.value == "one_more":
+            return current_player, direction
+        # shield 카드가 있으면 사용후, 턴 넘기기
+        else:
+            shield_card = next(check_card for check_card in player_hands[next_player] if check_card.value == "shield")
+            player_hands[next_player].remove(shield_card)
+            current_player = (current_player + (direction * 2)) % player_count
             pygame.time.delay(100)
-            return current_player_index, direction
+            return current_player, direction
 
-        # 폭탄 카드
-        elif card.value == "bomb":
-            print("bomb카드 이벤트 발생")
-            for i, hand in enumerate(player_hands):
-                if i != current_player:
-                    add_card = remain_cards.pop()
-                    hand.append(add_card)
-            current_player_index = (current_player_index + direction) % player_count
-            print(current_player_index, direction)
-            return current_player_index, direction
+    elif card.value == "one_more":
+        pygame.time.delay(100)
+        return current_player, direction
 
-        # 실드 카드(딘순히 내는 동작)
-        elif card.value == "shield":
-            print("shield카드 냈음")
-            current_player_index = (current_player_index + direction) % player_count
-            print(current_player_index, direction)
-            return current_player_index, direction
+    # 폭탄 카드
+    elif card.value == "bomb":
+        for i, hand in enumerate(player_hands):
+            if i != current_player:
+                add_card = remain_cards.pop()
+                hand.append(add_card)
+        current_player = (current_player + direction) % player_count
+        return current_player, direction
+
+    # 실드 카드(딘순히 내는 동작)
+    elif card.value == "shield":
+        current_player = (current_player + direction) % player_count
+        return current_player, direction
 
     # 체인지 카드(카드색 바꿈)
     elif card.value == "change":
-        change_time_limit = 10000  # 유저 시간제한
-        change_delay_time = random.randint(2000, 5000)  # 컴퓨터 시간
-        current_player_index = (current_player_index + direction) % player_count
-        return current_player_index, direction
+        current_player = (current_player + direction) % player_count
+        return current_player, direction
 
 
 def card_reshuffle(board_card, remain_cards):

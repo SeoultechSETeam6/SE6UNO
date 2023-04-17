@@ -47,6 +47,8 @@ def generate_cards(color_weakness):
                 card_image = pygame.image.load(f"{card_folder}/{color}_{value}.png")
                 card = Card(color, value, card_image, card_back_image)
                 cards.append(card)
+                if value == "bomb":
+                    break  # bom카드 생성 후 다음 카드로 넘어감
 
     # 색 없는 실드카드를 한 번에 추가합니다.
     for i in range(2):
@@ -55,7 +57,7 @@ def generate_cards(color_weakness):
         cards.append(card)
 
     # 색 없는 색변경 카드를 추가
-    for i in range(2):
+    for i in range(100):
         card_image = pygame.image.load(f"resources/Image/card_images/none_change.png")
         card = Card('none', 'change', card_image, card_back_image)
         cards.append(card)
@@ -98,6 +100,6 @@ def print_cards(cards):
 
 
 if __name__ == "__main__":
-    cards = generate_cards()
+    cards = generate_cards(False)
     print_cards(cards)
 '''

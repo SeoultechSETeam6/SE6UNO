@@ -2,7 +2,7 @@ import pygame
 import sys
 import pickle
 
-import in_game
+from single_game import SingleGame
 from mouse import Mouse
 from button import Button
 from option import basic_option as basic
@@ -36,11 +36,6 @@ class Main:
         self.background_volume = None
         self.effect_volume = None
 
-        # 인스턴스 메서드 바인딩
-        self.settings_button_click_event = self.settings_button_click_event.__get__(self)
-        self.exit_button_click_event = self.exit_button_click_event.__get__(self)
-        self.in_game_button_click_event = self.in_game_button_click_event.__get__(self)
-
     def settings_button_click_event(self):
         self.background_music.stop()
         print('설정 버튼 클릭됨')
@@ -54,7 +49,8 @@ class Main:
 
     def in_game_button_click_event(self):
         print('싱글 플레이 버튼 클릭됨')
-        in_game.singleplayer(self.display_size, self.color_weakness)
+        single_game_instance = SingleGame()
+        single_game_instance.run()
 
     def setting(self):
         # 설정 불러오기
