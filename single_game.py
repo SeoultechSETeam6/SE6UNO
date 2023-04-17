@@ -74,7 +74,7 @@ class SingleGame:
 
         # single_game 변수
         self.player_count = 5  # 플레이어 수
-        self.card_count = 2  # 처음 시작하는 카드 수
+        self.card_count = 7  # 처음 시작하는 카드 수
         self.winner_message = ""  # 승리 메세지
 
         # 게임 이미지를 로드
