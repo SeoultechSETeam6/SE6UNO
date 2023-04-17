@@ -3,10 +3,12 @@ import pygame
 
 
 # 유저의 카드를 그리는 함수
-def draw_cards_user(screen, cards, x, y, spacing, hovered_card_index=None):
+def draw_cards_user(screen, cards, x, y, max_per_row, spacing, hovered_card_index=None):
     for i, card in enumerate(cards):
+        row = i // max_per_row
+        column = i % max_per_row
         card_rect = card.card_img.get_rect()
-        card_rect.topleft = (x + i * spacing, y)
+        card_rect.topleft = (x + column * spacing, y + row * (spacing + 10))
         if i == hovered_card_index:
             card_rect.y -= 50
         screen.blit(card.card_img, card_rect)
@@ -38,11 +40,13 @@ def draw_change_card(screen, change_cards, x, y, spacing, hovered_card_index=Non
 
 
 # 마우스 오버를 한 유저 카드를 찾는 함수
-def find_hovered_card(cards, x, y, spacing, mouse_x, mouse_y):
+def find_hovered_card(cards, x, y, spacing, mouse_x, mouse_y, max_per_row):
     for i, card in enumerate(cards):
         card_width, card_height = card.card_img.get_size()
-        card_x = x + i * spacing
-        card_y = y
+        row = i // max_per_row
+        column = i % max_per_row
+        card_x = x + column * spacing
+        card_y = y + row * (spacing + 10)  # 각 행의 시작 y 좌표를 고려하도록 수정
         if card_x <= mouse_x < card_x + card_width and card_y <= mouse_y < card_y + card_height:
             return i
     return None
@@ -67,12 +71,14 @@ def draw_text(screen, text, font, color, x, y):
 
 
 # 카드 클릭
-def get_clicked_card(cards, x, y, spacing, mouse_x, mouse_y):
+def get_clicked_card(cards, x, y, spacing, mouse_x, mouse_y, max_per_row):
     for i, card in enumerate(cards):
-        column = i
-        card_rect = card.card_img.get_rect()
-        card_rect.topleft = (x + column * spacing, y)
-        if card_rect.collidepoint(mouse_x, mouse_y):
+        card_width, card_height = card.card_img.get_size()
+        row = i // max_per_row
+        column = i % max_per_row
+        card_x = x + column * spacing
+        card_y = y + row * (spacing + 10)  # 각 행의 시작 y 좌표를 고려하도록 수정
+        if card_x <= mouse_x < card_x + card_width and card_y <= mouse_y < card_y + card_height:
             return i, card
     return None, None
 

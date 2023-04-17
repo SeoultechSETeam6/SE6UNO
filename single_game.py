@@ -84,18 +84,90 @@ class SingleGame():
             if self.computer_attends[i]:
                 self.player_count += 1
 
+        self.computer_color = ["red", "blue", "green", "yellow"]
+
+        # 컴퓨터 초기 좌표와 카드 색 선호도.
+        self.user_coordinate = []
         self.computer_coordinate = []
-        if self.computer_attends[0]:
-            self.computer_coordinate.append([self.display_size[0] * 0.72, self.display_size[1] * 0.08])
-        if self.computer_attends[1]:
-            self.computer_coordinate.append([self.display_size[0] * 0.72, (self.display_size[1] * 0.08) + self.display_size[1] * 0.2])
-        if self.computer_attends[2]:
-            self.computer_coordinate.append([self.display_size[0] * 0.72, (self.display_size[1] * 0.08) + (self.display_size[1] * 0.4)])
-        if self.computer_attends[3]:
-            self.computer_coordinate.append([self.display_size[0] * 0.72, (self.display_size[1] * 0.08) + (self.display_size[1] * 0.6)])
-        if self.computer_attends[4]:
-            self.computer_coordinate.append([self.display_size[0] * 0.72, (self.display_size[1] * 0.08) + (self.display_size[1] * 0.8)])
-        self.max_per_row = 7
+        if self.display_size[0] == 1920:
+            self.max_per_row = 15
+            self.max_per_row_com = 20
+            self.user_coordinate.append(30)
+            self.user_coordinate.append(self.display_size[1] * 0.7)
+            self.user_spacing = self.display_size[1] * 0.08
+            if self.computer_attends[0]:
+                self.computer_coordinate.append([self.display_size[0] * 0.65, self.display_size[1] * 0.03])
+                self.computer1_color = self.computer_color[random.randint(0, 3)]
+                print("computer1_color", self.computer1_color)
+            if self.computer_attends[1]:
+                self.computer_coordinate.append([self.display_size[0] * 0.65, (self.display_size[1] * 0.03) + self.display_size[1] * 0.2])
+                self.computer2_color = self.computer_color[random.randint(0, 3)]
+                print("computer2_color", self.computer2_color)
+            if self.computer_attends[2]:
+                self.computer_coordinate.append([self.display_size[0] * 0.65, (self.display_size[1] * 0.03) + (self.display_size[1] * 0.4)])
+                self.computer3_color = self.computer_color[random.randint(0, 3)]
+                print("computer3_color", self.computer3_color)
+            if self.computer_attends[3]:
+                self.computer_coordinate.append([self.display_size[0] * 0.65, (self.display_size[1] * 0.03) + (self.display_size[1] * 0.6)])
+                self.computer4_color = self.computer_color[random.randint(0, 3)]
+                print("computer4_color", self.computer4_color)
+            if self.computer_attends[4]:
+                self.computer_coordinate.append([self.display_size[0] * 0.65, (self.display_size[1] * 0.03) + (self.display_size[1] * 0.8)])
+                self.computer5_color = self.computer_color[random.randint(0, 3)]
+                print("computer5_color", self.computer5_color)
+        if self.display_size[1] == 1600:
+            self.max_per_row = 13
+            self.max_per_row_com = 17
+            self.user_coordinate.append(30)
+            self.user_coordinate.append(self.display_size[1] * 0.7)
+            self.user_spacing = self.display_size[1] * 0.08
+            if self.computer_attends[0]:
+                self.computer_coordinate.append([self.display_size[0] * 0.72, self.display_size[1] * 0.08])
+                self.computer1_color = self.computer_color[random.randint(0, 3)]
+                print("computer1_color", self.computer1_color)
+            if self.computer_attends[1]:
+                self.computer_coordinate.append([self.display_size[0] * 0.72, (self.display_size[1] * 0.08) + self.display_size[1] * 0.2])
+                self.computer2_color = self.computer_color[random.randint(0, 3)]
+                print("computer2_color", self.computer2_color)
+            if self.computer_attends[2]:
+                self.computer_coordinate.append([self.display_size[0] * 0.72, (self.display_size[1] * 0.08) + (self.display_size[1] * 0.4)])
+                self.computer3_color = self.computer_color[random.randint(0, 3)]
+                print("computer3_color", self.computer3_color)
+            if self.computer_attends[3]:
+                self.computer_coordinate.append([self.display_size[0] * 0.72, (self.display_size[1] * 0.08) + (self.display_size[1] * 0.6)])
+                self.computer4_color = self.computer_color[random.randint(0, 3)]
+                print("computer4_color", self.computer4_color)
+            if self.computer_attends[4]:
+                self.computer_coordinate.append([self.display_size[0] * 0.72, (self.display_size[1] * 0.08) + (self.display_size[1] * 0.8)])
+                self.computer5_color = self.computer_color[random.randint(0, 3)]
+                print("computer5_color", self.computer5_color)
+        else :
+            self.max_per_row = 11
+            self.max_per_row_com = 15
+            self.user_coordinate.append(30)
+            self.user_coordinate.append(self.display_size[1] * 0.7)
+            self.user_spacing = self.display_size[1] * 0.08
+            if self.computer_attends[0]:
+                self.computer_coordinate.append([self.display_size[0] * 0.67, self.display_size[1] * 0.01])
+                self.computer1_color = self.computer_color[random.randint(0, 3)]
+                print("computer1_color", self.computer1_color)
+            if self.computer_attends[1]:
+                self.computer_coordinate.append([self.display_size[0] * 0.67, (self.display_size[1] * 0.01) + self.display_size[1] * 0.2])
+                self.computer2_color = self.computer_color[random.randint(0, 3)]
+                print("computer2_color", self.computer2_color)
+            if self.computer_attends[2]:
+                self.computer_coordinate.append([self.display_size[0] * 0.67, (self.display_size[1] * 0.01) + (self.display_size[1] * 0.4)])
+                self.computer3_color = self.computer_color[random.randint(0, 3)]
+                print("computer3_color", self.computer3_color)
+            if self.computer_attends[3]:
+                self.computer_coordinate.append([self.display_size[0] * 0.67, (self.display_size[1] * 0.01) + (self.display_size[1] * 0.6)])
+                self.computer4_color = self.computer_color[random.randint(0, 3)]
+                print("computer4_color", self.computer4_color)
+            if self.computer_attends[4]:
+                self.computer_coordinate.append([self.display_size[0] * 0.67, (self.display_size[1] * 0.01) + (self.display_size[1] * 0.8)])
+                self.computer5_color = self.computer_color[random.randint(0, 3)]
+                print("computer5_color", self.computer5_color)
+
 
         # 게임 이미지를 로드
         self.pause_button_img = pygame.image.load("./resources/Image/button_images/pause.png").convert_alpha()
@@ -187,16 +259,6 @@ class SingleGame():
         self.com_uno_remaining_time = None  # 컴퓨터턴 남은 우노 시간
         self.com_uno_remaining_time_text = None  # 컴퓨터턴 남은 우노 시간 텍스트
 
-        # 각 카드들의 위치 설정, (x, y, spacing)는 유저의 카드
-        self.x = self.display_size[0] / 10
-        self.y = self.display_size[1] * 0.8
-        self.spacing = self.display_size[1] * 0.08
-        # turn_arrow_img의 위치를 계산. (x3, y3)는 유저 좌표, (x4, y4, spacing4)는 AI의 좌표
-        self.x3 = self.display_size[0] / 10 - 150
-        self.y3 = self.display_size[1] * 0.8 - 100
-        self.x4 = self.display_size[0] * 0.63
-        self.y4 = self.display_size[1] * 0.07 - 100
-        self.spacing4 = self.display_size[1] * 0.2
         # change카드 좌표, spacing은 공백
         self.x5 = 100
         self.y5 = 100
@@ -212,10 +274,10 @@ class SingleGame():
         self.pause_button_rect.topleft = (25, 25)
         # next_turn버튼
         self.next_turn_button_rect = self.next_turn_button_img.get_rect()
-        self.next_turn_button_rect.topleft = (self.x, self.y - 150)
+        self.next_turn_button_rect.topleft = (self.user_coordinate[0], self.user_coordinate[1] - 150)
         # uno_button
         self.uno_button_rect = self.uno_button_img.get_rect()
-        self.uno_button_rect.topleft = (150, self.display_size[1] * 0.5)
+        self.uno_button_rect.topleft = (self.user_coordinate[0], self.user_coordinate[1] - 300)
         self.uno_button_inactive_rect = self.uno_button_inactive_img.get_rect()
         self.uno_button_inactive_rect.topleft = (150, self.display_size[1] * 0.5)
         self.play_drawn_card_button = pygame.Rect(0, 0, 430, 110)
@@ -282,7 +344,8 @@ class SingleGame():
         if Mouse.getMouseState() == MouseState.CLICK:
             if self.uno_button_rect.collidepoint(mouse_x, mouse_y) and len(self.player_hands[self.current_player]) == 1:
                 self.user_uno_clicked = True
-        self.hovered_card_index = find_hovered_card(self.player_hands[0], self.x, self.y, self.spacing, mouse_x, mouse_y)
+        self.hovered_card_index = find_hovered_card(self.player_hands[0], self.user_coordinate[0],
+                                                    self.user_coordinate[1], self.user_spacing, mouse_x, mouse_y, self.max_per_row)
         self.hovered_change_index = find_hovered_change(self.change_color_list, self.x5, self.y5, self.spacing5, mouse_x, mouse_y)
 
         # 현재 플레이어가 유저인지 확인
@@ -290,7 +353,8 @@ class SingleGame():
             if self.turn_start_time is None:
                 self.turn_start_time = pygame.time.get_ticks()
             if Mouse.getMouseState() == MouseState.CLICK:
-                self.clicked_card_index, self.clicked_card = get_clicked_card(self.player_hands[0], self.x, self.y, self.spacing, mouse_x, mouse_y)
+                self.clicked_card_index, self.clicked_card = get_clicked_card(self.player_hands[0],
+                                                                              self.user_coordinate[0], self.user_coordinate[1], self.user_spacing, mouse_x, mouse_y, self.max_per_row)
                 # remain_cards 클릭 확인
                 self.clicked_remain_cards = self.remain_cards_rect.collidepoint(mouse_x, mouse_y)
                 # next_turn_button 클릭 확인
@@ -587,7 +651,7 @@ class SingleGame():
 
         # 누구 턴인지 표시하는 화살표 그리기
         if self.user_turn:
-            self.screen.blit(self.turn_arrow_img, (self.x3, self.y3))
+            self.screen.blit(self.turn_arrow_img, (self.user_coordinate[0]-100, self.user_coordinate[1]-130))
         elif self.current_player == 1:
             self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[0][0]-150, self.computer_coordinate[0][1]-80))
         elif self.current_player == 2:
@@ -600,19 +664,20 @@ class SingleGame():
             self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[4][0]-150, self.computer_coordinate[4][1]-80))
 
         # 남은 카드 더미 그리기
-        self.screen.blit(self.remain_cards[0].card_img_back, (self.remain_cards_x_position, self.remain_cards_y_position))
+        self.screen.blit(self.remain_cards[0].card_img_back, (self.remain_cards_x_position, self.screen.get_rect().centery - 100))
         # 엎은 카드 그리기
-        draw_board_card(self.screen, self.board_card[-1], self.screen.get_rect().centerx, self.screen.get_rect().centery)
+        draw_board_card(self.screen, self.board_card[-1], self.screen.get_rect().centerx, self.screen.get_rect().centery - 100)
         # 유저 카드 그리기
-        draw_cards_user(self.screen, self.player_hands[0], self.x, self.y, self.spacing, self.hovered_card_index)
+        draw_cards_user(self.screen, self.player_hands[0], self.user_coordinate[0], self.user_coordinate[1], self.max_per_row,
+                        self.user_spacing, self.hovered_card_index)
         # ai의 카드를 그린다.
         # ai의 카드를 그린다.
         for i in range(len(self.player_hands) - 1):
             draw_cards_ai(self.screen, self.player_hands[i + 1], self.computer_coordinate[i][0],
                           self.computer_coordinate[i][1],
-                          self.max_per_row, self.display_size[1] * 0.04,
+                          self.max_per_row_com, 20,
                           self.hovered_card_index2,
-                          show_back=False)  # 추후 True로 바꾼다.
+                          show_back=True)  # 추후 True로 바꾼다.
 
         # 유저턴이고, 체인지 카드면 체인지카드를 그린다.
         if self.user_turn and self.change_card:
@@ -641,12 +706,12 @@ class SingleGame():
         if self.user_turn and self.new_drawn_card is None and not self.one_flags[0]:
             self.remaining_time = self.time_limit - (self.current_time - self.turn_start_time)
             self.remaining_time_text = f"턴 남은 시간: {self.remaining_time // 1000}초"
-            draw_text(self.screen, self.remaining_time_text, self.font, (255, 255, 255), self.screen.get_rect().centerx, 30)
+            draw_text(self.screen, self.remaining_time_text, self.font, (255, 255, 255), self.screen.get_rect().centerx/2, 30)
         # draw후 시간제한,턴 넘기기는 draw를 해야지 나옴.
         elif self.user_turn and self.new_drawn_card is not None and not self.one_flags[0]:
             self.after_draw_remaining_time = self.time_limit - (self.current_time - self.user_draw_time)
             self.after_draw_remaining_time_text = f"턴 남은 시간: {self.after_draw_remaining_time // 1000}초"
-            draw_text(self.screen, self.after_draw_remaining_time_text, self.font, (255, 255, 255), self.screen.get_rect().centerx, 30)
+            draw_text(self.screen, self.after_draw_remaining_time_text, self.font, (255, 255, 255), self.screen.get_rect().centerx/2, 30)
         '''
         # 유저 턴일때, uno버튼 시간
         elif self.user_turn and self.one_flags[0]:
