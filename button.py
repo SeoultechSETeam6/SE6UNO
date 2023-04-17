@@ -12,7 +12,7 @@ class Button:
     def __init__(self, x, y, width, height, text='Sample', on_click_function=None, font_size=25, selected=False):
         self.selected = selected
         self.x = x - width // 2
-        self.y = y
+        self.y = y - height // 2
         self.width = width
         self.height = height
         self.on_click_function = on_click_function
@@ -28,6 +28,7 @@ class Button:
         self.surface = pygame.Surface((self.width, self.height))
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         self.font = self.font.render(text, True, (0, 0, 0))
+        self.mouse_pos = None
 
     def process(self):
         """
@@ -36,15 +37,15 @@ class Button:
         :return: None
         """
         # 평상시
-        mouse_pos = pygame.mouse.get_pos()
+        self.mouse_pos = pygame.mouse.get_pos()
         self.surface.fill(self.fill_colors['normal'])
 
         # 마우스 갖다댈 시
-        if self.rect.collidepoint(mouse_pos) or self.selected:
+        if self.rect.collidepoint(self.mouse_pos) or self.selected:
             self.surface.fill(self.fill_colors['hover'])
 
             # 버튼 누를 때
-            if self.rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed(num_buttons=3)[0]:
+            if self.rect.collidepoint(self.mouse_pos) and pygame.mouse.get_pressed(num_buttons=3)[0]:
                 self.surface.fill(self.fill_colors['pressed'])
 
                 # 클릭 판정을 위해 클릭 된 상태라면 더 이상 이벤트를 발생시키지 않음
@@ -55,8 +56,8 @@ class Button:
                 self.alreadyPressed = False
 
         self.surface.blit(self.font, [
-            self.rect.width/2 - self.font.get_rect().width/2,
-            self.rect.height/2 - self.font.get_rect().height/2
+            self.rect.width / 2 - self.font.get_rect().width / 2,
+            self.rect.height / 2 - self.font.get_rect().height / 2
         ])
 
 
@@ -74,7 +75,7 @@ class ButtonWithImg(Button):
         self.image = pygame.transform.scale(pygame.image.load(img_path), (width, height))
 
         self.img_rect = self.image.get_rect()
-        self.img_rect.center = (x, y + height // 2)
+        self.img_rect.center = (x, y)
 
     # Override
     def process(self):
@@ -95,5 +96,6 @@ class ButtonWithImg(Button):
                 if not self.alreadyPressed:
                     self.on_click_function()
                     self.alreadyPressed = True
+
             else:
                 self.alreadyPressed = False

@@ -1,6 +1,5 @@
 import pygame
 from button import Button
-import sys
 
 pygame.init()
 
@@ -14,63 +13,41 @@ white = (255, 255, 255)
 gray = (200, 200, 200)
 black = (0, 0, 0)
 
+
 class Popup:
-    def __int__(self, width, height, text='Sample', on_click_function=None, font_size=25, pop=False):
+    def __init__(self, x, y, width=400, height=200, text='Sample', on_click_function=None, font_size=25, pop=False):
+        self.x = x - width // 2
+        self.y = y - height // 2
         self.width = width
         self.height = height
         self.text = text
         self.font_size = font_size
-        self.on_click_function = on_click_function
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.surface = pygame.Surface((self.width, self.height))
+
+        self.accept_button = Button(x,
+                                    y * 1.25,
+                                    self.width // 4,
+                                    self.height // 6, '확인', on_click_function,
+                                    self.font_size)
+        self.close_button = Button(x * 1.3,
+                                   y * 0.72,
+                                   self.width // 10,
+                                   self.height // 9, 'X', self.close,
+                                   self.font_size)
+
         self.pop = pop
+        self.on_click_function = self.close
 
-# 팝업창 설정
-popup_width = 400
-popup_height = 200
-popup = pygame.Surface((popup_width, popup_height))
-popup.fill(white)
+        self.font = pygame.font.Font("./resources/maplestory_font.ttf", font_size)
+        self.font = self.font.render(text, True, (255, 255, 255))
+        self.surface.fill(black)
 
-# 버튼 설정
-button_width = 100
-button_height = 40
-close_button = pygame.Rect(popup_width // 2 - button_width - 10, popup_height - 70, button_width, button_height)
-ok_button = pygame.Rect(popup_width // 2 + 10, popup_height - 70, button_width, button_height)
+    def open(self):
+        self.accept_button.process()
+        self.close_button.process()
 
-# 텍스트 설정
-font = pygame.font.Font(None, 32)
-text = font.render("This is a popup window", True, black)
-popup.blit(text, (50, 50))
+    def close(self):
+        print('닫기 버튼 클릭됨')
+        self.pop = False
 
-
-def draw_button(button, text, surface):
-    pygame.draw.rect(surface, gray, button)
-    text_surface = font.render(text, True, black)
-    text_rect = text_surface.get_rect(center=button.center)
-    surface.blit(text_surface, text_rect)
-
-
-popup_open = True
-
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-
-    screen.fill(white)
-
-    if popup_open:
-        screen.blit(popup, (screen_width // 2 - popup_width // 2, screen_height // 2 - popup_height // 2))
-        draw_button(close_button, "Close", popup)
-        draw_button(ok_button, "OK", popup)
-
-        # 마우스 이벤트 처리
-        mouse_pos = pygame.mouse.get_pos()
-        mouse_clicked = pygame.mouse.get_pressed()
-
-        if close_button.collidepoint(mouse_pos) and mouse_clicked[0]:
-            popup_open = False
-        if ok_button.collidepoint(mouse_pos) and mouse_clicked[0]:
-            print("OK button clicked")
-            popup_open = False
-
-    pygame.display.flip()

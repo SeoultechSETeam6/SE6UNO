@@ -90,13 +90,13 @@ class Main:
 
         # 버튼
         self.buttons = [
-            Button(self.display_size[0] // 2, self.display_size[1] // 2, self.button_size[0],
+            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.1, self.button_size[0],
                    self.button_size[1], '캠페인', self.campaign_button_click_event, self.font_size[1]),
-            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.2, self.button_size[0],
+            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.3, self.button_size[0],
                    self.button_size[1], '싱글 플레이', in_game.game, self.font_size[1]),
-            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.4, self.button_size[0],
+            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.5, self.button_size[0],
                    self.button_size[1], '설정', self.settings_button_click_event, self.font_size[1]),
-            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.6, self.button_size[0],
+            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.7, self.button_size[0],
                    self.button_size[1], '나가기', self.exit_button_click_event, self.font_size[1])]
 
         self.selected_button_index = 0
