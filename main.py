@@ -3,7 +3,6 @@ import sys
 import pickle
 
 from single_play_lobby import Lobby
-from mouse import Mouse
 from campaign_map import CampaignMap
 from mouse import Mouse
 from button import Button
@@ -21,6 +20,7 @@ class Main:
         self.button_size = None
         self.logo_size = None
         self.screen = None
+
         self.buttons = []
         self.selected_button_index = 0
         self.logo = None
@@ -71,6 +71,7 @@ class Main:
                 self.background_volume = pickle.load(f)
                 self.effect_volume = pickle.load(f)
         except EOFError:
+
             self.display_size = basic.display_size
             self.color_weakness = basic.color_weakness
             self.key_setting = basic.key_setting
@@ -100,10 +101,10 @@ class Main:
         pygame.display.set_caption(basic.game_title)
 
         # 로고 표시
-        self.logo = pygame.image.load("resources/Image/logo.jpg")
+        self.logo = pygame.image.load("resources/Image/logo.png")
         self.logo = pygame.transform.scale(self.logo, self.logo_size)
         self.logo_rect = self.logo.get_rect()
-        self.logo_rect.center = (self.display_size[0] // 2, self.logo_rect.height // 2)
+        self.logo_rect.center = ((self.display_size[0] // 2), self.logo_rect.height // 2)
 
         # 버튼 조작 키 표시
         self.font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[1])
