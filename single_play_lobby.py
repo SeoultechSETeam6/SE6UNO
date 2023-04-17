@@ -65,16 +65,16 @@ class Lobby:
             self.computer3_img = pygame.image.load("./resources/Image/lobby_images/middle/computer3.png").convert_alpha()
             self.computer4_img = pygame.image.load("./resources/Image/lobby_images/middle/computer4.png").convert_alpha()
             self.computer5_img = pygame.image.load("./resources/Image/lobby_images/middle/computer5.png").convert_alpha()
-            self.enter_img = pygame.image.load("./resources/Image/lobby_images/middle/computer_enter.png").convert_alpha()
-            self.start_img = pygame.image.load("./resources/Image/lobby_images/middle/game_start.png").convert_alpha()
+            self.enter_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/lobby_images/middle/computer_enter.png").convert_alpha(), basic.change_size[1])
+            self.start_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/lobby_images/middle/game_start.png").convert_alpha(), basic.change_size[1])
         else:
             self.computer1_img = pygame.image.load("./resources/Image/lobby_images/small/computer1.png").convert_alpha()
             self.computer2_img = pygame.image.load("./resources/Image/lobby_images/small/computer2.png").convert_alpha()
             self.computer3_img = pygame.image.load("./resources/Image/lobby_images/small/computer3.png").convert_alpha()
             self.computer4_img = pygame.image.load("./resources/Image/lobby_images/small/computer4.png").convert_alpha()
             self.computer5_img = pygame.image.load("./resources/Image/lobby_images/small/computer5.png").convert_alpha()
-            self.enter_img = pygame.image.load("./resources/Image/lobby_images/small/computer_enter.png").convert_alpha()
-            self.start_img = pygame.image.load("./resources/Image/lobby_images/small/game_start.png").convert_alpha()
+            self.enter_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/lobby_images/small/computer_enter.png").convert_alpha(), basic.change_size[2])
+            self.start_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/lobby_images/small/game_start.png").convert_alpha(), basic.change_size[2])
 
         # 이미지 크기 가져오기
         self.computer1_size = self.computer1_img.get_size()

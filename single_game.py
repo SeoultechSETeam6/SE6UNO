@@ -1,6 +1,7 @@
 import pygame
 import pickle
 import random
+import time
 import math
 from mouse import Mouse, MouseState
 from slider import Slider
@@ -32,7 +33,7 @@ from game_utils import (
 )
 
 
-class SingleGame():
+class SingleGame:
     def __init__(self, computer_attends):
         # 저장된 설정 불러오기, 만약 파일이 비어있다면 기본 설정으로 세팅
         try:
@@ -65,7 +66,6 @@ class SingleGame():
             self.font_size = basic.font_size[2]
             self.button_size = basic.button_size[2]
 
-
         # pygame 초기화
         pygame.init()
         self.font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[0])
@@ -78,7 +78,7 @@ class SingleGame():
 
         # single_game 변수
         self.player_count = 1  # 플레이어 수
-        self.card_count = 2  # 처음 시작하는 카드 수
+        self.card_count = 7  # 처음 시작하는 카드 수
         self.winner_message = ""  # 승리 메세지
 
         # 로비에서 가져온 정보
@@ -177,7 +177,6 @@ class SingleGame():
                 self.computer5_color = self.computer_color[random.randint(0, 3)]
                 print("computer5_color", self.computer5_color)
 
-
         # 게임 이미지를 로드
         self.pause_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/pause.png").convert_alpha(), self.size_change)
         self.resume_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/resume.png").convert_alpha(), self.size_change)
@@ -189,13 +188,14 @@ class SingleGame():
         self.uno_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/uno_button.png").convert_alpha(), self.size_change)
         self.uno_button_inactive_img = pygame.transform.scale_by(pygame.image.load(
             "./resources/Image/button_images/uno_button_inactive.png").convert_alpha(), self.size_change)
+        self.card_back_image = pygame.transform.scale_by(pygame.image.load("resources/Image/card_images/card_back.png"), self.size_change)
 
         # 게임 음악 로드
         self.background_music = pygame.mixer.Sound("./resources/Music/single_mode_play.ogg")
-        self.card_distribution = pygame.mixer.Sound("./resources/SoundEffect/carddistribution_sound.ogg")
-        self.card_place = pygame.mixer.Sound("./resources/SoundEffect/cardplace_sound.ogg")
-        self.card_shuffle = pygame.mixer.Sound("./resources/SoundEffect/cardshuffle_sound.ogg")
-        self.Uno_button = pygame.mixer.Sound("./resources/SoundEffect/Unobutton_sound.ogg")
+        self.card_distribution_music = pygame.mixer.Sound("./resources/SoundEffect/carddistribution_sound.ogg")
+        self.card_place_music = pygame.mixer.Sound("./resources/SoundEffect/cardplace_sound.ogg")
+        self.card_shuffle_music = pygame.mixer.Sound("./resources/SoundEffect/cardshuffle_sound.ogg")
+        self.Uno_button_music = pygame.mixer.Sound("./resources/SoundEffect/Unobutton_sound.ogg")
 
         # 화면 중앙 좌표 계산
         self.image_width, self.image_height = self.direction_img.get_size()
@@ -282,6 +282,7 @@ class SingleGame():
         # 플레이어들이 카드를 뽑고 남은 카드들의 위치를 잡는데 사용
         self.remain_cards_x_position = (self.screen.get_rect().centerx - 100)
         self.remain_cards_y_position = (self.screen.get_rect().centery - 50)
+        self.remain_pos = pygame.Vector2(self.screen.get_rect().centerx, self.screen.get_rect().centery - 100)
         # remain카드
         self.remain_cards_rect = self.remain_cards[0].card_img_back.get_rect()
         self.remain_cards_rect.topleft = (self.remain_cards_x_position, self.remain_cards_y_position)
@@ -297,6 +298,9 @@ class SingleGame():
         self.uno_button_inactive_rect = self.uno_button_inactive_img.get_rect()
         self.uno_button_inactive_rect.topleft = (150, self.display_size[1] * 0.5)
         self.play_drawn_card_button = pygame.Rect(0, 0, 430, 110)
+        # animation 메소드 모음
+        self.animation_method = {"reverse": self.reverse_animation, "skip": self.skip_animation, "draw_2": self.draw_2_animation, "bomb": self.bomb_animation,
+                                 "shield": self.shield_animation, "change": self.change_animation, "one_more": self.one_more_animation}
 
     def reset(self):
         self.pop_card = None  # 뽑은 카드 초기값
@@ -381,6 +385,7 @@ class SingleGame():
             if self.clicked_card is not None or self.clicked_remain_cards or self.clicked_next_turn_button or self.user_uno_clicked:
                 # 카드를 드로우함
                 if self.clicked_remain_cards and self.new_drawn_card is None and self.pop_card is None:
+                    self.draw_animation(self.current_player)
                     self.user_draw_time = pygame.time.get_ticks()
                     self.player_hands[0].append(self.remain_cards.pop())
                     self.new_drawn_card = self.player_hands[0][-1]
@@ -392,6 +397,7 @@ class SingleGame():
                 elif self.new_drawn_card is not None and self.pop_card is None:
                     # 유효성 검사 및 클릭카드가 new_drawn_card인지 확인
                     if self.new_drawn_card is not None and is_valid_move(self.new_drawn_card, self.top_card) and self.clicked_card == self.new_drawn_card and self.pop_card is None:
+                        self.place_animation(self.current_player)
                         self.board_card, self.player_hands[self.current_player], self.pop_card = user_submit_card\
                             (self.clicked_card, self.clicked_card_index, self.board_card, self.player_hands[self.current_player])
                         self.uno_check = check_uno(self.player_hands[0])
@@ -402,6 +408,7 @@ class SingleGame():
                 elif self.new_drawn_card is None and self.pop_card is None:
                     # 유효성 검사
                     if self.clicked_card is not None and is_valid_move(self.clicked_card, self.top_card):
+                        self.place_animation(self.current_player)
                         self.board_card, self.player_hands[self.current_player], self.pop_card = user_submit_card\
                             (self.clicked_card, self.clicked_card_index, self.board_card, self.player_hands[self.current_player])
                         self.uno_check = check_uno(self.player_hands[0])
@@ -422,6 +429,7 @@ class SingleGame():
                                                                                          self.player_hands,
                                                                                          self.remain_cards,
                                                                                          self.player_count)
+                            self.animation_method[self.pop_card.value](self.current_player)
                             self.reset()
                         # 내는 카드가 special이고, change일 경우
                         elif self.pop_card.is_special() and self.pop_card.value == "change":
@@ -431,6 +439,7 @@ class SingleGame():
                                 self.current_player, self.game_direction = apply_special_card_effects(
                                     self.pop_card, self.current_player, self.game_direction,
                                     self.player_hands, self.remain_cards, self.player_count)
+                                self.animation_method[self.pop_card.value](self.current_player)
                                 self.board_card.append(self.color_change)
                                 self.reset()
                         # 내는 카드가 special이 아닌 경우
@@ -446,6 +455,7 @@ class SingleGame():
                                                                                      self.player_hands,
                                                                                      self.remain_cards,
                                                                                      self.player_count)
+                        self.animation_method[self.pop_card.value](self.current_player)
                         self.reset()
                     # 내는 카드가 change인 경우
                     elif self.pop_card.value == "change":
@@ -458,6 +468,7 @@ class SingleGame():
                                                                                          self.player_hands,
                                                                                          self.remain_cards,
                                                                                          self.player_count)
+                            self.animation_method[self.pop_card.value](self.current_player)
                             self.board_card.append(self.color_change)
                             self.reset()
                     # 내는 카드가 special이 아닌 경우
@@ -468,6 +479,7 @@ class SingleGame():
             # 우노 시간 넘기면 발동
             if self.pop_card is not None and self.one_flags[0]:
                 if self.current_time - self.uno_current_time >= self.uno_delay_time:
+                    self.draw_animation(self.current_player)
                     self.uno_drawn_card = self.remain_cards.pop()
                     self.player_hands[0].append(self.uno_drawn_card)
                     # 내는 카드가 special이고, change일 경우
@@ -482,6 +494,7 @@ class SingleGame():
                             self.pop_card, self.current_player, self.game_direction, self.player_hands,
                             self.remain_cards,
                             self.player_count)
+                        self.animation_method[self.pop_card.value](self.current_player)
                         self.reset()
 
                     # 내는 카드가 special이 아닌 경우
@@ -495,10 +508,12 @@ class SingleGame():
                         self.pop_card, self.current_player, self.game_direction, self.player_hands,
                         self.remain_cards,
                         self.player_count)
+                    self.animation_method[self.pop_card.value](self.current_player)
                     self.reset()
             # 유저의 턴일 때 시간이 초과되면 드로우하고 턴을 넘김
             elif self.new_drawn_card is None:
                 if self.user_turn and self.current_time - self.turn_start_time >= self.time_limit:
+                    self.draw_animation(self.current_player)
                     self.new_drawn_card = self.remain_cards.pop()
                     self.player_hands[self.current_player].append(self.new_drawn_card)  # 카드를 드로우
                     self.current_player = (self.current_player + self.game_direction) % self.player_count
@@ -518,6 +533,7 @@ class SingleGame():
                     self.playable, self.pop_card_index = computer_playable_card(self.player_hands[self.current_player], self.board_card)
                 # 카드를 낼 수 있을 때 낸다.
                 if self.playable and self.new_drawn_card is None and self.pop_card is None:
+                    self.place_animation(self.current_player)
                     self.pop_card = self.player_hands[self.current_player][self.pop_card_index]
                     self.board_card, self.player_hands[self.current_player] = com_submit_card\
                         (self.pop_card, self.pop_card_index, self.board_card, self.player_hands[self.current_player])
@@ -526,11 +542,13 @@ class SingleGame():
                         self.one_flags, self.uno_current_time, self.uno_delay_time = is_uno(self.one_flags, self.current_player)
                 # 카드를 낼 수 없을 때 드로우 한다.
                 elif not self.playable and self.new_drawn_card is None and self.pop_card is None:
+                    self.draw_animation(self.current_player)
                     self.new_drawn_card = self.remain_cards.pop()
                     self.player_hands[self.current_player].append(self.new_drawn_card)
                 # 드로우한 카드가 낼 수 있는 경우
                 elif self.new_drawn_card is not None and is_valid_move(self.new_drawn_card, self.top_card) and self.pop_card is None:
                     if self.current_time - self.turn_start_time >= self.delay_time2:
+                        self.place_animation(self.current_player)
                         self.pop_card = self.new_drawn_card
                         self.pop_card_index = self.player_hands[self.current_player].index(self.pop_card)
                         self.board_card, self.player_hands[self.current_player] = com_submit_card \
@@ -549,6 +567,7 @@ class SingleGame():
                 # 컴퓨터가 우노이고, 유저가 우노를 클릭했을 경우
                 elif self.uno_check:
                     if self.user_uno_clicked:
+                        self.draw_animation(self.current_player)
                         self.one_flags[self.current_player] = False
                         self.uno_drawn_card = self.remain_cards.pop()
                         self.player_hands[self.current_player].append(self.uno_drawn_card)
@@ -560,6 +579,7 @@ class SingleGame():
                                                                                                   self.player_hands,
                                                                                                   self.remain_cards,
                                                                                                   self.player_count)
+                            self.animation_method[self.pop_card.value](self.current_player)
                             self.reset()
                         # 컴퓨터가 낸 카드가 change일 경우
                         elif self.pop_card.value == "change":
@@ -572,6 +592,7 @@ class SingleGame():
                                                                                                   self.player_hands,
                                                                                                   self.remain_cards,
                                                                                                   self.player_count)
+                            self.animation_method[self.pop_card.value](self.current_player)
                             self.reset()
                         # 컴퓨터가 낸 카드가 special이 아닌 경우
                         elif not self.pop_card.is_special():
@@ -587,6 +608,7 @@ class SingleGame():
                                                                                      self.player_hands,
                                                                                      self.remain_cards,
                                                                                      self.player_count)
+                        self.animation_method[self.pop_card.value](self.current_player)
                         self.reset()
                     # 내는 카드가 special이고, change일 경우
                     elif self.pop_card.is_special() and self.pop_card.value == "change":
@@ -599,6 +621,7 @@ class SingleGame():
                                                                                          self.player_hands,
                                                                                          self.remain_cards,
                                                                                          self.player_count)
+                            self.animation_method[self.pop_card.value](self.current_player)
                             self.board_card.append(self.color_change)
                             self.reset()
                     # 내는 카드가 special이 아닌 경우
@@ -615,6 +638,7 @@ class SingleGame():
                             self.pop_card, self.current_player, self.game_direction, self.player_hands,
                             self.remain_cards,
                             self.player_count)
+                        self.animation_method[self.pop_card.value](self.current_player)
                         self.reset()
 
                     # 내는 카드가 special이고 change인 경우
@@ -626,6 +650,7 @@ class SingleGame():
                                 self.pop_card, self.current_player, self.game_direction, self.player_hands,
                                 self.remain_cards,
                                 self.player_count)
+                            self.animation_method[self.pop_card.value](self.current_player)
                             self.board_card.append(self.color_change)
                             self.reset()
                     # 내는 카드가 special이 아닌 경우
@@ -642,6 +667,164 @@ class SingleGame():
         print("Asdasds")
         self.draw()
         self.paused = False
+
+    def place_animation(self, index):
+        self.card_place_music.set_volume(self.sound_volume * self.effect_volume)
+        self.card_place_music.play(1)
+        if index == 0:
+            pos = pygame.Vector2(self.user_coordinate[0]-self.turn_coordinate[0], self.user_coordinate[1]-self.turn_coordinate[1])
+        elif index == 1:
+            pos = pygame.Vector2(self.computer_coordinate[0][0]-self.turn_coordinate[2], self.computer_coordinate[0][1]-self.turn_coordinate[3])
+        elif index == 2:
+            pos = pygame.Vector2(self.computer_coordinate[1][0]-self.turn_coordinate[2], self.computer_coordinate[1][1]-self.turn_coordinate[3])
+        elif index == 3:
+            pos = pygame.Vector2(self.computer_coordinate[2][0]-self.turn_coordinate[2], self.computer_coordinate[2][1]-self.turn_coordinate[3])
+        elif index == 4:
+            pos = pygame.Vector2(self.computer_coordinate[3][0]-self.turn_coordinate[2], self.computer_coordinate[3][1]-self.turn_coordinate[3])
+        else:
+            pos = pygame.Vector2(self.computer_coordinate[4][0]-self.turn_coordinate[2], self.computer_coordinate[4][1]-self.turn_coordinate[3])
+        while True:
+            self.clock.tick(basic.fps)
+            if pos.distance_to(self.remain_pos) < 1:
+                break
+            pos = pos.lerp(self.remain_pos, 0.1)
+            self.draw()
+            self.screen.blit(self.card_back_image, pos)
+            pygame.display.flip()
+
+    def draw_animation(self, index):
+        remain_pos = pygame.Vector2(self.remain_cards_x_position, self.screen.get_rect().centery - 100)
+        self.card_place_music.set_volume(self.sound_volume * self.effect_volume)
+        self.card_place_music.play(1)
+        if index == 0:
+            pos = pygame.Vector2(self.user_coordinate[0] - self.turn_coordinate[0],
+                                 self.user_coordinate[1] - self.turn_coordinate[1])
+        elif index == 1:
+            pos = pygame.Vector2(self.computer_coordinate[0][0] - self.turn_coordinate[2],
+                                 self.computer_coordinate[0][1] - self.turn_coordinate[3])
+        elif index == 2:
+            pos = pygame.Vector2(self.computer_coordinate[1][0] - self.turn_coordinate[2],
+                                 self.computer_coordinate[1][1] - self.turn_coordinate[3])
+        elif index == 3:
+            pos = pygame.Vector2(self.computer_coordinate[2][0] - self.turn_coordinate[2],
+                                 self.computer_coordinate[2][1] - self.turn_coordinate[3])
+        elif index == 4:
+            pos = pygame.Vector2(self.computer_coordinate[3][0] - self.turn_coordinate[2],
+                                 self.computer_coordinate[3][1] - self.turn_coordinate[3])
+        else:
+            pos = pygame.Vector2(self.computer_coordinate[4][0] - self.turn_coordinate[2],
+                                 self.computer_coordinate[4][1] - self.turn_coordinate[3])
+        while True:
+            self.clock.tick(basic.fps)
+            if remain_pos.distance_to(pos) < 1:
+                break
+            remain_pos = remain_pos.lerp(pos, 0.1)
+            self.draw()
+            self.screen.blit(self.card_back_image, remain_pos)
+            pygame.display.flip()
+
+    def draw_2_animation(self, index):
+        self.draw()
+        self.screen.blit(pygame.transform.scale_by(pygame.image.load("./resources/Image/animation/+2.png"), self.size_change), (self.center_x, self.center_y))
+        pygame.display.flip()
+        time.sleep(0.7)
+        self.draw_animation((index - self.game_direction) % self.player_count)
+        self.draw_animation((index - self.game_direction) % self.player_count)
+
+    def bomb_animation(self, index):
+        self.draw()
+        self.screen.blit(pygame.transform.scale_by(pygame.image.load("./resources/Image/animation/bomb.png"), self.size_change), (self.center_x, self.center_y))
+        pygame.display.flip()
+        time.sleep(0.7)
+        remain_pos = [pygame.Vector2(self.remain_cards_x_position, self.screen.get_rect().centery - 100) for _ in range(6)]
+        self.card_place_music.set_volume(self.sound_volume * self.effect_volume)
+        self.card_place_music.play(1)
+        pos = [pygame.Vector2(self.user_coordinate[0] - self.turn_coordinate[0],
+                              self.user_coordinate[1] - self.turn_coordinate[1]),
+               pygame.Vector2(self.computer_coordinate[0][0] - self.turn_coordinate[2],
+                              self.computer_coordinate[0][1] - self.turn_coordinate[3]),
+               pygame.Vector2(self.computer_coordinate[1][0] - self.turn_coordinate[2],
+                              self.computer_coordinate[1][1] - self.turn_coordinate[3]),
+               pygame.Vector2(self.computer_coordinate[2][0] - self.turn_coordinate[2],
+                              self.computer_coordinate[2][1] - self.turn_coordinate[3]),
+               pygame.Vector2(self.computer_coordinate[3][0] - self.turn_coordinate[2],
+                              self.computer_coordinate[3][1] - self.turn_coordinate[3]),
+               pygame.Vector2(self.computer_coordinate[4][0] - self.turn_coordinate[2],
+                              self.computer_coordinate[4][1] - self.turn_coordinate[3])]
+        while True:
+            self.clock.tick(basic.fps)
+            if remain_pos[0].distance_to(pos[0]) < 1:
+                break
+            remain_pos[0] = remain_pos[0].lerp(pos[0], 0.1)
+            remain_pos[1] = remain_pos[1].lerp(pos[1], 0.1)
+            remain_pos[2] = remain_pos[2].lerp(pos[2], 0.1)
+            remain_pos[3] = remain_pos[3].lerp(pos[3], 0.1)
+            remain_pos[4] = remain_pos[4].lerp(pos[4], 0.1)
+            remain_pos[5] = remain_pos[5].lerp(pos[5], 0.1)
+            self.draw()
+            if self.game_direction > 0:
+                for i in range(0, self.player_count - 1):
+                    self.screen.blit(self.card_back_image, remain_pos[(index + i) % self.player_count])
+            else:
+                for i in range(0, self.player_count - 1):
+                    self.screen.blit(self.card_back_image, remain_pos[(index - i) % self.player_count])
+            pygame.display.flip()
+
+    def reverse_animation(self, index):
+        self.draw()
+        self.screen.blit(pygame.transform.scale_by(pygame.image.load("./resources/Image/animation/reverse.png"), self.size_change), (self.center_x, self.center_y))
+        pygame.display.flip()
+        time.sleep(0.7)
+
+    def skip_animation(self, index):
+        if self.game_direction > 0:
+            index = (index - 1) % self.player_count
+        else:
+            index = (index + 1) % self.player_count
+        if index == 0:
+            pos = pygame.Vector2(self.user_coordinate[0] - self.turn_coordinate[0],
+                                 self.user_coordinate[1] - self.turn_coordinate[1])
+        elif index == 1:
+            pos = pygame.Vector2(self.computer_coordinate[0][0] - self.turn_coordinate[2],
+                                 self.computer_coordinate[0][1] - self.turn_coordinate[3])
+        elif index == 2:
+            pos = pygame.Vector2(self.computer_coordinate[1][0] - self.turn_coordinate[2],
+                                 self.computer_coordinate[1][1] - self.turn_coordinate[3])
+        elif index == 3:
+            pos = pygame.Vector2(self.computer_coordinate[2][0] - self.turn_coordinate[2],
+                                 self.computer_coordinate[2][1] - self.turn_coordinate[3])
+        elif index == 4:
+            pos = pygame.Vector2(self.computer_coordinate[3][0] - self.turn_coordinate[2],
+                                 self.computer_coordinate[3][1] - self.turn_coordinate[3])
+        else:
+            pos = pygame.Vector2(self.computer_coordinate[4][0] - self.turn_coordinate[2],
+                                 self.computer_coordinate[4][1] - self.turn_coordinate[3])
+        self.draw()
+        self.screen.blit(pygame.transform.scale_by(pygame.image.load("./resources/Image/animation/skip.png"), self.size_change), pos)
+        pygame.display.flip()
+        time.sleep(0.7)
+
+    def one_more_animation(self, index):
+        self.draw()
+        self.screen.blit(pygame.transform.scale_by(pygame.image.load("./resources/Image/animation/-1.png"), self.size_change), (self.center_x, self.center_y))
+        pygame.display.flip()
+        time.sleep(0.7)
+
+    def change_animation(self, index):
+        self.draw()
+        self.screen.blit(
+            pygame.transform.scale_by(pygame.image.load("./resources/Image/animation/change.png"), self.size_change),
+            (self.center_x, self.center_y))
+        pygame.display.flip()
+        time.sleep(0.7)
+
+    def shield_animation(self, index):
+        self.draw()
+        self.screen.blit(
+            pygame.transform.scale_by(pygame.image.load("./resources/Image/animation/shield.png"), self.size_change),
+            (self.center_x, self.center_y))
+        pygame.display.flip()
+        time.sleep(0.7)
 
     def draw(self):
         self.screen.fill((111, 111, 111))
@@ -755,12 +938,16 @@ class SingleGame():
     def run(self):
         self.background_music.set_volume(self.sound_volume * self.background_volume)
         self.background_music.play(-1)
+        self.card_shuffle_music.set_volume(self.sound_volume * self.background_volume)
+        self.card_shuffle_music.play(1)
         while self.running:
             self.win()
             Mouse.updateMouseState()
             self.clock.tick(basic.fps)
             # 카드 섞기 발생
             if len(self.remain_cards) < 7:
+                self.card_shuffle_music.set_volume(self.sound_volume * self.background_volume)
+                self.card_shuffle_music.play(1)
                 self.board_card, self.remain_cards = card_reshuffle(self.board_card, self.remain_cards)
             self.game()
             self.draw()
