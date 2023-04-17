@@ -48,6 +48,7 @@ class Main:
         self.running = False
 
     def in_game_button_click_event(self):
+        self.background_music.stop()
         print('싱글 플레이 버튼 클릭됨')
         single_game_instance = Lobby()
         single_game_instance.run()

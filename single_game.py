@@ -53,12 +53,15 @@ class SingleGame():
 
         # 회면 크기 별 폰트와 버튼 크기 설정
         if self.display_size[0] == 1920:
+            self.size_change = basic.change_size[0]
             self.font_size = basic.font_size[0]
             self.button_size = basic.button_size[0]
         elif self.display_size[0] == 1600:
+            self.size_change = basic.change_size[1]
             self.font_size = basic.font_size[1]
             self.button_size = basic.button_size[1]
         else:
+            self.size_change = basic.change_size[2]
             self.font_size = basic.font_size[2]
             self.button_size = basic.button_size[2]
 
@@ -170,16 +173,23 @@ class SingleGame():
 
 
         # 게임 이미지를 로드
-        self.pause_button_img = pygame.image.load("./resources/Image/button_images/pause.png").convert_alpha()
-        self.resume_button_img = pygame.image.load("./resources/Image/button_images/resume.png").convert_alpha()
-        self.direction_img = pygame.image.load("./resources/Image/direction_images/direction.png").convert_alpha()
-        self.direction_reverse_img = pygame.image.load(
-            "./resources/Image/direction_images/direction_reverse.png").convert_alpha()
-        self.turn_arrow_img = pygame.image.load("./resources/Image/direction_images/turn_arrow.png").convert_alpha()
-        self.next_turn_button_img = pygame.image.load("./resources/Image/button_images/next_turn.png").convert_alpha()
-        self.uno_button_img = pygame.image.load("./resources/Image/button_images/uno_button.png").convert_alpha()
-        self.uno_button_inactive_img = pygame.image.load(
-            "./resources/Image/button_images/uno_button_inactive.png").convert_alpha()
+        self.pause_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/pause.png").convert_alpha(), self.size_change)
+        self.resume_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/resume.png").convert_alpha(), self.size_change)
+        self.direction_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/direction_images/direction.png").convert_alpha(), self.size_change)
+        self.direction_reverse_img = pygame.transform.scale_by(pygame.image.load(
+            "./resources/Image/direction_images/direction_reverse.png").convert_alpha(), self.size_change)
+        self.turn_arrow_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/direction_images/turn_arrow.png").convert_alpha(), self.size_change)
+        self.next_turn_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/next_turn.png").convert_alpha(), self.size_change)
+        self.uno_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/uno_button.png").convert_alpha(), self.size_change)
+        self.uno_button_inactive_img = pygame.transform.scale_by(pygame.image.load(
+            "./resources/Image/button_images/uno_button_inactive.png").convert_alpha(), self.size_change)
+
+        # 게임 음악 로드
+        self.background_music = pygame.mixer.Sound("./resources/Music/single_mode_play.ogg")
+        self.card_distribution = pygame.mixer.Sound("./resources/SoundEffect/carddistribution_sound.ogg")
+        self.card_place = pygame.mixer.Sound("./resources/SoundEffect/cardplace_sound.ogg")
+        self.card_shuffle = pygame.mixer.Sound("./resources/SoundEffect/cardshuffle_sound.ogg")
+        self.Uno_button = pygame.mixer.Sound("./resources/SoundEffect/Unobutton_sound.ogg")
 
         # 화면 중앙 좌표 계산
         self.image_width, self.image_height = self.direction_img.get_size()
@@ -187,12 +197,12 @@ class SingleGame():
         self.center_y = (self.display_size[1] - self.image_height) // 2
 
         # 카드 생성 및 셔플
-        self.cards = generate_cards(self.color_weakness)
+        self.cards = generate_cards(self.color_weakness, self.size_change)
         self.shuffled_cards = shuffle_cards(self.cards)
 
         # 카드 분배, 유저는 player_hands[0]이고, 나머지는 인공지능으로 설정한다. change는 카드 체인지를 위한 카드들.
         self.player_hands, self.remain_cards = distribute_cards(self.shuffled_cards, self.player_count, self.card_count)
-        self.change_color_list = generate_for_change_cards(self.color_weakness)
+        self.change_color_list = generate_for_change_cards(self.color_weakness, self.size_change)
 
         # 플레이어 순서 결정
         self.player_order = list(range(self.player_count))
@@ -620,11 +630,6 @@ class SingleGame():
                         self.current_player = (self.current_player + self.game_direction) % self.player_count
                         self.reset()
 
-        # 카드 섞기 발생
-        if not self.remain_cards:
-            self.board_card, self.remain_cards = card_reshuffle(self.board_card, self.remain_cards)
-
-
     def win(self):
         if self.game_over:
             # 마우스 클릭 또는 버튼 클릭시 넘어가야 함
@@ -745,6 +750,11 @@ class SingleGame():
                     self.pause()
 
     def run(self):
+        self.background_music.set_volume(self.sound_volume * self.background_volume)
+        self.background_music.play(-1)
+        # 카드 섞기 발생
+        if not self.remain_cards:
+            self.board_card, self.remain_cards = card_reshuffle(self.board_card, self.remain_cards)
         while self.running:
             self.win()
             Mouse.updateMouseState()

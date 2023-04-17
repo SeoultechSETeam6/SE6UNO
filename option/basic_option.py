@@ -10,6 +10,7 @@ key_setting = {'up': pygame.K_UP, 'down': pygame.K_DOWN, 'left': pygame.K_LEFT,
 button_size = [[200, 75], [167, 62.5], [125, 46.875]]
 font_size = [[60, 25], [50, 20], [37, 16]]
 logo_size = [[700, 500], [584, 417], [467, 333]]
+change_size = [1, 0.83, 0.66]
 
 # 공통된 변수
 game_title = "UNO Game"

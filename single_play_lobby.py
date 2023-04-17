@@ -10,6 +10,7 @@ from button import Button
 from option import save_option as save
 from option import basic_option as basic
 
+
 class Lobby:
     def __init__(self):
         # 저장된 설정 불러오기, 만약 파일이 비어있다면 기본 설정으로 세팅
