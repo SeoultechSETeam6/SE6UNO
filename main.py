@@ -1,7 +1,10 @@
 import pygame
 import sys
 import pickle
-import in_game
+
+from single_play_lobby import Lobby
+from mouse import Mouse
+from campaign_map import CampaignMap
 from mouse import Mouse
 from button import Button
 from option import basic_option as basic
@@ -34,6 +37,12 @@ class Main:
         self.background_volume = None
         self.effect_volume = None
 
+    def campaign_button_click_event(self):
+        basic.mouse_event_remove()
+        print('캠페인 버튼 클릭됨')
+        campaign = CampaignMap()
+        campaign.run()
+        
     def settings_button_click_event(self):
         self.background_music.stop()
         print('설정 버튼 클릭됨')
@@ -45,8 +54,14 @@ class Main:
         print('나가기 버튼 클릭됨')
         self.running = False
 
+    def in_game_button_click_event(self):
+        self.background_music.stop()
+        print('싱글 플레이 버튼 클릭됨')
+        single_game_instance = Lobby()
+        single_game_instance.run()
+
     def setting(self):
-        # 설정 불러오기
+        # 게임 설정 불러오기
         try:
             with open("./option/save_option.pickle", "rb") as f:
                 self.display_size = pickle.load(f)
@@ -63,6 +78,7 @@ class Main:
             self.background_volume = basic.background_volume
             self.effect_volume = basic.effect_volume
 
+        # 해상도에 맞게 크기 비율 조정
         if self.display_size[0] == 1920:
             self.font_size = basic.font_size[0]
             self.button_size = basic.button_size[0]
@@ -97,13 +113,16 @@ class Main:
 
         # 버튼
         self.buttons = [
-            Button(self.display_size[0] // 2, self.display_size[1] // 2, self.button_size[0], self.button_size[1],
-                   '싱글 플레이', in_game.game, self.font_size[1]),
+            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.1, self.button_size[0],
+                   self.button_size[1], '캠페인', self.campaign_button_click_event, self.font_size[1]),
             Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.3, self.button_size[0],
+                   self.button_size[1], '싱글 플레이', self.in_game_button_click_event, self.font_size[1]),
+            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.5, self.button_size[0],
                    self.button_size[1], '설정', self.settings_button_click_event, self.font_size[1]),
-            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.6, self.button_size[0],
+            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.7, self.button_size[0],
                    self.button_size[1], '나가기', self.exit_button_click_event, self.font_size[1])]
 
+        self.selected_button_index = 0
         self.buttons[self.selected_button_index].keyboard_selected = True
 
     def draw(self):

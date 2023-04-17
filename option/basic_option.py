@@ -8,6 +8,7 @@ key_setting = {'up': pygame.K_UP, 'down': pygame.K_DOWN, 'left': pygame.K_LEFT,
 
 # 화면 크기 변경시 같이 크기가 변경되어야 할 변수
 button_size = [[200, 75], [167, 62.5], [125, 46.875]]
+campaign_map_button_size = [[500, 347], [417.5, 290], [312.5, 217]]
 font_size = [[60, 25], [50, 20], [37, 16]]
 logo_size = [[700, 500], [584, 417], [467, 333]]
 
