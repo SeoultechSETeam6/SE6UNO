@@ -74,7 +74,6 @@ class ButtonWithImg(Button):
         super().__init__(x, y, width, height, "", on_click_function, 0, selected)
         self.img_path = img_path
         self.image = pygame.transform.scale(pygame.image.load(img_path), (width, height))
-
         self.img_rect = self.image.get_rect()
         self.img_rect.center = (x, y)
 
@@ -85,7 +84,7 @@ class ButtonWithImg(Button):
         self.surface.set_alpha(0)
 
         # 마우스 갖다댈 시
-        if self.rect.collidepoint(mouse_pos) or self.selected:
+        if self.rect.collidepoint(mouse_pos):
             self.surface.fill(self.fill_colors['hover'])
             self.surface.set_alpha(75)
 

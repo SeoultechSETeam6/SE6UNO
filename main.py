@@ -38,7 +38,7 @@ class Main:
         self.effect_volume = None
 
     def campaign_button_click_event(self):
-        basic.mouse_event_remove()
+        self.background_music.stop()
         print('캠페인 버튼 클릭됨')
         campaign = CampaignMap()
         campaign.run()

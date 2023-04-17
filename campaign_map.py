@@ -1,6 +1,7 @@
 import pygame
 import json
 import pickle
+from mouse import Mouse
 from button import ButtonWithImg
 from button import Button
 from option import basic_option as basic
@@ -44,7 +45,6 @@ class CampaignMap:
                 json.dump(clear_data, fw, indent=4)
 
     def exit_event(self):
-        basic.mouse_event_remove()
         print('캠페인 맵 메뉴에서 나가기 버튼 클릭 됨')
         self.running = False
 
@@ -77,7 +77,6 @@ class CampaignMap:
         self.popup.pop = True
 
     def check_event(self):
-        basic.mouse_event_remove()
         print('스테이지 입장버튼 클릭됨')
         self.popup = Popup(self.display_size[0] * 0.5, self.display_size[1] * 0.5,
                            self.display_size[0] * 0.4, self.display_size[1] * 0.4,
@@ -127,11 +126,11 @@ class CampaignMap:
                         ButtonWithImg(self.display_size[0] * 0.15, self.display_size[1] * 0.3,
                                       self.campaign_map_button_size[0],
                                       self.campaign_map_button_size[1],
-                                      "resources/image/story_image/storygym_1.jpg",
+                                      "./resources/image/story_image/storygym_1.png",
                                       self.check_event)]
 
         clear_flag = pygame.transform.scale(
-            (pygame.image.load("resources/image/story_image/clear_mark.png")),
+            (pygame.image.load("./resources/image/story_image/clear_mark.png")),
             (self.campaign_map_button_size[0] * 0.95, self.campaign_map_button_size[1] * 0.5))
 
         # 클리어 체크 후 버튼 표시 및 클리어 여부 표시
@@ -139,21 +138,21 @@ class CampaignMap:
             self.buttons.append(ButtonWithImg(self.display_size[0] * 0.2, self.display_size[1] * 0.67,
                                               self.campaign_map_button_size[0],
                                               self.campaign_map_button_size[1],
-                                              "resources/image/story_image/storygym_2.jpg",
+                                              "./resources/image/story_image/storygym_2.png",
                                               self.check_event))
             self.clear_flags.append(clear_flag)
         if self.clear_data["2nd"] > 0:
             self.buttons.append(ButtonWithImg(self.display_size[0] * 0.45, self.display_size[1] * 0.35,
                                               self.campaign_map_button_size[0],
                                               self.campaign_map_button_size[1],
-                                              "resources/image/story_image/storygym_3.jpg",
+                                              "./resources/image/story_image/storygym_3.png",
                                               self.check_event))
             self.clear_flags.append(clear_flag)
         if self.clear_data["3rd"] > 0:
             self.buttons.append(ButtonWithImg(self.display_size[0] * 0.5, self.display_size[1] * 0.72,
                                               self.campaign_map_button_size[0],
                                               self.campaign_map_button_size[1],
-                                              "resources/image/story_image/storygym_4.jpg",
+                                              "./resources/image/story_image/storygym_4.png",
                                               self.check_event))
             self.clear_flags.append(clear_flag)
         if self.clear_data["4th"] > 0:
@@ -161,7 +160,7 @@ class CampaignMap:
 
         # 키보드로 선택한 버튼 index 저장
         self.selected_button_index = 0
-        self.buttons[self.selected_button_index].selected = True
+        self.buttons[self.selected_button_index].keyboard_selected = True
 
     def draw(self):
         # 배경 색상
@@ -215,6 +214,8 @@ class CampaignMap:
             self.screen.blit(self.popup.close_button.surface, self.popup.close_button.rect)
             self.popup.open()
 
+        self.screen.blit(self.buttons[self.selected_button_index].selected_image,
+                         (self.buttons[self.selected_button_index].rect.x, self.buttons[self.selected_button_index].rect.y))
         # 매 프레임마다 화면 업데이트
         pygame.display.flip()
 
@@ -256,6 +257,7 @@ class CampaignMap:
         self.setting()
         # 메인 화면 표시
         while self.running:
+            Mouse.updateMouseState()
             self.clock.tick(basic.fps)
             self.event()
             self.draw()
