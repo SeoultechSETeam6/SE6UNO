@@ -451,7 +451,7 @@ class SingleGame:
                     if self.current_time - self.turn_start_time >= self.delay_time2:
                         self.current_player = (self.current_player + self.game_direction) % self.player_count
                         self.new_drawn_card = None
-                        self.computer_action_time = None
+                        self.computer_action_time = pygame.time.get_ticks() + self.delay_time
                         self.turn_start_time = pygame.time.get_ticks()
                 # 컴퓨터가 우노이고, 유저가 우노를 클릭했을 경우
                 elif self.uno_check:
