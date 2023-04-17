@@ -59,6 +59,7 @@ class Main:
         print('싱글 플레이 버튼 클릭됨')
         single_game_instance = Lobby()
         single_game_instance.run()
+        self.setting()
 
     def setting(self):
         # 게임 설정 불러오기
