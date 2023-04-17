@@ -71,7 +71,7 @@ class ButtonWithImg(Button):
     **on_click_funtion**: 버튼 클릭 시 일어날 이벤트 메서드
     """
     def __init__(self, x, y, width, height, img_path, on_click_function=None, selected=False):
-        super().__init__(x, y, width, height, "", on_click_function, 0, selected)
+        super().__init__(x, y, width, height, "", on_click_function, 50, selected)
         self.img_path = img_path
         self.image = pygame.transform.scale(pygame.image.load(img_path), (width, height))
         self.img_rect = self.image.get_rect()

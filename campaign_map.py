@@ -215,7 +215,7 @@ class CampaignMap:
             self.popup.open()
 
         self.screen.blit(self.buttons[self.selected_button_index].selected_image,
-                         (self.buttons[self.selected_button_index].rect.x, self.buttons[self.selected_button_index].rect.y))
+                         self.buttons[self.selected_button_index].rect)
         # 매 프레임마다 화면 업데이트
         pygame.display.flip()
 
