@@ -15,11 +15,6 @@ logo_size = [[700, 500], [584, 417], [467, 333]]
 # 공통된 변수
 game_title = "UNO Game"
 fps = 60
-
-
-# 마우스 중복 클릭 방지 메소드
-def mouse_event_remove():
-    while True:
-        pygame.event.clear()
-        if not pygame.mouse.get_pressed(num_buttons=3)[0]:
-            break
+sound_volume = 1.0
+background_volume = 1.0
+effect_volume = 1.0

@@ -90,11 +90,11 @@ class ButtonWithImg(Button):
             self.surface.set_alpha(75)
 
             # 버튼 누를 때
-            if self.rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed(num_buttons=3)[0]:
+            if self.rect.collidepoint(mouse_pos) and Mouse.getMouseState() == MouseState.CLICK:
                 self.surface.fill(self.fill_colors['pressed'])
-
+                Mouse.updateMouseState()
                 # 클릭 판정을 위해 클릭 된 상태라면 더 이상 이벤트를 발생시키지 않음
-                if not self.alreadyPressed:
+                if not self.alreadyPressed and Mouse.getMouseState() == MouseState.DRAG:
                     self.on_click_function()
                     self.alreadyPressed = True
 
