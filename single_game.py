@@ -5,6 +5,7 @@ import math
 from mouse import Mouse, MouseState
 from slider import Slider
 from button import Button
+from option.setting_option import Option
 from option import save_option as save
 from card_gen import generate_cards, generate_for_change_cards
 from card_shuffle import shuffle_cards, distribute_cards
@@ -32,7 +33,7 @@ from game_utils import (
 )
 
 
-class SingleGame():
+class SingleGame:
     def __init__(self, computer_attends):
         # 저장된 설정 불러오기, 만약 파일이 비어있다면 기본 설정으로 세팅
         try:
@@ -297,6 +298,9 @@ class SingleGame():
         self.uno_button_inactive_rect = self.uno_button_inactive_img.get_rect()
         self.uno_button_inactive_rect.topleft = (150, self.display_size[1] * 0.5)
         self.play_drawn_card_button = pygame.Rect(0, 0, 430, 110)
+
+        # Pause Button Check
+        self.alreadyPressed = False
 
     def reset(self):
         self.pop_card = None  # 뽑은 카드 초기값
@@ -638,10 +642,62 @@ class SingleGame():
             # 마우스 클릭 또는 버튼 클릭시 넘어가야 함
             self.running = False
 
-    def pause(self):
-        print("Asdasds")
-        self.draw()
+    ### 일시정지 버튼 관련 매서드 ###
+    def pause_popup(self):
+        self.pause_popup_draw()
+        self.settings_button.process()
+        self.close_button.process()
+        self.exit_button.process()
+        self.screen.blit(self.pause_popup_surface, self.pause_popup_rect)
+        self.screen.blit(self.settings_button.surface, self.settings_button.rect)
+        self.screen.blit(self.close_button.surface, self.close_button.rect)
+        self.screen.blit(self.exit_button.surface, self.exit_button.rect)
+
+    def pause_popup_draw(self):
+        width = self.display_size[0] * 0.4
+        height = self.display_size[1] * 0.4
+        x = self.display_size[0] // 2 - width // 2
+        y = self.display_size[1] // 2 - height // 2
+        self.pause_popup_rect = pygame.Rect(x, y, width, height)
+        self.pause_popup_surface = pygame.Surface((width, height))
+        self.pause_popup_surface.fill((0, 0, 0))
+
+        self.settings_button = Button(self.display_size[0] // 2, self.display_size[1] // 2 * 0.85, width // 2.5, height // 5, '설정', self.pause_popup_settings_button_event, self.font_size[0])
+        self.exit_button = Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.15, width // 2.5, height // 5, '게임 나가기', self.pause_popup_exit_button_event, self.font_size[0])
+        self.close_button = Button(self.display_size[0] // 2 * 1.3, self.display_size[1] // 2 * 0.7, width // 7, height // 7, 'X', self.pause_popup_close, self.font_size[0])
+
+    def pause_popup_close(self):
+        print('일시정지 해제')
+        self.turn_start_time += pygame.time.get_ticks() - self.pause_start_time
         self.paused = False
+
+    def pause_popup_exit_button_event(self):
+        print('게임 종료 버튼 클릭')
+        self.running = False
+
+    def pause_popup_settings_button_event(self):
+        self.background_music.stop()
+        print('설정 버튼 클릭됨')
+        option = Option()
+        option.run()
+        # self.setting()
+
+    def pause_button_process(self):
+        mouse_pos = pygame.mouse.get_pos()
+
+        if self.pause_button_rect.collidepoint(mouse_pos):
+            # 버튼 누를 때
+            if self.pause_button_rect.collidepoint(mouse_pos) and Mouse.getMouseState() == MouseState.CLICK:
+                Mouse.updateMouseState()
+                # 클릭 판정을 위해 클릭 된 상태라면 더 이상 이벤트를 발생시키지 않음
+                if not self.alreadyPressed and Mouse.getMouseState() == MouseState.DRAG:
+                    self.pause_start_time = pygame.time.get_ticks()
+                    self.paused = True
+                    self.alreadyPressed = True
+            else:
+                self.alreadyPressed = False
+
+    ### 일시정지 버튼 관련 메서드 끝 ###
 
     def draw(self):
         self.screen.fill((111, 111, 111))
@@ -740,6 +796,9 @@ class SingleGame():
             self.winner_message = "Computer wins!"
             self.game_over = True
 
+        if self.paused:
+            self.pause_popup()
+
         # 매 프레임마다 화면 업데이트
         pygame.display.flip()
 
@@ -749,8 +808,13 @@ class SingleGame():
                 self.running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.paused = True
-                    self.pause()
+                    if not self.paused:
+                        self.pause_start_time = pygame.time.get_ticks()
+                        self.paused = True
+                        print('일시정지 시작')
+                    else:
+                        self.pause_popup_close()
+
 
     def run(self):
         self.background_music.set_volume(self.sound_volume * self.background_volume)
@@ -762,6 +826,8 @@ class SingleGame():
             # 카드 섞기 발생
             if len(self.remain_cards) < 7:
                 self.board_card, self.remain_cards = card_reshuffle(self.board_card, self.remain_cards)
-            self.game()
+            if not self.paused:
+                self.game()
             self.draw()
             self.event()
+            self.pause_button_process()

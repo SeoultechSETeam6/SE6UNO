@@ -189,5 +189,3 @@ class Lobby:
             self.check_computer_click()
             self.check_start_click()  # start_img 클릭 확인
             self.draw()
-        # 나가기
-        pygame.quit()
