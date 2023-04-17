@@ -239,6 +239,14 @@ def apply_special_card_effects(card, current_player, direction, player_hands, re
         return current_player, direction
 
 
+def random_top_card_color(top_card, dummy_cards, board_card):
+    color_list = ['red', 'blue', 'green', 'yellow']
+    color = color_list[random.randint(0,3)]
+    dummy_card = [card for card in dummy_cards if card.value == top_card.value and card.color == color]
+    board_card.append(dummy_card[0])
+    return board_card
+
+
 def card_reshuffle(board_card, remain_cards):
     top_card = board_card[-1]
     board_card = board_card[:-1]  # top_card를 제외한 나머지 카드를 가져옵니다.
@@ -246,8 +254,8 @@ def card_reshuffle(board_card, remain_cards):
     remain_cards.extend(board_card)  # 가져온 카드를 remain_cards에 추가합니다.
     board_card = [top_card]  # board_card를 top_card만 남겨둡니다.
 
-    # 카드 change 항목을 제거한다.
-    remain_cards = [card for card in remain_cards if card.value is not None]
+    # 카드 change, 더미 항목을 제거한다.
+    remain_cards = [card for card in remain_cards if card.value is not None and not card.is_dummy]
     random.shuffle(remain_cards)  # remain_cards를 무작위로 섞습니다.
     print("셔플완료")
     return board_card, remain_cards
