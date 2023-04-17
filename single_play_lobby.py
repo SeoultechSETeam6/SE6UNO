@@ -154,6 +154,7 @@ class Lobby:
                                     self.computer4_attend, self.computer5_attend]
                 single_game = SingleGame(computer_attends)
                 single_game.run()
+                self.running = False
 
     def draw(self):
         self.screen.fill((111, 111, 111))
@@ -186,8 +187,7 @@ class Lobby:
                     self.running = False
             Mouse.updateMouseState()
             self.clock.tick(basic.fps)
+            self.draw()
             self.check_computer_click()
             self.check_start_click()  # start_img 클릭 확인
-            self.draw()
-        # 나가기
-        pygame.quit()
+
