@@ -2,7 +2,7 @@ import pygame
 import sys
 import pickle
 
-from single_game import SingleGame
+from single_play_lobby import Lobby
 from mouse import Mouse
 from button import Button
 from option import basic_option as basic
@@ -49,7 +49,7 @@ class Main:
 
     def in_game_button_click_event(self):
         print('싱글 플레이 버튼 클릭됨')
-        single_game_instance = SingleGame()
+        single_game_instance = Lobby()
         single_game_instance.run()
 
     def setting(self):
@@ -95,7 +95,7 @@ class Main:
         self.logo = pygame.image.load("resources/Image/logo.png")
         self.logo = pygame.transform.scale(self.logo, self.logo_size)
         self.logo_rect = self.logo.get_rect()
-        self.logo_rect.center = (self.display_size[0] // 2, self.logo_rect.height // 2)
+        self.logo_rect.center = ((self.display_size[0] // 2), self.logo_rect.height // 2)
 
         # 버튼 조작 키 표시
         self.font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[1])

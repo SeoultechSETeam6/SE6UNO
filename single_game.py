@@ -32,8 +32,8 @@ from game_utils import (
 )
 
 
-class SingleGame:
-    def __init__(self):
+class SingleGame():
+    def __init__(self, computer_attends):
         # 저장된 설정 불러오기, 만약 파일이 비어있다면 기본 설정으로 세팅
         try:
             with open("./option/save_option.pickle", "rb") as f:
@@ -62,6 +62,7 @@ class SingleGame:
             self.font_size = basic.font_size[2]
             self.button_size = basic.button_size[2]
 
+
         # pygame 초기화
         pygame.init()
         self.font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[0])
@@ -71,6 +72,7 @@ class SingleGame:
         pygame.display.set_caption(basic.game_title)
         self.clock = pygame.time.Clock()
         self.running = True
+
 
         # single_game 변수
         self.player_count = 5  # 플레이어 수
