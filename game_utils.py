@@ -249,4 +249,5 @@ def card_reshuffle(board_card, remain_cards):
     # 카드 change 항목을 제거한다.
     remain_cards = [card for card in remain_cards if card.value is not None]
     random.shuffle(remain_cards)  # remain_cards를 무작위로 섞습니다.
+    print("셔플완료")
     return board_card, remain_cards

@@ -78,7 +78,7 @@ class SingleGame():
 
         # single_game 변수
         self.player_count = 1  # 플레이어 수
-        self.card_count = 7  # 처음 시작하는 카드 수
+        self.card_count = 2  # 처음 시작하는 카드 수
         self.winner_message = ""  # 승리 메세지
 
         # 로비에서 가져온 정보
@@ -98,6 +98,8 @@ class SingleGame():
             self.user_coordinate.append(30)
             self.user_coordinate.append(self.display_size[1] * 0.7)
             self.user_spacing = self.display_size[1] * 0.08
+            self.turn_coordinate = [70, 150, 150, 80]
+            self.next_turn_co = [0, 150]
             if self.computer_attends[0]:
                 self.computer_coordinate.append([self.display_size[0] * 0.65, self.display_size[1] * 0.03])
                 self.computer1_color = self.computer_color[random.randint(0, 3)]
@@ -118,12 +120,14 @@ class SingleGame():
                 self.computer_coordinate.append([self.display_size[0] * 0.65, (self.display_size[1] * 0.03) + (self.display_size[1] * 0.8)])
                 self.computer5_color = self.computer_color[random.randint(0, 3)]
                 print("computer5_color", self.computer5_color)
-        if self.display_size[1] == 1600:
+        elif self.display_size[0] == 1600:
             self.max_per_row = 13
             self.max_per_row_com = 17
             self.user_coordinate.append(30)
             self.user_coordinate.append(self.display_size[1] * 0.7)
             self.user_spacing = self.display_size[1] * 0.08
+            self.turn_coordinate = [70, 120, 120, 80]
+            self.next_turn_co = [0, 100]
             if self.computer_attends[0]:
                 self.computer_coordinate.append([self.display_size[0] * 0.72, self.display_size[1] * 0.08])
                 self.computer1_color = self.computer_color[random.randint(0, 3)]
@@ -144,12 +148,14 @@ class SingleGame():
                 self.computer_coordinate.append([self.display_size[0] * 0.72, (self.display_size[1] * 0.08) + (self.display_size[1] * 0.8)])
                 self.computer5_color = self.computer_color[random.randint(0, 3)]
                 print("computer5_color", self.computer5_color)
-        else :
+        elif self.display_size[0] == 1280:
             self.max_per_row = 11
             self.max_per_row_com = 15
             self.user_coordinate.append(30)
             self.user_coordinate.append(self.display_size[1] * 0.7)
             self.user_spacing = self.display_size[1] * 0.08
+            self.turn_coordinate = [50, 100, 100, 40]
+            self.next_turn_co = [0, 80]
             if self.computer_attends[0]:
                 self.computer_coordinate.append([self.display_size[0] * 0.67, self.display_size[1] * 0.01])
                 self.computer1_color = self.computer_color[random.randint(0, 3)]
@@ -284,10 +290,10 @@ class SingleGame():
         self.pause_button_rect.topleft = (25, 25)
         # next_turn버튼
         self.next_turn_button_rect = self.next_turn_button_img.get_rect()
-        self.next_turn_button_rect.topleft = (self.user_coordinate[0], self.user_coordinate[1] - 150)
+        self.next_turn_button_rect.topleft = (self.user_coordinate[0] - self.next_turn_co[0], self.user_coordinate[1] - self.next_turn_co[1])
         # uno_button
         self.uno_button_rect = self.uno_button_img.get_rect()
-        self.uno_button_rect.topleft = (self.user_coordinate[0], self.user_coordinate[1] - 300)
+        self.uno_button_rect.topleft = (150, self.display_size[1] * 0.5)
         self.uno_button_inactive_rect = self.uno_button_inactive_img.get_rect()
         self.uno_button_inactive_rect.topleft = (150, self.display_size[1] * 0.5)
         self.play_drawn_card_button = pygame.Rect(0, 0, 430, 110)
@@ -381,10 +387,7 @@ class SingleGame():
                 # 카드를 드로우 하고 턴을 넘기는 함수.
                 elif self.new_drawn_card is not None and self.clicked_next_turn_button:
                     self.current_player = (self.current_player + self.game_direction) % self.player_count
-                    self.new_drawn_card = None
-                    self.clicked_card = None
-                    self.clicked_remain_cards = False
-                    self.clicked_next_turn_button = False
+                    self.reset()
                 # 카드를 드로우 하고, 드로우한 카드를 내는 함수.
                 elif self.new_drawn_card is not None and self.pop_card is None:
                     # 유효성 검사 및 클릭카드가 new_drawn_card인지 확인
@@ -656,17 +659,17 @@ class SingleGame():
 
         # 누구 턴인지 표시하는 화살표 그리기
         if self.user_turn:
-            self.screen.blit(self.turn_arrow_img, (self.user_coordinate[0]-100, self.user_coordinate[1]-130))
+            self.screen.blit(self.turn_arrow_img, (self.user_coordinate[0]-self.turn_coordinate[0], self.user_coordinate[1]-self.turn_coordinate[1]))
         elif self.current_player == 1:
-            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[0][0]-150, self.computer_coordinate[0][1]-80))
+            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[0][0]-self.turn_coordinate[2], self.computer_coordinate[0][1]-self.turn_coordinate[3]))
         elif self.current_player == 2:
-            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[1][0]-150, self.computer_coordinate[1][1]-80))
+            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[1][0]-self.turn_coordinate[2], self.computer_coordinate[1][1]-self.turn_coordinate[3]))
         elif self.current_player == 3:
-            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[2][0]-150, self.computer_coordinate[2][1]-80))
+            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[2][0]-self.turn_coordinate[2], self.computer_coordinate[2][1]-self.turn_coordinate[3]))
         elif self.current_player == 4:
-            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[3][0]-150, self.computer_coordinate[3][1]-80))
+            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[3][0]-self.turn_coordinate[2], self.computer_coordinate[3][1]-self.turn_coordinate[3]))
         elif self.current_player == 5:
-            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[4][0]-150, self.computer_coordinate[4][1]-80))
+            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[4][0]-self.turn_coordinate[2], self.computer_coordinate[4][1]-self.turn_coordinate[3]))
 
         # 남은 카드 더미 그리기
         self.screen.blit(self.remain_cards[0].card_img_back, (self.remain_cards_x_position, self.screen.get_rect().centery - 100))
@@ -752,13 +755,13 @@ class SingleGame():
     def run(self):
         self.background_music.set_volume(self.sound_volume * self.background_volume)
         self.background_music.play(-1)
-        # 카드 섞기 발생
-        if not self.remain_cards:
-            self.board_card, self.remain_cards = card_reshuffle(self.board_card, self.remain_cards)
         while self.running:
             self.win()
             Mouse.updateMouseState()
             self.clock.tick(basic.fps)
+            # 카드 섞기 발생
+            if len(self.remain_cards) < 7:
+                self.board_card, self.remain_cards = card_reshuffle(self.board_card, self.remain_cards)
             self.game()
             self.draw()
             self.event()
