@@ -78,7 +78,7 @@ class SingleGame:
 
         # single_game 변수
         self.player_count = 1  # 플레이어 수
-        self.card_count = 7  # 처음 시작하는 카드 수
+        self.card_count = 2  # 처음 시작하는 카드 수
         self.winner_message = ""  # 승리 메세지
 
         # 로비에서 가져온 정보
@@ -659,9 +659,29 @@ class SingleGame:
                         self.reset()
 
     def win(self):
+        popup = None
+        if len(self.player_hands[0]) == 0:
+            popup = pygame.transform.scale_by(pygame.image.load("./resources/Image/win.png"), self.size_change)
+            self.game_over = True
+        elif any(len(player_hand) == 0 for player_hand in self.player_hands[1:]):
+            popup = pygame.transform.scale_by(pygame.image.load("./resources/Image/lose.png"), self.size_change)
+            self.game_over = True
         if self.game_over:
-            # 마우스 클릭 또는 버튼 클릭시 넘어가야 함
-            self.running = False
+            self.background_music.stop()
+            self.card_shuffle_music.stop()
+            self.screen.fill((0, 0, 0))
+            self.screen.blit(popup, (self.screen.get_width() // 2 - popup.get_size()[0] // 2,
+                                     self.screen.get_height() // 2 - popup.get_size()[1] // 2))
+            pygame.display.flip()
+            popup_running = True
+            while popup_running:
+                for popup_event in pygame.event.get():
+                    if popup_event.type == pygame.KEYDOWN:
+                        self.running = False
+                        popup_running = False
+                    if popup_event.type == pygame.MOUSEBUTTONDOWN:
+                        self.running = False
+                        popup_running = False
 
     def pause(self):
         print("Asdasds")
@@ -916,19 +936,14 @@ class SingleGame:
             draw_text(self.screen, self.com_uno_remaining_time_text, self.font, (255, 255, 255), self.screen.get_rect().centerx, 30)
         '''
 
-        if len(self.player_hands[0]) == 0:
-            self.winner_message = "User Wins!"
-            self.game_over = True
-        elif any(len(player_hand) == 0 for player_hand in self.player_hands[1:]):
-            self.winner_message = "Computer wins!"
-            self.game_over = True
-
         # 매 프레임마다 화면 업데이트
         pygame.display.flip()
 
     def event(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                self.background_music.stop()
+                self.card_shuffle_music.stop()
                 self.running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:

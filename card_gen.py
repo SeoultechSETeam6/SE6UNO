@@ -48,7 +48,7 @@ def generate_cards(color_weakness, size_by):
         cards.append(card)
 
     # 색 없는 색변경 카드를 추가
-    for i in range(100):
+    for i in range(2):
         card_image = pygame.transform.scale_by(pygame.image.load(f"./resources/Image/card_images/none_change.png"), size_by)
         card = Card('none', 'change', card_image, card_back_image)
         cards.append(card)
