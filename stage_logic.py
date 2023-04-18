@@ -8,7 +8,7 @@ from mouse import Mouse, MouseState
 from slider import Slider
 from button import Button
 from option import save_option as save
-from card_gen import generate_cards, generate_for_change_cards, generate_a_stage_cards, generate_c_stage_cards, generate_c_for_change_cards
+from card_gen import generate_cards, generate_for_change_cards, generate_a_stage_cards, generate_c_stage_cards, generate_c_for_change_cards, generate_d_stage_cards
 from card_shuffle import shuffle_cards, distribute_cards, stage_a_distribute
 from option import basic_option as basic
 from game_utils import (
@@ -1231,3 +1231,34 @@ class StageC(SingleGame):
                         self.turn_count = self.turn_count + 1
                         if self.turn_count%5 == 0:
                             self.board_card = random_top_card_color(self.top_card, self.dummy_cards, self.board_card, self.dummy_cards_c)
+
+
+class StageD(SingleGame):
+    def __init__(self):
+        super().__init__([False, True, True, True, True])
+        self.cards = generate_d_stage_cards(self.color_weakness, self.size_change)
+
+    def win(self):
+        popup = None
+        if len(self.player_hands[0]) == 0 or any(len(player_hand) >= 5 for player_hand in self.player_hands[1:]):
+            popup = pygame.transform.scale_by(pygame.image.load("./resources/Image/win.png"), self.size_change)
+            self.game_over = True
+        elif any(len(player_hand) == 0 for player_hand in self.player_hands[1:]) or len(self.player_hands[0]) == 5:
+            popup = pygame.transform.scale_by(pygame.image.load("./resources/Image/lose.png"), self.size_change)
+            self.game_over = True
+        if self.game_over:
+            self.background_music.stop()
+            self.card_shuffle_music.stop()
+            self.screen.fill((0, 0, 0))
+            self.screen.blit(popup, (self.screen.get_width() // 2 - popup.get_size()[0] // 2,
+                                     self.screen.get_height() // 2 - popup.get_size()[1] // 2))
+            pygame.display.flip()
+            popup_running = True
+            while popup_running:
+                for popup_event in pygame.event.get():
+                    if popup_event.type == pygame.KEYDOWN:
+                        self.running = False
+                        popup_running = False
+                    if popup_event.type == pygame.MOUSEBUTTONDOWN:
+                        self.running = False
+                        popup_running = False
