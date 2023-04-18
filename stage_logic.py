@@ -59,10 +59,6 @@ class StageB(SingleGame):
 
 
     def game(self):
-        print(len(self.remain_cards))
-        print(len(self.player_hands[0]), len(self.player_hands[1]), len(self.player_hands[2]),
-              len(self.player_hands[3]))
-        print(len(self.player_hands))
         # 마우스의 위치를 가져옴
         mouse_x, mouse_y = pygame.mouse.get_pos()
         # 현재 플레이어 결정
