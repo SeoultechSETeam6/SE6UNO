@@ -35,7 +35,7 @@ from game_utils import (
 
 
 class SingleGame:
-    def __init__(self, computer_attends):
+    def __init__(self, computer_attends, username):
         # 저장된 설정 불러오기, 만약 파일이 비어있다면 기본 설정으로 세팅
         try:
             with open("./option/save_option.pickle", "rb") as f:
@@ -79,8 +79,16 @@ class SingleGame:
 
         # single_game 변수
         self.player_count = 1  # 플레이어 수
-        self.card_count = 2  # 처음 시작하는 카드 수
+        self.card_count = 7  # 처음 시작하는 카드 수
         self.winner_message = ""  # 승리 메세지
+
+        # 플레이어 이름
+        self.player_name = self.font.render(username, True, (0, 0, 0))
+        self.computer_name = [self.small_font.render("computer1", True, (0, 0, 0)),
+                              self.small_font.render("computer2", True, (0, 0, 0)),
+                              self.small_font.render("computer3", True, (0, 0, 0)),
+                              self.small_font.render("computer4", True, (0, 0, 0)),
+                              self.small_font.render("computer5", True, (0, 0, 0))]
 
         # 로비에서 가져온 정보
         self.computer_attends = computer_attends
@@ -454,6 +462,17 @@ class SingleGame:
         self.image_width, self.image_height = self.direction_img.get_size()
         self.center_x = (self.display_size[0] - self.image_width) // 2
         self.center_y = (self.display_size[1] - self.image_height) // 2
+
+        # 카드 생성 및 셔플
+        self.cards = generate_cards(self.color_weakness, self.size_change)
+        self.shuffled_cards = shuffle_cards(self.cards)
+
+        # 카드 분배, 유저는 player_hands[0]이고, 나머지는 인공지능으로 설정한다. change는 카드 체인지를 위한 카드들.
+        self.player_hands, self.remain_cards = distribute_cards(self.shuffled_cards, self.player_count, self.card_count)
+        self.change_color_list = generate_for_change_cards(self.color_weakness, self.size_change)
+
+        # 보드에 뒤집힌 카드 설정 (카드 한 장을 뽑아서 남은 카드 덱 옆에 보이게 놓기)
+        self.board_card = [self.remain_cards.pop()]
 
         # change카드 좌표, spacing은 공백
         self.x5 = 100
@@ -1083,6 +1102,7 @@ class SingleGame:
 
     def draw(self):
         self.screen.fill((111, 111, 111))
+
         # 퍼즈버튼 그리기(그리는 이미지, 작동되는 함수)
         if self.paused:
             self.screen.blit(self.resume_button_img, (25, 25))
@@ -1161,6 +1181,18 @@ class SingleGame:
             self.after_draw_remaining_time = self.time_limit - (self.current_time - self.user_draw_time)
             self.after_draw_remaining_time_text = f"턴 남은 시간: {self.after_draw_remaining_time // 1000}초"
             draw_text(self.screen, self.after_draw_remaining_time_text, self.font, (255, 255, 255), self.screen.get_rect().centerx/2, 30)
+
+        # 유저 이름 그리기
+        self.screen.blit(self.player_name,
+                         (self.user_coordinate[0] - self.turn_coordinate[0] + self.font_size[0] * 3,
+                          self.user_coordinate[1] - self.turn_coordinate[1] + self.font_size[0]))
+        j = 0
+        for i in range(5):
+            if self.computer_attends[i]:
+                self.screen.blit(self.computer_name[i],
+                                 (self.computer_coordinate[j][0] - self.turn_coordinate[2] - self.font_size[0] // 2,
+                                  self.computer_coordinate[j][1] - self.turn_coordinate[3] + self.font_size[0] * 2))
+                j = j + 1
         '''
         # 유저 턴일때, uno버튼 시간
         elif self.user_turn and self.one_flags[0]:
@@ -1173,13 +1205,6 @@ class SingleGame:
             self.com_uno_remaining_time_text = f"우노버튼 남은 시간: {self.com_uno_remaining_time // 1000}초"
             draw_text(self.screen, self.com_uno_remaining_time_text, self.font, (255, 255, 255), self.screen.get_rect().centerx, 30)
         '''
-
-        if len(self.player_hands[0]) == 0:
-            self.winner_message = "User Wins!"
-            self.game_over = True
-        elif any(len(player_hand) == 0 for player_hand in self.player_hands[1:]):
-            self.winner_message = "Computer wins!"
-            self.game_over = True
 
         if self.paused:
             self.pause_popup()
