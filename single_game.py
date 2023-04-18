@@ -190,6 +190,7 @@ class SingleGame:
         self.uno_button_inactive_img = pygame.transform.scale_by(pygame.image.load(
             "./resources/Image/button_images/uno_button_inactive.png").convert_alpha(), self.size_change)
         self.card_back_image = pygame.transform.scale_by(pygame.image.load("resources/Image/card_images/card_back.png"), self.size_change)
+        self.selected_image = pygame.transform.scale_by(pygame.image.load("./resources/Image/selected_check.png"), self.size_change * 0.2)
 
         # 게임 음악 로드
         self.background_music = pygame.mixer.Sound("./resources/Music/single_mode_play.ogg")
@@ -223,9 +224,9 @@ class SingleGame:
 
         # 선택한 카드 위로 띄우기 해야함
         # 카드 약간 띄우는 초기값 index는 플레이어, index2는 ai,
-        self.hovered_card_index = None
+        self.hovered_card_index = 0
         self.hovered_card_index2 = None
-        self.hovered_change_index = None
+        self.hovered_change_index = 0
 
         self.paused = False  # 일시정지 초기값
         self.game_over = False  # 게임 오버 초기값
@@ -305,6 +306,9 @@ class SingleGame:
 
         # Pause Button Check
         self.alreadyPressed = False
+
+        # 0: 드로우, 1: 우노버튼, 2: 턴 넘기기, 3. 덱
+        self.key_select_option = 3
 
     def setting(self):
         try:
@@ -448,8 +452,10 @@ class SingleGame:
         self.uno_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/uno_button.png").convert_alpha(), self.size_change)
         self.uno_button_inactive_img = pygame.transform.scale_by(pygame.image.load(
             "./resources/Image/button_images/uno_button_inactive.png").convert_alpha(), self.size_change)
-        self.card_back_image = pygame.transform.scale_by(pygame.image.load("resources/Image/card_images/card_back.png"), self.size_change)
+        self.card_back_image = pygame.transform.scale_by(pygame.image.load("./resources/Image/card_images/card_back.png"), self.size_change)
+        self.selected_image = pygame.transform.scale_by(pygame.image.load("./resources/Image/selected_check.png"), self.size_change * 0.2)
 
+        # 화면 중앙 좌표 계산
         # 화면 중앙 좌표 계산
         self.image_width, self.image_height = self.direction_img.get_size()
         self.center_x = (self.display_size[0] - self.image_width) // 2
@@ -547,8 +553,8 @@ class SingleGame:
                 self.Uno_button_music.play(1)
                 self.user_uno_clicked = True
         self.hovered_card_index = find_hovered_card(self.player_hands[0], self.user_coordinate[0],
-                                                    self.user_coordinate[1], self.user_spacing, mouse_x, mouse_y, self.max_per_row)
-        self.hovered_change_index = find_hovered_change(self.change_color_list, self.x5, self.y5, self.spacing5, mouse_x, mouse_y)
+                                                    self.user_coordinate[1], self.user_spacing, mouse_x, mouse_y, self.max_per_row, self.hovered_card_index)
+        self.hovered_change_index = find_hovered_change(self.change_color_list, self.x5, self.y5, self.spacing5, mouse_x, mouse_y, self.hovered_card_index)
 
         # 현재 플레이어가 유저인지 확인
         if self.user_turn:
@@ -599,6 +605,7 @@ class SingleGame:
                                                                                                 self.current_player)
             # 카드를 냈을 때,
             if self.pop_card is not None:
+                self.hovered_card_index -= 1
                 # 우노일 경우
                 if self.uno_check:
                     if self.user_uno_clicked:
@@ -1181,6 +1188,18 @@ class SingleGame:
             self.winner_message = "Computer wins!"
             self.game_over = True
 
+        # 키보드로 선택된 경우 체크 표시
+        # 드로우
+        if self.key_select_option == 0:
+            self.screen.blit(self.selected_image, (self.screen.get_rect().centerx - 100, self.screen.get_rect().centery))
+        # 우노 버튼
+        elif self.key_select_option == 1:
+            self.screen.blit(self.selected_image, self.uno_button_rect)
+        # 다음 턴 버튼
+        elif self.key_select_option == 2:
+            self.screen.blit(self.selected_image, self.next_turn_button_rect)
+
+        # 일시정지 팝업 띄우기
         if self.paused:
             self.pause_popup()
 
@@ -1203,6 +1222,58 @@ class SingleGame:
                         self.card_shuffle_music.stop()
                     else:
                         self.pause_popup_close()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == self.key_setting['left']:
+                        if self.key_select_option == 3:
+                            self.hovered_card_index = (self.hovered_card_index - 1) % len(self.player_hands[0])
+                    elif event.key == self.key_setting['right']:
+                        if self.key_select_option == 3:
+                            self.hovered_card_index = (self.hovered_card_index + 1) % len(self.player_hands[0])
+                    elif event.key == self.key_setting['up']:
+                        if self.key_select_option == 0:
+                            self.key_select_option = 3
+                        elif self.key_select_option == 1:
+                            self.key_select_option = 0
+                        elif self.key_select_option == 2:
+                            if any(self.one_flags):
+                                self.key_select_option = 1
+                            else:
+                                self.key_select_option = 0
+                        else:
+                            if self.user_turn and self.new_drawn_card is not None:
+                                self.key_select_option = 2
+                            elif any(self.one_flags):
+                                self.key_select_option = 1
+                            else:
+                                self.key_select_option = 0
+                    elif event.key == self.key_setting['down']:
+                        if self.key_select_option == 0:
+                            if any(self.one_flags):
+                                self.key_select_option = 1
+                            elif self.user_turn and self.new_drawn_card is not None:
+                                self.key_select_option = 2
+                            else:
+                                self.key_select_option = 3
+                        elif self.key_select_option == 1:
+                            if self.user_turn and self.new_drawn_card is not None:
+                                self.key_select_option = 2
+                            else:
+                                self.key_select_option = 3
+                        elif self.key_select_option == 2:
+                            self.key_select_option = 3
+                        else:
+                            self.key_select_option = 0
+                    elif event.key == self.key_setting['enter']:
+                        if self.key_select_option == 0:
+                            pass
+                        elif self.key_select_option == 1:
+                            pass
+                        elif self.key_select_option == 2:
+                            pass
+                        else:
+                            self.clicked_card_index, self.clicked_card \
+                                = self.hovered_card_index, self.player_hands[0][self.hovered_card_index]
+
 
 
     def run(self):
