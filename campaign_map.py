@@ -6,7 +6,7 @@ from button import ButtonWithImg
 from button import Button
 from option import basic_option as basic
 from popup import Popup
-
+from stage_logic import StageA, StageB, StageC, StageD
 
 class CampaignMap:
     def __init__(self):
@@ -48,40 +48,53 @@ class CampaignMap:
         print('캠페인 맵 메뉴에서 나가기 버튼 클릭 됨')
         self.running = False
 
-    def start_1st_stage_event(self):
-        print('1스테이지 입장 버튼 클릭됨')
+    def start_1st_check_event(self):
+        print('1스테이지 입장버튼 클릭됨')
         self.popup = Popup(self.display_size[0] * 0.5, self.display_size[1] * 0.5,
                            self.display_size[0] * 0.4, self.display_size[1] * 0.4,
-                           '1스테이지 설명', self.check_event)
+                           '정말 입장하시겠습니까?', self.start_1st_stage_event)
+        self.popup.pop = True
+
+    def start_1st_stage_event(self):
+        self.popup.pop = False
+        stage_1 = StageA()
+        stage_1.run()
+
+    def start_2nd_check_event(self):
+        print('2스테이지 입장버튼 클릭됨')
+        self.popup = Popup(self.display_size[0] * 0.5, self.display_size[1] * 0.5,
+                           self.display_size[0] * 0.4, self.display_size[1] * 0.4,
+                           '정말 입장하시겠습니까?', self.start_2nd_stage_event)
         self.popup.pop = True
 
     def start_2nd_stage_event(self):
-        print('2스테이지 입장 버튼 클릭됨')
+        self.popup.pop = False
+        stage_2 = StageB()
+        stage_2.run()
+
+    def start_3rd_check_event(self):
+        print('3스테이지 입장버튼 클릭됨')
         self.popup = Popup(self.display_size[0] * 0.5, self.display_size[1] * 0.5,
                            self.display_size[0] * 0.4, self.display_size[1] * 0.4,
-                           '2스테이지 설명', self.check_event)
+                           '정말 입장하시겠습니까?', self.start_3rd_stage_event)
         self.popup.pop = True
 
     def start_3rd_stage_event(self):
-        print('3스테이지 입장 버튼 클릭됨')
+        self.popup.pop = False
+        stage_3 = StageC()
+        stage_3.run()
+
+    def start_4th_check_event(self):
+        print('4스테이지 입장버튼 클릭됨')
         self.popup = Popup(self.display_size[0] * 0.5, self.display_size[1] * 0.5,
                            self.display_size[0] * 0.4, self.display_size[1] * 0.4,
-                           '3스테이지 설명', self.check_event)
+                           '정말 입장하시겠습니까?', self.start_4th_stage_event)
         self.popup.pop = True
 
     def start_4th_stage_event(self):
-        print('4스테이지 입장 버튼 클릭됨')
-        self.popup = Popup(self.display_size[0] * 0.5, self.display_size[1] * 0.5,
-                           self.display_size[0] * 0.4, self.display_size[1] * 0.4,
-                           '4스테이지 설명', self.check_event)
-        self.popup.pop = True
-
-    def check_event(self):
-        print('스테이지 입장버튼 클릭됨')
-        self.popup = Popup(self.display_size[0] * 0.5, self.display_size[1] * 0.5,
-                           self.display_size[0] * 0.4, self.display_size[1] * 0.4,
-                           '정말 입장하시겠습니까?', self.exit_event)
-        self.popup.pop = True
+        self.popup.pop = False
+        stage_4 = StageD()
+        stage_4.run()
 
     def setting(self):
         # 창 관련 설정 불러오기
@@ -127,7 +140,7 @@ class CampaignMap:
                                       self.campaign_map_button_size[0],
                                       self.campaign_map_button_size[1],
                                       "./resources/image/story_image/storygym_1.png",
-                                      self.check_event)]
+                                      self.start_1st_check_event)]
 
         clear_flag = pygame.transform.scale(
             (pygame.image.load("./resources/image/story_image/clear_mark.png")),
@@ -139,21 +152,21 @@ class CampaignMap:
                                               self.campaign_map_button_size[0],
                                               self.campaign_map_button_size[1],
                                               "./resources/image/story_image/storygym_2.png",
-                                              self.check_event))
+                                              self.start_2nd_check_event))
             self.clear_flags.append(clear_flag)
         if self.clear_data["2nd"] > 0:
             self.buttons.append(ButtonWithImg(self.display_size[0] * 0.45, self.display_size[1] * 0.35,
                                               self.campaign_map_button_size[0],
                                               self.campaign_map_button_size[1],
                                               "./resources/image/story_image/storygym_3.png",
-                                              self.check_event))
+                                              self.start_3rd_check_event))
             self.clear_flags.append(clear_flag)
         if self.clear_data["3rd"] > 0:
             self.buttons.append(ButtonWithImg(self.display_size[0] * 0.5, self.display_size[1] * 0.72,
                                               self.campaign_map_button_size[0],
                                               self.campaign_map_button_size[1],
                                               "./resources/image/story_image/storygym_4.png",
-                                              self.check_event))
+                                              self.start_4th_check_event))
             self.clear_flags.append(clear_flag)
         if self.clear_data["4th"] > 0:
             self.clear_flags.append(clear_flag)

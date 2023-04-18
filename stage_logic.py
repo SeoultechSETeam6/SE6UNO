@@ -38,7 +38,7 @@ from game_utils import (
 
 class StageA(SingleGame):
     def __init__(self):
-        super().__init__([False, False, True, False, False])
+        super().__init__([False, False, True, False, False], 'You')
         self.regular_cards, self.special_cards = generate_a_stage_cards(self.color_weakness, self.size_change)
         self.player_hands, self.remain_cards = stage_a_distribute(self.player_count, self.regular_cards, self.special_cards, self.card_count)
 
@@ -63,8 +63,8 @@ class StageA(SingleGame):
                 self.Uno_button_music.play(1)
                 self.user_uno_clicked = True
         self.hovered_card_index = find_hovered_card(self.player_hands[0], self.user_coordinate[0],
-                                                    self.user_coordinate[1], self.user_spacing, mouse_x, mouse_y, self.max_per_row)
-        self.hovered_change_index = find_hovered_change(self.change_color_list, self.x5, self.y5, self.spacing5, mouse_x, mouse_y)
+                                                    self.user_coordinate[1], self.user_spacing, mouse_x, mouse_y, self.max_per_row, self.hovered_card_index)
+        self.hovered_change_index = find_hovered_change(self.change_color_list, self.x5, self.y5, self.spacing5, mouse_x, mouse_y, self.hovered_card_index)
 
         # 현재 플레이어가 유저인지 확인
         if self.user_turn:
@@ -382,7 +382,7 @@ class StageA(SingleGame):
 
 class StageB(SingleGame):
     def __init__(self):
-        super().__init__([True, False, True, False, True])
+        super().__init__([True, False, True, False, True], 'You')
         self.turn_count = 1
         self.cards = generate_cards(self.color_weakness, self.size_change)
         self.shuffled_cards = shuffle_cards(self.cards)
@@ -414,9 +414,9 @@ class StageB(SingleGame):
                 self.user_uno_clicked = True
         self.hovered_card_index = find_hovered_card(self.player_hands[0], self.user_coordinate[0],
                                                     self.user_coordinate[1], self.user_spacing, mouse_x, mouse_y,
-                                                    self.max_per_row)
+                                                    self.max_per_row, self.hovered_card_index)
         self.hovered_change_index = find_hovered_change(self.change_color_list, self.x5, self.y5, self.spacing5,
-                                                        mouse_x, mouse_y)
+                                                        mouse_x, mouse_y, self.hovered_card_index)
 
         # 현재 플레이어가 유저인지 확인
         if self.user_turn:
@@ -815,7 +815,7 @@ class StageB(SingleGame):
 
 class StageC(SingleGame):
     def __init__(self):
-        super().__init__([True, False, True, False, False])
+        super().__init__([True, False, True, False, False], 'You')
         self.turn_count = 1
         self.dummy_cards = generate_c_stage_cards(self.color_weakness, self.size_change)
         self.dummy_cards_c = generate_c_for_change_cards(self.color_weakness, self.size_change)
@@ -838,8 +838,8 @@ class StageC(SingleGame):
             if self.uno_button_rect.collidepoint(mouse_x, mouse_y) and len(self.player_hands[self.current_player]) == 1:
                 self.user_uno_clicked = True
         self.hovered_card_index = find_hovered_card(self.player_hands[0], self.user_coordinate[0],
-                                                    self.user_coordinate[1], self.user_spacing, mouse_x, mouse_y, self.max_per_row)
-        self.hovered_change_index = find_hovered_change(self.change_color_list, self.x5, self.y5, self.spacing5, mouse_x, mouse_y)
+                                                    self.user_coordinate[1], self.user_spacing, mouse_x, mouse_y, self.max_per_row, self.hovered_card_index)
+        self.hovered_change_index = find_hovered_change(self.change_color_list, self.x5, self.y5, self.spacing5, mouse_x, mouse_y, self.hovered_card_index)
 
         # 현재 플레이어가 유저인지 확인
         if self.user_turn:
@@ -1235,7 +1235,7 @@ class StageC(SingleGame):
 
 class StageD(SingleGame):
     def __init__(self):
-        super().__init__([False, True, True, True, True])
+        super().__init__([False, True, True, True, True], 'You')
         self.cards = generate_d_stage_cards(self.color_weakness, self.size_change)
 
     def win(self):
