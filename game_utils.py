@@ -40,7 +40,7 @@ def draw_change_card(screen, change_cards, x, y, spacing, hovered_card_index=Non
 
 
 # 마우스 오버를 한 유저 카드를 찾는 함수
-def find_hovered_card(cards, x, y, spacing, mouse_x, mouse_y, max_per_row):
+def find_hovered_card(cards, x, y, spacing, mouse_x, mouse_y, max_per_row, hovered_card_index):
     for i, card in enumerate(cards):
         card_width, card_height = card.card_img.get_size()
         row = i // max_per_row
@@ -49,18 +49,18 @@ def find_hovered_card(cards, x, y, spacing, mouse_x, mouse_y, max_per_row):
         card_y = y + row * (spacing + 10)  # 각 행의 시작 y 좌표를 고려하도록 수정
         if card_x <= mouse_x < card_x + card_width and card_y <= mouse_y < card_y + card_height:
             return i
-    return None
+    return hovered_card_index
 
 
 # 마우스 오버를 한 체인지 카드 찾기
-def find_hovered_change(change, x5, y5, spacing5, mouse_x, mouse_y):
+def find_hovered_change(change, x5, y5, spacing5, mouse_x, mouse_y, hovered_card_index):
     for i, card in enumerate(change):
         card_width, card_height = card.card_img.get_size()
         card_x = x5 + i * spacing5
         card_y = y5
         if card_x <= mouse_x < card_x + card_width and card_y <= mouse_y < card_y + card_height:
             return i
-    return None
+    return hovered_card_index
 
 
 def draw_text(screen, text, font, color, x, y):
