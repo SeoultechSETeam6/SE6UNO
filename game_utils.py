@@ -254,6 +254,8 @@ def random_top_card_color(top_card, dummy_cards, board_card, dummy_cards_c):  # 
 
 
 def card_reshuffle(board_card, remain_cards):
+    print("리셔플 발생")
+    print(remain_cards)
     top_card = board_card[-1]
     board_card = board_card[:-1]  # top_card를 제외한 나머지 카드를 가져옵니다.
 
@@ -261,7 +263,8 @@ def card_reshuffle(board_card, remain_cards):
     board_card = [top_card]  # board_card를 top_card만 남겨둡니다.
 
     # 카드 change, 더미 항목을 제거한다.
-    remain_cards = [card for card in remain_cards if card.value is not None and not card.is_dummy]
+    remain_cards = [card for card in remain_cards if card.value is not None or not card.is_dummy]
     random.shuffle(remain_cards)  # remain_cards를 무작위로 섞습니다.
     print("셔플완료")
+    print(remain_cards)
     return board_card, remain_cards
