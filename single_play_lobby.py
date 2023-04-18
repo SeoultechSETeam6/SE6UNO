@@ -119,6 +119,28 @@ class Lobby:
             self.computer5_coordinate = (self.display_size[0]-300, 520)
             self.start_coordinate = (self.display_size[0]/2 - self.start_img_size[0]/2, self.display_size[1]/2- self.start_img_size[1]/2)
 
+        # 이름 변경 버튼
+        self.change_name_button = Button(self.display_size[0] // 2, self.display_size[1] // 4, self.button_size[0],
+                                         self.button_size[1], 'User 이름 변경', self.change_name_event, self.font_size[1])
+        self.name = "You"
+        self.name_display = self.font.render("User name : " + self.name, True, (0, 0, 0))
+
+    def change_name_event(self):
+        self.name = ""
+        popup = self.font.render("바꿀 이름을 입력하고 " + pygame.key.name(save.key_setting['enter']) + "키를 입력하시오.", True, (0, 0, 0))
+        self.screen.fill((255, 255, 255))
+        self.screen.blit(popup, (self.screen.get_width() // 2 - popup.get_size()[0] // 2,
+                                 self.screen.get_height() // 2))
+        pygame.display.flip()
+        popup_running = True
+        while popup_running:
+            for popup_event in pygame.event.get():
+                if popup_event.type == pygame.KEYDOWN:
+                    if popup_event.key == self.key_setting['enter']:
+                        popup_running = False
+                        break
+                    self.name = self.name + pygame.key.name(popup_event.key)
+
     def check_computer_click(self):
         mouse_x, mouse_y = Mouse.getMousePos()
         mouse_state = Mouse.getMouseState()
@@ -149,11 +171,11 @@ class Lobby:
 
         if (self.start_coordinate[0] <= mouse_x <= self.start_coordinate[0] + self.start_img_size[0]
                 and self.start_coordinate[1] <= mouse_y <= self.start_coordinate[1] + self.start_img_size[1]):
-            if mouse_state == MouseState.CLICK:
+            if mouse_state == MouseState.CLICK and not self.all_computers_unattended():
                 print("Start game")
                 computer_attends = [self.computer1_attend, self.computer2_attend, self.computer3_attend,
                                     self.computer4_attend, self.computer5_attend]
-                single_game = SingleGame(computer_attends)
+                single_game = SingleGame(computer_attends, self.name)
                 single_game.run()
                 self.running = False
 
@@ -179,6 +201,12 @@ class Lobby:
         if not self.all_computers_unattended():
             self.screen.blit(self.start_img, self.start_coordinate)
 
+        self.change_name_button.process()
+        self.screen.blit(self.change_name_button.surface, self.change_name_button.rect)
+
+        self.name_display = self.font.render("User name : " + self.name, True, (0, 0, 0))
+        self.screen.blit(self.name_display, (100, 100))
+
         pygame.display.flip()
 
     def run(self):
@@ -191,5 +219,3 @@ class Lobby:
             self.draw()
             self.check_computer_click()
             self.check_start_click()  # start_img 클릭 확인
-
-            self.draw()
