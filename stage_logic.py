@@ -1240,10 +1240,10 @@ class StageD(SingleGame):
 
     def win(self):
         popup = None
-        if len(self.player_hands[0]) == 0 or any(len(player_hand) >= 5 for player_hand in self.player_hands[1:]):
+        if len(self.player_hands[0]) == 0 or any(len(player_hand) >= 15 for player_hand in self.player_hands[1:]):
             popup = basic.scale_by(pygame.image.load("./resources/Image/win.png"), self.size_change)
             self.game_over = True
-        elif any(len(player_hand) == 0 for player_hand in self.player_hands[1:]) or len(self.player_hands[0]) == 5:
+        elif any(len(player_hand) == 0 for player_hand in self.player_hands[1:]) or len(self.player_hands[0]) == 15:
             popup = basic.scale_by(pygame.image.load("./resources/Image/lose.png"), self.size_change)
             self.game_over = True
         if self.game_over:
