@@ -1321,11 +1321,11 @@ class SingleGame:
                             self.key_select_option = 0
                     elif event.key == self.key_setting['enter']:
                         if self.key_select_option == 0:
-                            pass
+                            self.clicked_remain_cards = True
                         elif self.key_select_option == 1:
-                            pass
+                            self.user_uno_clicked = True
                         elif self.key_select_option == 2:
-                            pass
+                            self.clicked_next_turn_button = True
                         else:
                             self.clicked_card_index, self.clicked_card \
                                 = self.hovered_card_index, self.player_hands[0][self.hovered_card_index]
