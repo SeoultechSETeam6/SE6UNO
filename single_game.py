@@ -6,6 +6,7 @@ import math
 from mouse import Mouse, MouseState
 from slider import Slider
 from button import Button
+from option.setting_option import Option
 from option import save_option as save
 from card_gen import generate_cards, generate_for_change_cards, generate_c_stage_cards, generate_c_for_change_cards
 from card_shuffle import shuffle_cards, distribute_cards
@@ -79,7 +80,7 @@ class SingleGame:
 
         # single_game 변수
         self.player_count = 1  # 플레이어 수
-        self.card_count = 7  # 처음 시작하는 카드 수
+        self.card_count = 2  # 처음 시작하는 카드 수
         self.winner_message = ""  # 승리 메세지
 
         self.computer_attends = computer_attends
@@ -303,6 +304,185 @@ class SingleGame:
         self.animation_method = {"reverse": self.reverse_animation, "skip": self.skip_animation, "draw_2": self.draw_2_animation, "bomb": self.bomb_animation,
                                  "shield": self.shield_animation, "change": self.change_animation, "one_more": self.one_more_animation}
 
+        # Pause Button Check
+        self.alreadyPressed = False
+
+    def setting(self):
+        try:
+            with open("./option/save_option.pickle", "rb") as f:
+                self.display_size = pickle.load(f)
+                self.color_weakness = pickle.load(f)
+                self.key_setting = pickle.load(f)
+                self.sound_volume = pickle.load(f)
+                self.background_volume = pickle.load(f)
+                self.effect_volume = pickle.load(f)
+        except EOFError:
+            self.display_size = basic.display_size
+            self.color_weakness = basic.color_weakness
+            self.key_setting = basic.key_setting
+            self.sound_volume = basic.sound_volume
+            self.background_volume = basic.background_volume
+            self.effect_volume = basic.effect_volume
+
+        # 회면 크기 별 폰트와 버튼 크기 설정
+        if self.display_size[0] == 1920:
+            self.size_change = basic.change_size[0]
+            self.font_size = basic.font_size[0]
+            self.button_size = basic.button_size[0]
+        elif self.display_size[0] == 1600:
+            self.size_change = basic.change_size[1]
+            self.font_size = basic.font_size[1]
+            self.button_size = basic.button_size[1]
+        else:
+            self.size_change = basic.change_size[2]
+            self.font_size = basic.font_size[2]
+            self.button_size = basic.button_size[2]
+
+        # pygame 초기화
+        pygame.init()
+        self.font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[0])
+        self.small_font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[1])
+
+        self.screen = pygame.display.set_mode(self.display_size)
+        pygame.display.set_caption(basic.game_title)
+        self.clock = pygame.time.Clock()
+        self.running = True
+
+        self.computer_color = ["red", "blue", "green", "yellow"]
+
+        # 컴퓨터 초기 좌표와 카드 색 선호도.
+        self.user_coordinate = []
+        self.computer_coordinate = []
+        if self.display_size[0] == 1920:
+            self.max_per_row = 15
+            self.max_per_row_com = 20
+            self.user_coordinate.append(30)
+            self.user_coordinate.append(self.display_size[1] * 0.7)
+            self.user_spacing = self.display_size[1] * 0.08
+            self.turn_coordinate = [70, 150, 150, 80]
+            self.next_turn_co = [0, 150]
+            if self.computer_attends[0]:
+                self.computer_coordinate.append([self.display_size[0] * 0.65, self.display_size[1] * 0.03])
+                self.computer1_color = self.computer_color[random.randint(0, 3)]
+                print("computer1_color", self.computer1_color)
+            if self.computer_attends[1]:
+                self.computer_coordinate.append([self.display_size[0] * 0.65, (self.display_size[1] * 0.03) + self.display_size[1] * 0.2])
+                self.computer2_color = self.computer_color[random.randint(0, 3)]
+                print("computer2_color", self.computer2_color)
+            if self.computer_attends[2]:
+                self.computer_coordinate.append([self.display_size[0] * 0.65, (self.display_size[1] * 0.03) + (self.display_size[1] * 0.4)])
+                self.computer3_color = self.computer_color[random.randint(0, 3)]
+                print("computer3_color", self.computer3_color)
+            if self.computer_attends[3]:
+                self.computer_coordinate.append([self.display_size[0] * 0.65, (self.display_size[1] * 0.03) + (self.display_size[1] * 0.6)])
+                self.computer4_color = self.computer_color[random.randint(0, 3)]
+                print("computer4_color", self.computer4_color)
+            if self.computer_attends[4]:
+                self.computer_coordinate.append([self.display_size[0] * 0.65, (self.display_size[1] * 0.03) + (self.display_size[1] * 0.8)])
+                self.computer5_color = self.computer_color[random.randint(0, 3)]
+                print("computer5_color", self.computer5_color)
+        elif self.display_size[0] == 1600:
+            self.max_per_row = 13
+            self.max_per_row_com = 17
+            self.user_coordinate.append(30)
+            self.user_coordinate.append(self.display_size[1] * 0.7)
+            self.user_spacing = self.display_size[1] * 0.08
+            self.turn_coordinate = [70, 120, 120, 80]
+            self.next_turn_co = [0, 100]
+            if self.computer_attends[0]:
+                self.computer_coordinate.append([self.display_size[0] * 0.72, self.display_size[1] * 0.08])
+                self.computer1_color = self.computer_color[random.randint(0, 3)]
+                print("computer1_color", self.computer1_color)
+            if self.computer_attends[1]:
+                self.computer_coordinate.append([self.display_size[0] * 0.72, (self.display_size[1] * 0.08) + self.display_size[1] * 0.2])
+                self.computer2_color = self.computer_color[random.randint(0, 3)]
+                print("computer2_color", self.computer2_color)
+            if self.computer_attends[2]:
+                self.computer_coordinate.append([self.display_size[0] * 0.72, (self.display_size[1] * 0.08) + (self.display_size[1] * 0.4)])
+                self.computer3_color = self.computer_color[random.randint(0, 3)]
+                print("computer3_color", self.computer3_color)
+            if self.computer_attends[3]:
+                self.computer_coordinate.append([self.display_size[0] * 0.72, (self.display_size[1] * 0.08) + (self.display_size[1] * 0.6)])
+                self.computer4_color = self.computer_color[random.randint(0, 3)]
+                print("computer4_color", self.computer4_color)
+            if self.computer_attends[4]:
+                self.computer_coordinate.append([self.display_size[0] * 0.72, (self.display_size[1] * 0.08) + (self.display_size[1] * 0.8)])
+                self.computer5_color = self.computer_color[random.randint(0, 3)]
+                print("computer5_color", self.computer5_color)
+        elif self.display_size[0] == 1280:
+            self.max_per_row = 11
+            self.max_per_row_com = 15
+            self.user_coordinate.append(30)
+            self.user_coordinate.append(self.display_size[1] * 0.7)
+            self.user_spacing = self.display_size[1] * 0.08
+            self.turn_coordinate = [50, 100, 100, 40]
+            self.next_turn_co = [0, 80]
+            if self.computer_attends[0]:
+                self.computer_coordinate.append([self.display_size[0] * 0.67, self.display_size[1] * 0.01])
+                self.computer1_color = self.computer_color[random.randint(0, 3)]
+                print("computer1_color", self.computer1_color)
+            if self.computer_attends[1]:
+                self.computer_coordinate.append([self.display_size[0] * 0.67, (self.display_size[1] * 0.01) + self.display_size[1] * 0.2])
+                self.computer2_color = self.computer_color[random.randint(0, 3)]
+                print("computer2_color", self.computer2_color)
+            if self.computer_attends[2]:
+                self.computer_coordinate.append([self.display_size[0] * 0.67, (self.display_size[1] * 0.01) + (self.display_size[1] * 0.4)])
+                self.computer3_color = self.computer_color[random.randint(0, 3)]
+                print("computer3_color", self.computer3_color)
+            if self.computer_attends[3]:
+                self.computer_coordinate.append([self.display_size[0] * 0.67, (self.display_size[1] * 0.01) + (self.display_size[1] * 0.6)])
+                self.computer4_color = self.computer_color[random.randint(0, 3)]
+                print("computer4_color", self.computer4_color)
+            if self.computer_attends[4]:
+                self.computer_coordinate.append([self.display_size[0] * 0.67, (self.display_size[1] * 0.01) + (self.display_size[1] * 0.8)])
+                self.computer5_color = self.computer_color[random.randint(0, 3)]
+                print("computer5_color", self.computer5_color)
+
+        # 게임 이미지를 로드
+        self.pause_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/pause.png").convert_alpha(), self.size_change)
+        self.resume_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/resume.png").convert_alpha(), self.size_change)
+        self.direction_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/direction_images/direction.png").convert_alpha(), self.size_change)
+        self.direction_reverse_img = pygame.transform.scale_by(pygame.image.load(
+            "./resources/Image/direction_images/direction_reverse.png").convert_alpha(), self.size_change)
+        self.turn_arrow_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/direction_images/turn_arrow.png").convert_alpha(), self.size_change)
+        self.next_turn_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/next_turn.png").convert_alpha(), self.size_change)
+        self.uno_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/uno_button.png").convert_alpha(), self.size_change)
+        self.uno_button_inactive_img = pygame.transform.scale_by(pygame.image.load(
+            "./resources/Image/button_images/uno_button_inactive.png").convert_alpha(), self.size_change)
+        self.card_back_image = pygame.transform.scale_by(pygame.image.load("resources/Image/card_images/card_back.png"), self.size_change)
+
+        # 화면 중앙 좌표 계산
+        self.image_width, self.image_height = self.direction_img.get_size()
+        self.center_x = (self.display_size[0] - self.image_width) // 2
+        self.center_y = (self.display_size[1] - self.image_height) // 2
+
+        # change카드 좌표, spacing은 공백
+        self.x5 = 100
+        self.y5 = 100
+        self.spacing5 = 200
+        # 플레이어들이 카드를 뽑고 남은 카드들의 위치를 잡는데 사용
+        self.remain_cards_x_position = (self.screen.get_rect().centerx - 100)
+        self.remain_cards_y_position = (self.screen.get_rect().centery - 50)
+        self.remain_pos = pygame.Vector2(self.screen.get_rect().centerx, self.screen.get_rect().centery - 100)
+        # remain카드
+        self.remain_cards_rect = self.remain_cards[0].card_img_back.get_rect()
+        self.remain_cards_rect.topleft = (self.remain_cards_x_position, self.remain_cards_y_position)
+        # pause버튼
+        self.pause_button_rect = self.pause_button_img.get_rect()
+        self.pause_button_rect.topleft = (25, 25)
+        # next_turn버튼
+        self.next_turn_button_rect = self.next_turn_button_img.get_rect()
+        self.next_turn_button_rect.topleft = (self.user_coordinate[0] - self.next_turn_co[0], self.user_coordinate[1] - self.next_turn_co[1])
+        # uno_button
+        self.uno_button_rect = self.uno_button_img.get_rect()
+        self.uno_button_rect.topleft = (150, self.display_size[1] * 0.5)
+        self.uno_button_inactive_rect = self.uno_button_inactive_img.get_rect()
+        self.uno_button_inactive_rect.topleft = (150, self.display_size[1] * 0.5)
+        self.play_drawn_card_button = pygame.Rect(0, 0, 430, 110)
+
+        # Pause Button Check
+        self.alreadyPressed = False
+
     def reset(self):
         self.pop_card = None  # 뽑은 카드 초기값
         self.pop_card_index = None  # 뽑은 카드 인덱스 숫자 초기값
@@ -367,6 +547,8 @@ class SingleGame:
 
         if Mouse.getMouseState() == MouseState.CLICK:
             if self.uno_button_rect.collidepoint(mouse_x, mouse_y) and len(self.player_hands[self.current_player]) == 1:
+                self.Uno_button_music.set_volume(self.sound_volume * self.effect_volume)
+                self.Uno_button_music.play(1)
                 self.user_uno_clicked = True
         self.hovered_card_index = find_hovered_card(self.player_hands[0], self.user_coordinate[0],
                                                     self.user_coordinate[1], self.user_spacing, mouse_x, mouse_y, self.max_per_row)
@@ -686,14 +868,93 @@ class SingleGame:
                         self.turn_count = self.turn_count + 1
 
     def win(self):
+        popup = None
+        if len(self.player_hands[0]) == 0:
+            popup = pygame.transform.scale_by(pygame.image.load("./resources/Image/win.png"), self.size_change)
+            self.game_over = True
+        elif any(len(player_hand) == 0 for player_hand in self.player_hands[1:]):
+            popup = pygame.transform.scale_by(pygame.image.load("./resources/Image/lose.png"), self.size_change)
+            self.game_over = True
         if self.game_over:
-            # 마우스 클릭 또는 버튼 클릭시 넘어가야 함
-            self.running = False
+            self.background_music.stop()
+            self.card_shuffle_music.stop()
+            self.screen.fill((0, 0, 0))
+            self.screen.blit(popup, (self.screen.get_width() // 2 - popup.get_size()[0] // 2,
+                                     self.screen.get_height() // 2 - popup.get_size()[1] // 2))
+            pygame.display.flip()
+            popup_running = True
+            while popup_running:
+                for popup_event in pygame.event.get():
+                    if popup_event.type == pygame.KEYDOWN:
+                        self.running = False
+                        popup_running = False
+                    if popup_event.type == pygame.MOUSEBUTTONDOWN:
+                        self.running = False
+                        popup_running = False
 
-    def pause(self):
-        print("Asdasds")
-        self.draw()
+    ### 일시정지 버튼 관련 매서드 ###
+    def pause_popup(self):
+        self.pause_popup_draw()
+        self.settings_button.process()
+        self.close_button.process()
+        self.exit_button.process()
+        self.screen.blit(self.pause_popup_surface, self.pause_popup_rect)
+        self.screen.blit(self.settings_button.surface, self.settings_button.rect)
+        self.screen.blit(self.close_button.surface, self.close_button.rect)
+        self.screen.blit(self.exit_button.surface, self.exit_button.rect)
+
+    def pause_popup_draw(self):
+        width = self.display_size[0] * 0.4
+        height = self.display_size[1] * 0.4
+        x = self.display_size[0] // 2 - width // 2
+        y = self.display_size[1] // 2 - height // 2
+        self.pause_popup_rect = pygame.Rect(x, y, width, height)
+        self.pause_popup_surface = pygame.Surface((width, height))
+        self.pause_popup_surface.fill((0, 0, 0))
+
+        self.settings_button = Button(self.display_size[0] // 2, self.display_size[1] // 2 * 0.85, width // 2.5, height // 5, '설정', self.pause_popup_settings_button_event, self.font_size[0])
+        self.exit_button = Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.15, width // 2.5, height // 5, '게임 나가기', self.pause_popup_exit_button_event, self.font_size[0])
+        self.close_button = Button(self.display_size[0] // 2 * 1.3, self.display_size[1] // 2 * 0.7, width // 7, height // 7, 'X', self.pause_popup_close, self.font_size[0])
+
+    def pause_popup_close(self):
+        self.background_music.set_volume(self.sound_volume * self.background_volume)
+        self.background_music.play(-1)
+        print('일시정지 해제')
+        self.turn_start_time += pygame.time.get_ticks() - self.pause_start_time
         self.paused = False
+
+    def pause_popup_exit_button_event(self):
+        self.background_music.stop()
+        self.card_shuffle_music.stop()
+        print('게임 종료 버튼 클릭')
+        self.running = False
+
+    def pause_popup_settings_button_event(self):
+        self.background_music.stop()
+        self.card_shuffle_music.stop()
+        print('설정 버튼 클릭됨')
+        option = Option()
+        option.run()
+        self.setting()
+
+    def pause_button_process(self):
+        mouse_pos = pygame.mouse.get_pos()
+
+        if self.pause_button_rect.collidepoint(mouse_pos):
+            # 버튼 누를 때
+            if self.pause_button_rect.collidepoint(mouse_pos) and Mouse.getMouseState() == MouseState.CLICK:
+                Mouse.updateMouseState()
+                # 클릭 판정을 위해 클릭 된 상태라면 더 이상 이벤트를 발생시키지 않음
+                if not self.alreadyPressed and Mouse.getMouseState() == MouseState.DRAG:
+                    self.background_music.stop()
+                    self.card_shuffle_music.stop()
+                    self.pause_start_time = pygame.time.get_ticks()
+                    self.paused = True
+                    self.alreadyPressed = True
+            else:
+                self.alreadyPressed = False
+
+    ### 일시정지 버튼 관련 메서드 끝 ###
 
     def place_animation(self, index):
         self.card_place_music.set_volume(self.sound_volume * self.effect_volume)
@@ -763,37 +1024,31 @@ class SingleGame:
         self.screen.blit(pygame.transform.scale_by(pygame.image.load("./resources/Image/animation/bomb.png"), self.size_change), (self.center_x, self.center_y))
         pygame.display.flip()
         time.sleep(0.7)
-        remain_pos = [pygame.Vector2(self.remain_cards_x_position, self.screen.get_rect().centery - 100) for _ in range(6)]
+        remain_pos = [pygame.Vector2(self.remain_cards_x_position, self.screen.get_rect().centery - 100)]
         self.card_place_music.set_volume(self.sound_volume * self.effect_volume)
         self.card_place_music.play(1)
         pos = [pygame.Vector2(self.user_coordinate[0] - self.turn_coordinate[0],
-                              self.user_coordinate[1] - self.turn_coordinate[1]),
-               pygame.Vector2(self.computer_coordinate[0][0] - self.turn_coordinate[2],
-                              self.computer_coordinate[0][1] - self.turn_coordinate[3]),
-               pygame.Vector2(self.computer_coordinate[1][0] - self.turn_coordinate[2],
-                              self.computer_coordinate[1][1] - self.turn_coordinate[3]),
-               pygame.Vector2(self.computer_coordinate[2][0] - self.turn_coordinate[2],
-                              self.computer_coordinate[2][1] - self.turn_coordinate[3]),
-               pygame.Vector2(self.computer_coordinate[3][0] - self.turn_coordinate[2],
-                              self.computer_coordinate[3][1] - self.turn_coordinate[3]),
-               pygame.Vector2(self.computer_coordinate[4][0] - self.turn_coordinate[2],
-                              self.computer_coordinate[4][1] - self.turn_coordinate[3])]
+                              self.user_coordinate[1] - self.turn_coordinate[1])]
+        j = 0
+        for i in range(0, 5):
+            if self.computer_attends[i]:
+                pos.append(pygame.Vector2(self.computer_coordinate[j][0] - self.turn_coordinate[2],
+                                          self.computer_coordinate[j][1] - self.turn_coordinate[3]))
+                remain_pos.append(pygame.Vector2(self.remain_cards_x_position, self.screen.get_rect().centery - 100))
+                j = j + 1
         while True:
             self.clock.tick(basic.fps)
             if remain_pos[0].distance_to(pos[0]) < 1:
                 break
-            remain_pos[0] = remain_pos[0].lerp(pos[0], 0.1)
-            remain_pos[1] = remain_pos[1].lerp(pos[1], 0.1)
-            remain_pos[2] = remain_pos[2].lerp(pos[2], 0.1)
-            remain_pos[3] = remain_pos[3].lerp(pos[3], 0.1)
-            remain_pos[4] = remain_pos[4].lerp(pos[4], 0.1)
-            remain_pos[5] = remain_pos[5].lerp(pos[5], 0.1)
+            for i in range(len(remain_pos)):
+                remain_pos[i] = remain_pos[i].lerp(pos[i], 0.1)
             self.draw()
             if self.game_direction > 0:
-                for i in range(0, self.player_count - 1):
+                for i in range(self.player_count - 1):
                     self.screen.blit(self.card_back_image, remain_pos[(index + i) % self.player_count])
+                print()
             else:
-                for i in range(0, self.player_count - 1):
+                for i in range(self.player_count - 1):
                     self.screen.blit(self.card_back_image, remain_pos[(index - i) % self.player_count])
             pygame.display.flip()
 
@@ -888,7 +1143,10 @@ class SingleGame:
         # 유저 카드 그리기
         draw_cards_user(self.screen, self.player_hands[0], self.user_coordinate[0], self.user_coordinate[1], self.max_per_row,
                         self.user_spacing, self.hovered_card_index)
-        # ai의 카드를 그린다.
+        # 현재 색 그리기
+        card_folder = "./resources/Image/select_color_cw" if self.color_weakness else "./resources/Image/select_color"
+        card_color = pygame.transform.scale_by(pygame.image.load(f"{card_folder}/{self.top_card.color}.png"), self.size_change)
+        self.screen.blit(card_color, (self.remain_cards_x_position, self.screen.get_rect().centery - 250))
         # ai의 카드를 그린다.
         for i in range(len(self.player_hands) - 1):
             draw_cards_ai(self.screen, self.player_hands[i + 1], self.computer_coordinate[i][0],
@@ -950,19 +1208,32 @@ class SingleGame:
             self.winner_message = "Computer wins!"
             self.game_over = True
 
+        if self.paused:
+            self.pause_popup()
+
         # 매 프레임마다 화면 업데이트
         pygame.display.flip()
 
     def event(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                self.background_music.stop()
+                self.card_shuffle_music.stop()
                 self.running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.paused = True
-                    self.pause()
+                    if not self.paused:
+                        self.pause_start_time = pygame.time.get_ticks()
+                        self.paused = True
+                        print('일시정지 시작')
+                        self.background_music.stop()
+                        self.card_shuffle_music.stop()
+                    else:
+                        self.pause_popup_close()
+
 
     def run(self):
+        self.setting()
         self.background_music.set_volume(self.sound_volume * self.background_volume)
         self.background_music.play(-1)
         self.card_shuffle_music.set_volume(self.sound_volume * self.background_volume)
@@ -976,10 +1247,9 @@ class SingleGame:
                 self.card_shuffle_music.set_volume(self.sound_volume * self.background_volume)
                 self.card_shuffle_music.play(1)
                 self.board_card, self.remain_cards = card_reshuffle(self.board_card, self.remain_cards)
-            self.game()
+            if not self.paused:
+                self.game()
             self.draw()
             self.event()
-
-
-
+            self.pause_button_process()
 
