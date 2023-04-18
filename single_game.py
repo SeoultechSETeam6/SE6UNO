@@ -188,18 +188,18 @@ class SingleGame:
                 print("computer5_color", self.computer5_color)
 
         # 게임 이미지를 로드
-        self.pause_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/pause.png").convert_alpha(), self.size_change)
-        self.resume_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/resume.png").convert_alpha(), self.size_change)
-        self.direction_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/direction_images/direction.png").convert_alpha(), self.size_change)
-        self.direction_reverse_img = pygame.transform.scale_by(pygame.image.load(
+        self.pause_button_img = basic.scale_by(pygame.image.load("./resources/Image/button_images/pause.png").convert_alpha(), self.size_change)
+        self.resume_button_img = basic.scale_by(pygame.image.load("./resources/Image/button_images/resume.png").convert_alpha(), self.size_change)
+        self.direction_img = basic.scale_by(pygame.image.load("./resources/Image/direction_images/direction.png").convert_alpha(), self.size_change)
+        self.direction_reverse_img = basic.scale_by(pygame.image.load(
             "./resources/Image/direction_images/direction_reverse.png").convert_alpha(), self.size_change)
-        self.turn_arrow_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/direction_images/turn_arrow.png").convert_alpha(), self.size_change)
-        self.next_turn_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/next_turn.png").convert_alpha(), self.size_change)
-        self.uno_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/uno_button.png").convert_alpha(), self.size_change)
-        self.uno_button_inactive_img = pygame.transform.scale_by(pygame.image.load(
+        self.turn_arrow_img = basic.scale_by(pygame.image.load("./resources/Image/direction_images/turn_arrow.png").convert_alpha(), self.size_change)
+        self.next_turn_button_img = basic.scale_by(pygame.image.load("./resources/Image/button_images/next_turn.png").convert_alpha(), self.size_change)
+        self.uno_button_img = basic.scale_by(pygame.image.load("./resources/Image/button_images/uno_button.png").convert_alpha(), self.size_change)
+        self.uno_button_inactive_img = basic.scale_by(pygame.image.load(
             "./resources/Image/button_images/uno_button_inactive.png").convert_alpha(), self.size_change)
-        self.card_back_image = pygame.transform.scale_by(pygame.image.load("resources/Image/card_images/card_back.png"), self.size_change)
-        self.selected_image = pygame.transform.scale_by(pygame.image.load("./resources/Image/selected_check.png"), self.size_change * 0.2)
+        self.card_back_image = basic.scale_by(pygame.image.load("resources/Image/card_images/card_back.png"), self.size_change)
+        self.selected_image = basic.scale_by(pygame.image.load("./resources/Image/selected_check.png"), self.size_change * 0.2)
 
         # 게임 음악 로드
         self.background_music = pygame.mixer.Sound("./resources/Music/single_mode_play.ogg")
@@ -451,18 +451,18 @@ class SingleGame:
                 print("computer5_color", self.computer5_color)
 
         # 게임 이미지를 로드
-        self.pause_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/pause.png").convert_alpha(), self.size_change)
-        self.resume_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/resume.png").convert_alpha(), self.size_change)
-        self.direction_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/direction_images/direction.png").convert_alpha(), self.size_change)
-        self.direction_reverse_img = pygame.transform.scale_by(pygame.image.load(
+        self.pause_button_img = basic.scale_by(pygame.image.load("./resources/Image/button_images/pause.png").convert_alpha(), self.size_change)
+        self.resume_button_img = basic.scale_by(pygame.image.load("./resources/Image/button_images/resume.png").convert_alpha(), self.size_change)
+        self.direction_img = basic.scale_by(pygame.image.load("./resources/Image/direction_images/direction.png").convert_alpha(), self.size_change)
+        self.direction_reverse_img = basic.scale_by(pygame.image.load(
             "./resources/Image/direction_images/direction_reverse.png").convert_alpha(), self.size_change)
-        self.turn_arrow_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/direction_images/turn_arrow.png").convert_alpha(), self.size_change)
-        self.next_turn_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/next_turn.png").convert_alpha(), self.size_change)
-        self.uno_button_img = pygame.transform.scale_by(pygame.image.load("./resources/Image/button_images/uno_button.png").convert_alpha(), self.size_change)
-        self.uno_button_inactive_img = pygame.transform.scale_by(pygame.image.load(
+        self.turn_arrow_img = basic.scale_by(pygame.image.load("./resources/Image/direction_images/turn_arrow.png").convert_alpha(), self.size_change)
+        self.next_turn_button_img = basic.scale_by(pygame.image.load("./resources/Image/button_images/next_turn.png").convert_alpha(), self.size_change)
+        self.uno_button_img = basic.scale_by(pygame.image.load("./resources/Image/button_images/uno_button.png").convert_alpha(), self.size_change)
+        self.uno_button_inactive_img = basic.scale_by(pygame.image.load(
             "./resources/Image/button_images/uno_button_inactive.png").convert_alpha(), self.size_change)
-        self.card_back_image = pygame.transform.scale_by(pygame.image.load("./resources/Image/card_images/card_back.png"), self.size_change)
-        self.selected_image = pygame.transform.scale_by(pygame.image.load("./resources/Image/selected_check.png"), self.size_change * 0.2)
+        self.card_back_image = basic.scale_by(pygame.image.load("./resources/Image/card_images/card_back.png"), self.size_change)
+        self.selected_image = basic.scale_by(pygame.image.load("./resources/Image/selected_check.png"), self.size_change * 0.2)
 
         # 화면 중앙 좌표 계산
         # 화면 중앙 좌표 계산
@@ -893,10 +893,10 @@ class SingleGame:
     def win(self):
         popup = None
         if len(self.player_hands[0]) == 0:
-            popup = pygame.transform.scale_by(pygame.image.load("./resources/Image/win.png"), self.size_change)
+            popup = basic.scale_by(pygame.image.load("./resources/Image/win.png"), self.size_change)
             self.game_over = True
         elif any(len(player_hand) == 0 for player_hand in self.player_hands[1:]):
-            popup = pygame.transform.scale_by(pygame.image.load("./resources/Image/lose.png"), self.size_change)
+            popup = basic.scale_by(pygame.image.load("./resources/Image/lose.png"), self.size_change)
             self.game_over = True
         if self.game_over:
             self.background_music.stop()
@@ -1036,7 +1036,7 @@ class SingleGame:
 
     def draw_2_animation(self, index):
         self.draw()
-        self.screen.blit(pygame.transform.scale_by(pygame.image.load("./resources/Image/animation/+2.png"), self.size_change), (self.center_x, self.center_y))
+        self.screen.blit(basic.scale_by(pygame.image.load("./resources/Image/animation/+2.png"), self.size_change), (self.center_x, self.center_y))
         pygame.display.flip()
         time.sleep(0.7)
         self.draw_animation((index - self.game_direction) % self.player_count)
@@ -1044,7 +1044,7 @@ class SingleGame:
 
     def bomb_animation(self, index):
         self.draw()
-        self.screen.blit(pygame.transform.scale_by(pygame.image.load("./resources/Image/animation/bomb.png"), self.size_change), (self.center_x, self.center_y))
+        self.screen.blit(basic.scale_by(pygame.image.load("./resources/Image/animation/bomb.png"), self.size_change), (self.center_x, self.center_y))
         pygame.display.flip()
         time.sleep(0.7)
         remain_pos = [pygame.Vector2(self.remain_cards_x_position, self.screen.get_rect().centery - 100)]
@@ -1077,7 +1077,7 @@ class SingleGame:
 
     def reverse_animation(self, index):
         self.draw()
-        self.screen.blit(pygame.transform.scale_by(pygame.image.load("./resources/Image/animation/reverse.png"), self.size_change), (self.center_x, self.center_y))
+        self.screen.blit(basic.scale_by(pygame.image.load("./resources/Image/animation/reverse.png"), self.size_change), (self.center_x, self.center_y))
         pygame.display.flip()
         time.sleep(0.7)
 
@@ -1105,20 +1105,20 @@ class SingleGame:
             pos = pygame.Vector2(self.computer_coordinate[4][0] - self.turn_coordinate[2],
                                  self.computer_coordinate[4][1] - self.turn_coordinate[3])
         self.draw()
-        self.screen.blit(pygame.transform.scale_by(pygame.image.load("./resources/Image/animation/skip.png"), self.size_change), pos)
+        self.screen.blit(basic.scale_by(pygame.image.load("./resources/Image/animation/skip.png"), self.size_change), pos)
         pygame.display.flip()
         time.sleep(0.7)
 
     def one_more_animation(self, index):
         self.draw()
-        self.screen.blit(pygame.transform.scale_by(pygame.image.load("./resources/Image/animation/-1.png"), self.size_change), (self.center_x, self.center_y))
+        self.screen.blit(basic.scale_by(pygame.image.load("./resources/Image/animation/-1.png"), self.size_change), (self.center_x, self.center_y))
         pygame.display.flip()
         time.sleep(0.7)
 
     def change_animation(self, index):
         self.draw()
         self.screen.blit(
-            pygame.transform.scale_by(pygame.image.load("./resources/Image/animation/change.png"), self.size_change),
+            basic.scale_by(pygame.image.load("./resources/Image/animation/change.png"), self.size_change),
             (self.center_x, self.center_y))
         pygame.display.flip()
         time.sleep(0.7)
@@ -1126,7 +1126,7 @@ class SingleGame:
     def shield_animation(self, index):
         self.draw()
         self.screen.blit(
-            pygame.transform.scale_by(pygame.image.load("./resources/Image/animation/shield.png"), self.size_change),
+            basic.scale_by(pygame.image.load("./resources/Image/animation/shield.png"), self.size_change),
             (self.center_x, self.center_y))
         pygame.display.flip()
         time.sleep(0.7)
@@ -1169,7 +1169,7 @@ class SingleGame:
                         self.user_spacing, self.hovered_card_index)
         # 현재 색 그리기
         card_folder = "./resources/Image/select_color_cw" if self.color_weakness else "./resources/Image/select_color"
-        card_color = pygame.transform.scale_by(pygame.image.load(f"{card_folder}/{self.top_card.color}.png"), self.size_change)
+        card_color = basic.scale_by(pygame.image.load(f"{card_folder}/{self.top_card.color}.png"), self.size_change)
         self.screen.blit(card_color, (self.remain_cards_x_position, self.screen.get_rect().centery - 250))
         # ai의 카드를 그린다.
         for i in range(len(self.player_hands) - 1):

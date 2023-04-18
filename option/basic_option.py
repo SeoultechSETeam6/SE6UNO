@@ -19,3 +19,11 @@ fps = 60
 sound_volume = 1.0
 background_volume = 1.0
 effect_volume = 1.0
+
+
+def scale_by(surface, scale_factor):
+    width, height = surface.get_size()
+    new_width = int(width * scale_factor)
+    new_height = int(height * scale_factor)
+    return pygame.transform.scale(surface, (new_width, new_height))
+
