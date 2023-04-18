@@ -79,6 +79,44 @@ def generate_for_change_cards(color_weakness, size_by):
     return for_change_cards
 
 
+def generate_a_stage_cards(color_weakness, size_by):
+    special_cards = []
+    regular_cards = []
+    card_back_image = pygame.transform.scale_by(pygame.image.load("./resources/Image/card_images/card_back.png"),
+                                                size_by)
+
+    card_folder = "./resources/Image/cw_card_images" if color_weakness else "./resources/Image/card_images"
+    # 색약 모드와 경로 차별화
+
+    for i in range(2):
+        for color in colors:
+            for value in values:
+                card_image = pygame.transform.scale_by(pygame.image.load(f"{card_folder}/{color}_{value}.png"), size_by)
+                card = Card(color, value, card_image, card_back_image)
+                if card.is_special():
+                    special_cards.append(card)
+                else:
+                    regular_cards.append(card)
+                if value == "bomb":
+                    break
+
+    # 색 없는 색변경 카드를 추가
+    for i in range(2):
+        card_image = pygame.transform.scale_by(
+            pygame.image.load(f"./resources/Image/card_images/none_change.png"), size_by)
+        card = Card('none', 'change', card_image, card_back_image)
+        special_cards.append(card)
+
+    # 색 없는 색변경 카드를 추가
+    for i in range(2):
+        card_image = pygame.image.load(f"resources/Image/card_images/none_change.png")
+        card = Card('none', 'change', card_image, card_back_image)
+        special_cards.append(card)
+
+    return regular_cards, special_cards
+
+
+
 def generate_c_stage_cards(color_weakness, size_by):
     cards = []
     card_back_image = pygame.transform.scale_by(pygame.image.load("resources/Image/card_images/card_back.png"), size_by)

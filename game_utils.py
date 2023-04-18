@@ -253,6 +253,30 @@ def random_top_card_color(top_card, dummy_cards, board_card, dummy_cards_c):  # 
     return board_card
 
 
+def find_combos(hand):
+    combos = []
+
+    # card.value 가 skip인 카드가 두 장 이상
+    skip_cards = [card for card in hand if card.value == 'skip']
+    draw_2_cards = [card for card in hand if card.value == 'draw_2']
+    for color in set(card.color for card in hand):
+        same_color_skip = next((card for card in skip_cards if card.color == color), None)
+        same_color_draw_2 = next((card for card in draw_2_cards if card.color == color), None)
+
+    if len(skip_cards) >= 2:
+        combos = (skip_cards[:2])
+
+    # card.value 가 draw_2인 카드 두 장 이상
+    elif len(draw_2_cards) >= 2:
+        combos = (draw_2_cards[:2])
+
+    # 서로 같은 card.color를 가지는 skip과 draw_2를 가지고 있을때
+    elif same_color_skip and same_color_draw_2:
+        combos = ([same_color_skip, same_color_draw_2])
+
+    return combos
+
+
 def card_reshuffle(board_card, remain_cards):
     print("리셔플 발생")
     print(remain_cards)

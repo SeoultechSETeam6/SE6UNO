@@ -80,7 +80,7 @@ class SingleGame:
 
         # single_game 변수
         self.player_count = 1  # 플레이어 수
-        self.card_count = 2  # 처음 시작하는 카드 수
+        self.card_count = 7  # 처음 시작하는 카드 수
         self.winner_message = ""  # 승리 메세지
 
         self.computer_attends = computer_attends
@@ -529,9 +529,6 @@ class SingleGame:
         self.com_uno_remaining_time_text = None  # 컴퓨터턴 남은 우노 시간 텍스트
 
     def game(self):
-        print(len(self.remain_cards))
-        print(len(self.player_hands[0]), len(self.player_hands[1]), len(self.player_hands[2]), len(self.player_hands[3]))
-        print(len(self.player_hands))
         # 마우스의 위치를 가져옴
         mouse_x, mouse_y = pygame.mouse.get_pos()
         # 현재 플레이어 결정
@@ -1135,7 +1132,7 @@ class SingleGame:
             self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[3][0]-self.turn_coordinate[2], self.computer_coordinate[3][1]-self.turn_coordinate[3]))
         elif self.current_player == 5:
             self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[4][0]-self.turn_coordinate[2], self.computer_coordinate[4][1]-self.turn_coordinate[3]))
-        print(self.remain_cards)
+
         # 남은 카드 더미 그리기
         self.screen.blit(self.remain_cards[0].card_img_back, (self.remain_cards_x_position, self.screen.get_rect().centery - 100))
         # 엎은 카드 그리기
