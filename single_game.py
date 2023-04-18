@@ -8,7 +8,7 @@ from slider import Slider
 from button import Button
 from option.setting_option import Option
 from option import save_option as save
-from card_gen import generate_cards, generate_for_change_cards
+from card_gen import generate_cards, generate_for_change_cards, generate_c_stage_cards, generate_c_for_change_cards
 from card_shuffle import shuffle_cards, distribute_cards
 from option import basic_option as basic
 from game_utils import (
@@ -30,6 +30,7 @@ from game_utils import (
     user_submit_card,
     com_submit_card,
     apply_special_card_effects,
+    random_top_card_color,
     card_reshuffle
 )
 
@@ -90,10 +91,10 @@ class SingleGame:
                               self.small_font.render("computer4", True, (0, 0, 0)),
                               self.small_font.render("computer5", True, (0, 0, 0))]
 
-        # 로비에서 가져온 정보
         self.computer_attends = computer_attends
-        for i in range(len(self.computer_attends)):
-            if self.computer_attends[i]:
+        # 로비에서 가져온 정보
+        for attend in self.computer_attends:
+            if attend:
                 self.player_count += 1
 
         self.computer_color = ["red", "blue", "green", "yellow"]
@@ -283,7 +284,7 @@ class SingleGame:
         self.uno_remaining_time_text = None  # 유저턴 남은 우노 시간 텍스트
         self.com_uno_remaining_time = None  # 컴퓨터턴 남은 우노 시간
         self.com_uno_remaining_time_text = None  # 컴퓨터턴 남은 우노 시간 텍스트
-
+        self.turn_count = 1 # 턴 카운트
         # change카드 좌표, spacing은 공백
         self.x5 = 100
         self.y5 = 100
@@ -594,6 +595,7 @@ class SingleGame:
                 elif self.new_drawn_card is not None and self.clicked_next_turn_button:
                     self.current_player = (self.current_player + self.game_direction) % self.player_count
                     self.reset()
+                    self.turn_count = self.turn_count + 1
                 # 카드를 드로우 하고, 드로우한 카드를 내는 함수.
                 elif self.new_drawn_card is not None and self.pop_card is None:
                     # 유효성 검사 및 클릭카드가 new_drawn_card인지 확인
@@ -632,6 +634,7 @@ class SingleGame:
                                                                                          self.player_count)
                             self.animation_method[self.pop_card.value](self.current_player)
                             self.reset()
+                            self.turn_count = self.turn_count + 1
                         # 내는 카드가 special이고, change일 경우
                         elif self.pop_card.is_special() and self.pop_card.value == "change":
                             self.change_card = True
@@ -643,10 +646,12 @@ class SingleGame:
                                 self.animation_method[self.pop_card.value](self.current_player)
                                 self.board_card.append(self.color_change)
                                 self.reset()
+                                self.turn_count = self.turn_count + 1
                         # 내는 카드가 special이 아닌 경우
                         elif not self.pop_card.is_special():
                             self.current_player = (self.current_player + self.game_direction) % self.player_count
                             self.reset()
+                            self.turn_count = self.turn_count + 1
                 elif not self.uno_check:
                     # 내는 카드가 special이고 change가 아닐 때,
                     if self.pop_card.is_special() and self.pop_card.value != "change":
@@ -658,6 +663,7 @@ class SingleGame:
                                                                                      self.player_count)
                         self.animation_method[self.pop_card.value](self.current_player)
                         self.reset()
+                        self.turn_count = self.turn_count + 1
                     # 내는 카드가 change인 경우
                     elif self.pop_card.value == "change":
                         self.change_card = True
@@ -672,10 +678,12 @@ class SingleGame:
                             self.animation_method[self.pop_card.value](self.current_player)
                             self.board_card.append(self.color_change)
                             self.reset()
+                            self.turn_count = self.turn_count + 1
                     # 내는 카드가 special이 아닌 경우
                     else:
                         self.current_player = (self.current_player + self.game_direction) % self.player_count
                         self.reset()
+                        self.turn_count = self.turn_count + 1
 
             # 우노 시간 넘기면 발동
             if self.pop_card is not None and self.one_flags[0]:
@@ -697,11 +705,13 @@ class SingleGame:
                             self.player_count)
                         self.animation_method[self.pop_card.value](self.current_player)
                         self.reset()
+                        self.turn_count = self.turn_count + 1
 
                     # 내는 카드가 special이 아닌 경우
                     elif not self.pop_card.is_special():
                         self.current_player = (self.current_player + self.game_direction) % self.player_count
                         self.reset()
+                        self.turn_count = self.turn_count + 1
             # 우노 마치고, change_card 제한시간 넘는 경우
             elif self.change_uno_expire:
                 if self.user_turn and self.current_time - self.turn_start_time >= self.time_limit:
@@ -711,6 +721,7 @@ class SingleGame:
                         self.player_count)
                     self.animation_method[self.pop_card.value](self.current_player)
                     self.reset()
+                    self.turn_count = self.turn_count + 1
             # 유저의 턴일 때 시간이 초과되면 드로우하고 턴을 넘김
             elif self.new_drawn_card is None:
                 if self.user_turn and self.current_time - self.turn_start_time >= self.time_limit:
@@ -719,12 +730,14 @@ class SingleGame:
                     self.player_hands[self.current_player].append(self.new_drawn_card)  # 카드를 드로우
                     self.current_player = (self.current_player + self.game_direction) % self.player_count
                     self.reset()
+                    self.turn_count = self.turn_count + 1
 
             # 유저가 드로우를 하고 시간이 초과되면 턴을 그냥 넘김
             elif self.new_drawn_card is not None:
                 if self.user_turn and self.current_time - self.user_draw_time >= self.time_limit:
                     self.current_player = (self.current_player + self.game_direction) % self.player_count
                     self.reset()
+                    self.turn_count = self.turn_count + 1
 
         # 컴퓨터 턴 처리
         if not self.user_turn:
@@ -746,6 +759,7 @@ class SingleGame:
                     self.draw_animation(self.current_player)
                     self.new_drawn_card = self.remain_cards.pop()
                     self.player_hands[self.current_player].append(self.new_drawn_card)
+                    self.turn_count = self.turn_count + 1
                 # 드로우한 카드가 낼 수 있는 경우
                 elif self.new_drawn_card is not None and is_valid_move(self.new_drawn_card, self.top_card) and self.pop_card is None:
                     if self.current_time - self.turn_start_time >= self.delay_time2:
@@ -765,6 +779,7 @@ class SingleGame:
                         self.new_drawn_card = None
                         self.computer_action_time = pygame.time.get_ticks() + self.delay_time
                         self.turn_start_time = pygame.time.get_ticks()
+                        self.turn_count = self.turn_count + 1
                 # 컴퓨터가 우노이고, 유저가 우노를 클릭했을 경우
                 elif self.uno_check:
                     if self.user_uno_clicked:
@@ -782,6 +797,7 @@ class SingleGame:
                                                                                                   self.player_count)
                             self.animation_method[self.pop_card.value](self.current_player)
                             self.reset()
+                            self.turn_count = self.turn_count + 1
                         # 컴퓨터가 낸 카드가 change일 경우
                         elif self.pop_card.value == "change":
                             self.change_index = random.randint(0, 3)
@@ -795,10 +811,12 @@ class SingleGame:
                                                                                                   self.player_count)
                             self.animation_method[self.pop_card.value](self.current_player)
                             self.reset()
+                            self.turn_count = self.turn_count + 1
                         # 컴퓨터가 낸 카드가 special이 아닌 경우
                         elif not self.pop_card.is_special():
                             self.current_player = (self.current_player + self.game_direction) % self.player_count
                             self.reset()
+                            self.turn_count = self.turn_count + 1
                 # 컴퓨터가 우노가 아니고, 컴퓨터가 카드를 낸 경우
                 elif not self.uno_check and self.pop_card is not None:
                     # 내는 카드가 special이고 change가 아닐 경우
@@ -811,6 +829,7 @@ class SingleGame:
                                                                                      self.player_count)
                         self.animation_method[self.pop_card.value](self.current_player)
                         self.reset()
+                        self.turn_count = self.turn_count + 1
                     # 내는 카드가 special이고, change일 경우
                     elif self.pop_card.is_special() and self.pop_card.value == "change":
                         if self.current_time - self.turn_start_time >= self.delay_time3:
@@ -825,10 +844,12 @@ class SingleGame:
                             self.animation_method[self.pop_card.value](self.current_player)
                             self.board_card.append(self.color_change)
                             self.reset()
+                            self.turn_count = self.turn_count + 1
                     # 내는 카드가 special이 아닌 경우
                     elif not self.pop_card.is_special():
                         self.current_player = (self.current_player + self.game_direction) % self.player_count
                         self.reset()
+                        self.turn_count = self.turn_count + 1
 
             # 컴퓨터의 턴일 때 시간이 초과되면 우노를 넘긴다.
             if any(self.one_flags[1:]) and not self.user_turn:
@@ -841,6 +862,7 @@ class SingleGame:
                             self.player_count)
                         self.animation_method[self.pop_card.value](self.current_player)
                         self.reset()
+                        self.turn_count = self.turn_count + 1
 
                     # 내는 카드가 special이고 change인 경우
                     elif self.pop_card.is_special() and self.pop_card.value == "change":
@@ -854,10 +876,12 @@ class SingleGame:
                             self.animation_method[self.pop_card.value](self.current_player)
                             self.board_card.append(self.color_change)
                             self.reset()
+                            self.turn_count = self.turn_count + 1
                     # 내는 카드가 special이 아닌 경우
                     elif not self.pop_card.is_special():
                         self.current_player = (self.current_player + self.game_direction) % self.player_count
                         self.reset()
+                        self.turn_count = self.turn_count + 1
 
     def win(self):
         popup = None
@@ -1241,7 +1265,7 @@ class SingleGame:
             Mouse.updateMouseState()
             self.clock.tick(basic.fps)
             # 카드 섞기 발생
-            if len(self.remain_cards) < 7:
+            if self.turn_count % 10 == 0:
                 self.card_shuffle_music.set_volume(self.sound_volume * self.background_volume)
                 self.card_shuffle_music.play(1)
                 self.board_card, self.remain_cards = card_reshuffle(self.board_card, self.remain_cards)
@@ -1250,3 +1274,4 @@ class SingleGame:
             self.draw()
             self.event()
             self.pause_button_process()
+

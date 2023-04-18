@@ -4,6 +4,7 @@ import random
 import math
 
 from single_game import SingleGame
+from stage_logic import StageA, StageB, StageC
 from mouse import Mouse, MouseState
 from slider import Slider
 from button import Button
