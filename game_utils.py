@@ -239,15 +239,56 @@ def apply_special_card_effects(card, current_player, direction, player_hands, re
         return current_player, direction
 
 
+def random_top_card_color(top_card, dummy_cards, board_card, dummy_cards_c):  # stage c애서 발동
+    color_list = ['red', 'blue', 'green', 'yellow']
+    color = color_list[random.randint(0, 3)]
+    if top_card.value != "change":
+        dummy_card = [card for card in dummy_cards if card.value == top_card.value and card.color == color]
+        board_card.append(dummy_card[0])
+    elif top_card.value == "change":
+        dummy_card = dummy_cards_c[random.randint(0, 3)]
+        board_card.append(dummy_card)
+    print(dummy_card)
+    print(top_card)
+    return board_card
+
+
+def find_combos(hand):
+    combos = []
+
+    # card.value 가 skip인 카드가 두 장 이상
+    skip_cards = [card for card in hand if card.value == 'skip']
+    draw_2_cards = [card for card in hand if card.value == 'draw_2']
+    for color in set(card.color for card in hand):
+        same_color_skip = next((card for card in skip_cards if card.color == color), None)
+        same_color_draw_2 = next((card for card in draw_2_cards if card.color == color), None)
+
+    if len(skip_cards) >= 2:
+        combos = (skip_cards[:2])
+
+    # card.value 가 draw_2인 카드 두 장 이상
+    elif len(draw_2_cards) >= 2:
+        combos = (draw_2_cards[:2])
+
+    # 서로 같은 card.color를 가지는 skip과 draw_2를 가지고 있을때
+    elif same_color_skip and same_color_draw_2:
+        combos = ([same_color_skip, same_color_draw_2])
+
+    return combos
+
+
 def card_reshuffle(board_card, remain_cards):
+    print("리셔플 발생")
+    print(remain_cards)
     top_card = board_card[-1]
     board_card = board_card[:-1]  # top_card를 제외한 나머지 카드를 가져옵니다.
 
     remain_cards.extend(board_card)  # 가져온 카드를 remain_cards에 추가합니다.
     board_card = [top_card]  # board_card를 top_card만 남겨둡니다.
 
-    # 카드 change 항목을 제거한다.
-    remain_cards = [card for card in remain_cards if card.value is not None]
+    # 카드 change, 더미 항목을 제거한다.
+    remain_cards = [card for card in remain_cards if card.value is not None or not card.is_dummy]
     random.shuffle(remain_cards)  # remain_cards를 무작위로 섞습니다.
     print("셔플완료")
+    print(remain_cards)
     return board_card, remain_cards
