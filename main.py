@@ -3,9 +3,9 @@ import sys
 import pickle
 
 from single_play_lobby import Lobby
-from campaign_map import CampaignMap
+from scene.campaign_map import CampaignMap
 from mouse import Mouse
-from button import Button
+from ui.button import Button
 from option import basic_option as basic
 from option.setting_option import Option
 
@@ -13,6 +13,10 @@ from option.setting_option import Option
 class Main:
     def __init__(self):
         # Pygame 초기화
+        pygame.init()
+        self.running = True
+        self.clock = pygame.time.Clock()
+
         self.display_size = None
         self.color_weakness = None
         self.key_setting = None
@@ -29,9 +33,7 @@ class Main:
         self.key_setting_up = None
         self.key_setting_down = None
         self.key_setting_enter = None
-        pygame.init()
-        self.running = True
-        self.clock = pygame.time.Clock()
+
         self.background_music = pygame.mixer.Sound("./resources/Music/main.ogg")
         self.sound_volume = None
         self.background_volume = None
@@ -72,7 +74,6 @@ class Main:
                 self.background_volume = pickle.load(f)
                 self.effect_volume = pickle.load(f)
         except EOFError:
-
             self.display_size = basic.display_size
             self.color_weakness = basic.color_weakness
             self.key_setting = basic.key_setting

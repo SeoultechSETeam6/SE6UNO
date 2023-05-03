@@ -2,13 +2,10 @@ import pygame
 import pickle
 import random
 import time
-import math
 from mouse import Mouse, MouseState
-from slider import Slider
-from button import Button
+from ui.button import Button
 from option.setting_option import Option
-from option import save_option as save
-from card_gen import generate_cards, generate_for_change_cards, generate_c_stage_cards, generate_c_for_change_cards
+from card_gen import generate_cards, generate_for_change_cards
 from card_shuffle import shuffle_cards, distribute_cards
 from option import basic_option as basic
 from game_utils import (
@@ -30,7 +27,6 @@ from game_utils import (
     user_submit_card,
     com_submit_card,
     apply_special_card_effects,
-    random_top_card_color,
     card_reshuffle
 )
 

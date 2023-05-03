@@ -2,8 +2,8 @@ import pygame
 import pickle
 import math
 from mouse import Mouse
-from slider import Slider
-from button import Button
+from ui.slider import Slider
+from ui.button import Button
 from option import save_option as save
 from option import basic_option as basic
 

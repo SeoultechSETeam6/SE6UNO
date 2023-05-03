@@ -1,13 +1,9 @@
 import pygame
 import pickle
-import random
-import math
 
 from single_game import SingleGame
-from stage_logic import StageA, StageB, StageC
 from mouse import Mouse, MouseState
-from slider import Slider
-from button import Button
+from ui.button import Button
 from option import save_option as save
 from option import basic_option as basic
 

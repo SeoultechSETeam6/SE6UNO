@@ -1,28 +1,16 @@
 from single_game import SingleGame
 import pygame
-import pickle
 import random
-import time
-import math
 from mouse import Mouse, MouseState
-from slider import Slider
-from button import Button
-from option import save_option as save
-from card_gen import generate_cards, generate_for_change_cards, generate_a_stage_cards, generate_c_stage_cards, generate_c_for_change_cards, generate_d_stage_cards
+from card_gen import generate_cards, generate_a_stage_cards, generate_c_stage_cards, generate_c_for_change_cards, generate_d_stage_cards
 from card_shuffle import shuffle_cards, distribute_cards, stage_a_distribute
 from option import basic_option as basic
 from game_utils import (
-    draw_cards_user,
-    draw_cards_ai,
-    draw_change_card,
     find_hovered_card,
     find_hovered_change,
-    draw_text,
     get_clicked_card,
     get_clicked_change,
-    draw_button,
     get_top_card,
-    draw_board_card,
     is_valid_move,
     check_uno,
     computer_playable_card,
@@ -30,9 +18,7 @@ from game_utils import (
     user_submit_card,
     com_submit_card,
     apply_special_card_effects,
-    random_top_card_color,
-    find_combos,
-    card_reshuffle
+    random_top_card_color
 )
 
 

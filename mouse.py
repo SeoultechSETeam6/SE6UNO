@@ -13,7 +13,6 @@ class MouseState(Enum):
 
 
 class Mouse:
-
     _mouseState = MouseState.HOVER
 
     @staticmethod
