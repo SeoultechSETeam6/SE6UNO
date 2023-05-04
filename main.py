@@ -2,6 +2,7 @@ import pygame
 import sys
 import pickle
 
+from achievement import Achievement
 from single_play_lobby import Lobby
 from campaign_map import CampaignMap
 from mouse import Mouse
@@ -48,6 +49,12 @@ class Main:
         print('설정 버튼 클릭됨')
         option = Option()
         option.run()
+        self.setting()
+
+    def achievement_button_click_event(self):
+        print('업적 버튼 클릭 됨')
+        achievement = Achievement()
+        achievement.run()
         self.setting()
 
     def exit_button_click_event(self):
@@ -122,6 +129,8 @@ class Main:
             Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.5, self.button_size[0],
                    self.button_size[1], '설정', self.settings_button_click_event, self.font_size[1]),
             Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.7, self.button_size[0],
+                   self.button_size[1], '업적', self.achievement_button_click_event, self.font_size[1]),
+            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.9, self.button_size[0],
                    self.button_size[1], '나가기', self.exit_button_click_event, self.font_size[1])]
 
         self.selected_button_index = 0
