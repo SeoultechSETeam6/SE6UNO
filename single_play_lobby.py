@@ -2,7 +2,7 @@ import pygame
 import pickle
 
 from single_game import SingleGame
-from mouse import Mouse, MouseState
+from controller.mouse_controller import Mouse, MouseState
 from ui.button import Button
 from option import save_option as save
 from option import basic_option as basic

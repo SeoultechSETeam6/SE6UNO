@@ -1,7 +1,7 @@
 import pygame
 import pickle
 import math
-from mouse import Mouse
+from controller.mouse_controller import Mouse
 from ui.slider import Slider
 from ui.button import Button
 from option import save_option as save

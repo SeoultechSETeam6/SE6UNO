@@ -1,7 +1,7 @@
 import pygame
 import json
 import pickle
-from mouse import Mouse
+from controller.mouse_controller import Mouse
 from ui.button import Button
 from option import basic_option as basic
 from ui.popup import Popup

@@ -2,7 +2,7 @@ import pygame
 import pickle
 import random
 import time
-from mouse import Mouse, MouseState
+from controller.mouse_controller import Mouse, MouseState
 from ui.button import Button
 from option.setting_option import Option
 from card_gen import generate_cards, generate_for_change_cards

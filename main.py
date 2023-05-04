@@ -4,7 +4,7 @@ import pickle
 
 from single_play_lobby import Lobby
 from scene.campaign_map import CampaignMap
-from mouse import Mouse
+from controller.mouse_controller import Mouse
 from ui.button import Button
 from option import basic_option as basic
 from option.setting_option import Option

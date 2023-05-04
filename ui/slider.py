@@ -1,6 +1,6 @@
 import pygame
 import math
-from mouse import Mouse, MouseState
+from controller.mouse_controller import Mouse, MouseState
 
 
 class Slider:

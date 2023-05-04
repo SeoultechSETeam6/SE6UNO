@@ -1,7 +1,7 @@
 from single_game import SingleGame
 import pygame
 import random
-from mouse import Mouse, MouseState
+from controller.mouse_controller import Mouse, MouseState
 from card_gen import generate_cards, generate_a_stage_cards, generate_c_stage_cards, generate_c_for_change_cards, generate_d_stage_cards
 from card_shuffle import shuffle_cards, distribute_cards, stage_a_distribute
 from option import basic_option as basic

@@ -1,5 +1,5 @@
 import pygame
-from mouse import Mouse, MouseState
+from controller.mouse_controller import Mouse, MouseState
 
 
 class Button:
@@ -25,11 +25,12 @@ class Button:
         self.alreadyPressed = False
         self.selected_image = pygame.image.load("../resources/Image/selected_check.png")
         self.selected_image = pygame.transform.scale(self.selected_image, (width * 0.5, width * 0.5))
+        self.color = color
 
-        self.color = {
-            'normal': color,
-            'hover': int(color * 0.6),
-            'pressed': int(color * 0.3),
+        self.colors = {
+            'normal': self.color,
+            'hover': int(self.color * 0.6),
+            'pressed': int(self.color * 0.3),
         }
 
         self.surface = pygame.Surface((self.width, self.height))
@@ -41,21 +42,21 @@ class Button:
 
     def detect_event(self):
         """
-        커서를 감지하고 효과를 연출, 클릭 시 지정한 메서드를 실행하닏 메서드입니다.\n
+        커서를 감지하고 효과를 연출, 클릭 시 지정한 메서드를 실행하는 메서드입니다.\n
         화면이 매 프레임마다 업데이트 되므로 버튼이 기능하려면 무한 반복하는 부분에서 메서드를 사용해야합니다.
         :return: None
         """
         # 평상시
         self.__mouse_pos = pygame.mouse.get_pos()
-        self.surface.fill(self.color['normal'])
+        self.surface.fill(self.colors['normal'])
 
         # 마우스 갖다댈 시
         if self.rect.collidepoint(self.__mouse_pos):
-            self.surface.fill(self.color['hover'])
+            self.surface.fill(self.colors['hover'])
 
             # 버튼 누를 때
             if self.rect.collidepoint(self.__mouse_pos) and Mouse.getMouseState() == MouseState.CLICK:
-                self.surface.fill(self.color['pressed'])
+                self.surface.fill(self.colors['pressed'])
                 Mouse.updateMouseState()
                 # 클릭 판정을 위해 클릭 된 상태라면 더 이상 이벤트를 발생시키지 않음
                 if not self.alreadyPressed and Mouse.getMouseState() == MouseState.DRAG:
@@ -107,7 +108,6 @@ class ImageButton(Button):
         super().draw()
         self.screen.blit(self.image, self.img_rect)
 
-
     def old_draw(self):
         # 평상시
         mouse_pos = pygame.mouse.get_pos()
@@ -115,12 +115,12 @@ class ImageButton(Button):
 
         # 마우스 갖다댈 시
         if self.rect.collidepoint(mouse_pos):
-            self.surface.fill(self.color['hover'])
+            self.surface.fill(self.colors['hover'])
             self.surface.set_alpha(75)
 
             # 버튼 누를 때
             if self.rect.collidepoint(mouse_pos) and Mouse.getMouseState() == MouseState.CLICK:
-                self.surface.fill(self.color['pressed'])
+                self.surface.fill(self.colors['pressed'])
                 Mouse.updateMouseState()
                 # 클릭 판정을 위해 클릭 된 상태라면 더 이상 이벤트를 발생시키지 않음
                 if not self.alreadyPressed and Mouse.getMouseState() == MouseState.DRAG:

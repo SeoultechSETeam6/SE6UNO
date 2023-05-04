@@ -1,10 +1,12 @@
 import json
 import pygame
 
+
+# 게임 설정 기본값
 FILEPATH = "../game_settings.json"
 INIT_GAME_DATA = {
     "settings": {
-        "display_size": {
+        "resolution": {
             "width": 1920,
             "height": 1080
         },
@@ -27,34 +29,38 @@ INIT_GAME_DATA = {
         "2nd": 0,
         "3rd": 0,
         "4th": 0
+    },
+    "achivement": {
     }
 }
 game_data = INIT_GAME_DATA
 
 
-def get_settings_data():
+# 설정 불러오기
+def load_settings_data():
     try:
-        with open(FILEPATH) as fr:
+        with open(FILEPATH, encoding='utf-8') as fr:
             settings_data = json.load(fr)["settings"]
     except FileNotFoundError:
-        with open(FILEPATH, 'w') as fw:
+        with open(FILEPATH, 'w', encoding='utf-8') as fw:
             json.dump(INIT_GAME_DATA, fw, indent=4)
             settings_data = INIT_GAME_DATA["settings"]
 
     return settings_data
 
 
-def set_settings_data():
-    with open(FILEPATH, 'w') as fw:
+# 설정 저장
+def save_settings_data():
+    with open(FILEPATH, 'w', encoding='utf-8') as fw:
         json.dump(game_data, fw, indent=4)
 
 
-def get_stage_clear_data():
+def load_stage_clear_data():
     try:
-        with open(FILEPATH) as fr:
+        with open(FILEPATH, encoding='utf-8') as fr:
             clear_data = json.load(fr)["stage_clear_status"]
     except FileNotFoundError:
-        with open(FILEPATH, 'w') as fw:
+        with open(FILEPATH, 'w', encoding='utf-8') as fw:
             json.dump(game_data, fw, indent=4)
             clear_data = INIT_GAME_DATA["stage_clear_status"]
 
