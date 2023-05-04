@@ -57,6 +57,7 @@ class Achievement:
         self.adequate_defense_image_height = None
         self.greedy_man_image_height = None
 
+        pygame.init()
         self.screen = pygame.display.set_mode(self.display_size)
         pygame.display.set_caption(basic.game_title)
         self.clock = pygame.time.Clock()
@@ -97,7 +98,7 @@ class Achievement:
             self.terrorist_coordinate = (300, 300)
             self.adequate_defense_coordinate = (600, 300)
             self.check_greedy_man_coordinate = (900, 300)
-            self.exit_button_coordinate = (1000, 600)
+            self.exit_button_coordinate = (1100, 700)
 
         # 나가기 버튼
         self.exit_button = Button(self.exit_button_coordinate[0], self.exit_button_coordinate[1], self.button_size[0],
@@ -221,6 +222,8 @@ class Achievement:
 
     def draw(self):
         self.screen.fill((20, 20, 20))
+
+        # 업적 로고 표시
         self.screen.blit(self.single_player_winner_image, self.single_player_winner_coordinate)
         self.screen.blit(self.stage_all_clear_image, self.stage_all_clear_coordinate)
         self.screen.blit(self.speed_racer_image, self.speed_racer_coordinate)
@@ -234,7 +237,6 @@ class Achievement:
         with open('game_data.json', 'r', encoding='utf-8') as file:
             game_data = json.load(file)
         achievements = game_data['achievements']
-
         self.draw_achievement_info(achievements['single_player_winner'], self.single_player_winner_coordinate[0],
                                    self.single_player_winner_coordinate[1] + self.single_player_winner_image_height)
         self.draw_achievement_info(achievements['stage_all_clear'], self.stage_all_clear_coordinate[0],
@@ -258,6 +260,11 @@ class Achievement:
                          (self.exit_button.rect.x, self.exit_button.rect.y - self.font_size[1]))
 
         pygame.display.flip()
+
+    def event(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
 
     def run(self):
         while self.running:

@@ -1,6 +1,8 @@
 import pygame
 import sys
 import pickle
+import json
+import os
 
 from achievement import Achievement
 from single_play_lobby import Lobby
@@ -9,6 +11,18 @@ from mouse import Mouse
 from button import Button
 from option import basic_option as basic
 from option.setting_option import Option
+
+
+def load_default_game_data():
+    with open('default_game_data.json', 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+
+def create_game_data_if_not_exists():
+    if not os.path.exists('game_data.json'):
+        default_game_data = load_default_game_data()
+        with open('game_data.json', 'w', encoding='utf-8') as f:
+            json.dump(default_game_data, f, indent=4)
 
 
 class Main:
@@ -52,6 +66,7 @@ class Main:
         self.setting()
 
     def achievement_button_click_event(self):
+        self.background_music.stop()
         print('업적 버튼 클릭 됨')
         achievement = Achievement()
         achievement.run()
@@ -182,5 +197,7 @@ class Main:
         sys.exit()
 
 
-main = Main()
-main.run()
+if __name__ == '__main__':
+    create_game_data_if_not_exists()
+    main = Main()
+    main.run()

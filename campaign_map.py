@@ -29,7 +29,7 @@ class CampaignMap:
         # 스테이지 진행 상황 불러오기
         self.file_path = "./game_data.json"
         try:
-            with open(self.file_path) as fr:
+            with open(self.file_path, "r", encoding="utf-8") as fr:
                 self.clear_data = json.load(fr)["campaign_cleared_status"]
         except FileNotFoundError:
             clear_data = {
@@ -41,7 +41,7 @@ class CampaignMap:
                 }
             }
             # 0일 경우 미클리어, 1 이상일 경우 클리어
-            with open(self.file_path, 'w') as fw:
+            with open(self.file_path, 'w', encoding="utf-8") as fw:
                 json.dump(clear_data, fw, indent=4)
 
     def exit_event(self):
