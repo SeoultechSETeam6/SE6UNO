@@ -74,8 +74,8 @@ class Achievement:
             self.chivalry_coordinate = (900, 0)
             self.win_by_a_nose_coordinate = (1200, 0)
             self.terrorist_coordinate = (1500, 0)
-            self.adequate_defense_coordinate = (0, 300)
-            self.check_greedy_man_coordinate = (300, 300)
+            self.adequate_defense_coordinate = (0, 350)
+            self.check_greedy_man_coordinate = (300, 350)
             self.exit_button_coordinate = (1700, 900)
         elif self.display_size[0] == 1600:
             self.achievement_folder = "./resources/Image/achievements/middle"
@@ -84,9 +84,9 @@ class Achievement:
             self.speed_racer_coordinate = (600, 0)
             self.chivalry_coordinate = (900, 0)
             self.win_by_a_nose_coordinate = (1200, 0)
-            self.terrorist_coordinate = (0, 300)
-            self.adequate_defense_coordinate = (300, 300)
-            self.check_greedy_man_coordinate = (600, 300)
+            self.terrorist_coordinate = (0, 350)
+            self.adequate_defense_coordinate = (300, 350)
+            self.check_greedy_man_coordinate = (600, 350)
             self.exit_button_coordinate = (1300, 800)
         else:
             self.achievement_folder = "./resources/Image/achievements/small"
@@ -94,10 +94,10 @@ class Achievement:
             self.stage_all_clear_coordinate = (300, 0)
             self.speed_racer_coordinate = (600, 0)
             self.chivalry_coordinate = (900, 0)
-            self.win_by_a_nose_coordinate = (0, 300)
-            self.terrorist_coordinate = (300, 300)
-            self.adequate_defense_coordinate = (600, 300)
-            self.check_greedy_man_coordinate = (900, 300)
+            self.win_by_a_nose_coordinate = (0, 350)
+            self.terrorist_coordinate = (300, 350)
+            self.adequate_defense_coordinate = (600, 350)
+            self.check_greedy_man_coordinate = (900, 350)
             self.exit_button_coordinate = (1100, 700)
 
         # 나가기 버튼
@@ -255,6 +255,7 @@ class Achievement:
                                    self.check_greedy_man_coordinate[1] + self.greedy_man_image_height)
 
         # 나가기 버튼
+        self.exit_button.process()
         self.screen.blit(self.exit_button.surface, self.exit_button.rect)
         self.screen.blit(self.exit_button.selected_image,
                          (self.exit_button.rect.x, self.exit_button.rect.y - self.font_size[1]))
