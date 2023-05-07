@@ -3,10 +3,8 @@ import pickle
 import random
 import time
 from mouse import Mouse, MouseState
-from slider import Slider
 from button import Button
 from option.setting_option import Option
-from option import save_option as save
 from card_gen import generate_cards, generate_for_change_cards, generate_c_stage_cards, generate_c_for_change_cards
 from card_shuffle import shuffle_cards, distribute_cards
 from option import basic_option as basic
@@ -79,7 +77,7 @@ class SingleGameYhj:
 
         # single_game 변수
         self.player_count = 1  # 플레이어 수
-        self.card_count = 7  # 처음 시작하는 카드 수
+        self.card_count = 2  # 처음 시작하는 카드 수
 
         # 플레이어 이름
         self.player_name = self.font.render(username, True, (0, 0, 0))
@@ -142,10 +140,10 @@ class SingleGameYhj:
         self.time_limit = 10000  # 유저의 턴 시간 제한
         self.current_time = pygame.time.get_ticks()  # 현재 시간
         self.turn_start_time = None  # 턴 시작 시간
+        self.is_draw = False # 드로우한 시간인지 아닌지 구분
         self.delay_time = random.randint(1000, 2000)  # 컴퓨터 딜레이 타임1
-        self.delay_time2 = self.delay_time + random.randint(900, 2000)  # 컴퓨터 딜레이 타임2
-        self.delay_time3 = self.delay_time2 + random.randint(900, 2000)  # 컴퓨터 딜레이 타임3
-        self.computer_action_time = pygame.time.get_ticks() + self.delay_time  # 현재 시간에 랜덤한 지연 시간을 더함
+        self.delay_time2 = random.randint(900, 2000)  # 컴퓨터 딜레이 타임2
+        self.delay_time3 = random.randint(900, 2000)  # 컴퓨터 딜레이 타임3
 
         # 화면 중앙 좌표 계산
         self.image_width, self.image_height = self.direction_img.get_size()
@@ -201,8 +199,7 @@ class SingleGameYhj:
         self.pause_button_rect.topleft = (25, 25)
         # next_turn버튼
         self.next_turn_button_rect = self.next_turn_button_img.get_rect()
-        self.next_turn_button_rect.topleft = (
-        self.user_coordinate[0] - self.next_turn_co[0], self.user_coordinate[1] - self.next_turn_co[1])
+        self.next_turn_button_rect.topleft = (self.user_coordinate[0] - self.next_turn_co[0], self.user_coordinate[1] - self.next_turn_co[1])
         # uno_button
         self.uno_button_rect = self.uno_button_img.get_rect()
         self.uno_button_rect.topleft = (150, self.display_size[1] * 0.5)
@@ -222,25 +219,26 @@ class SingleGameYhj:
 
         # uno 초기값
         self.uno_check = False
-        self.uno_current_time = None
         self.uno_delay_time = None
-        self.uno_click_time = None
-        self.user_uno_clicked = False
-        self.one_flags = [False, False, False, False, False, False]
+        self.uno_current_time = None
+        self.uno_flags = [False, False, False, False, False, False]
+
+        self.remaining_time = None
+        self.remaining_time_text = None
+        self.after_draw_remaining_time = None
+        self.after_draw_remaining_time_text = None
+        self.pause_start_time = None
+
         self.change_card = False
         self.clicked_card_index = None
         self.clicked_change_index = None
         self.change_index = None
         self.playable = False
         self.clicked_change = False
-        self.user_draw_time = None
-        self.uno_drawn_card = None
         self.color_change = None
-        self.change_uno_expire = False
 
         self.pop_card = None  # 뽑은 카드 초기값
         self.pop_card_index = None  # 뽑은 카드 인덱스 숫자 초기값
-        self.draw_requested = False  # draw 했는지 확인하는 초기값
         self.new_drawn_card = None  # draw한 카드가 어떤 카드인가의 초기값
 
         self.clicked_card = None  # 클릭 카드 초기값
@@ -254,6 +252,27 @@ class SingleGameYhj:
 
     def setting(self):
         pass
+
+    def reset(self):
+        self.is_draw = False
+
+        self.turn_start_time = None
+
+        self.change_card = False
+        self.clicked_card_index = None
+        self.clicked_change_index = None
+        self.change_index = None
+        self.playable = False
+        self.clicked_change = False
+        self.color_change = None
+
+        self.pop_card = None  # 뽑은 카드 초기값
+        self.pop_card_index = None  # 뽑은 카드 인덱스 숫자 초기값
+        self.new_drawn_card = None  # draw한 카드가 어떤 카드인가의 초기값
+
+        self.clicked_card = None  # 클릭 카드 초기값
+        self.clicked_remain_cards = False  # remain_cards 클릭 여부 초기값
+        self.clicked_next_turn_button = False  # 다음턴 클릭여부 초기값
 
     def game(self):
         # 마우스의 위치를 가져옴
@@ -270,10 +289,14 @@ class SingleGameYhj:
             self.user_turn = False
 
         if Mouse.getMouseState() == MouseState.CLICK:
-            if self.uno_button_rect.collidepoint(mouse_x, mouse_y) and len(self.player_hands[self.current_player]) == 1:
+            if self.uno_button_rect.collidepoint(mouse_x, mouse_y) and self.uno_check:
                 self.Uno_button_music.set_volume(self.sound_volume * self.effect_volume)
                 self.Uno_button_music.play(1)
-                self.user_uno_clicked = True
+                self.uno_flags[self.current_player] = True
+
+        if self.uno_check:
+            return
+
         self.hovered_card_index = find_hovered_card(self.player_hands[0], self.user_coordinate[0],
                                                     self.user_coordinate[1], self.user_spacing, mouse_x, mouse_y, self.max_per_row, self.hovered_card_index)
         self.hovered_change_index = find_hovered_change(self.change_color_list, self.x5, self.y5, self.spacing5, mouse_x, mouse_y, self.hovered_card_index)
@@ -281,9 +304,19 @@ class SingleGameYhj:
         if self.user_turn:
             if self.turn_start_time is None:
                 self.turn_start_time = pygame.time.get_ticks()
-            if self.time_over():
-                self.current_player = self.current_player + 1
-                return
+            if self.current_time - self.turn_start_time >= self.time_limit:
+                if self.is_draw:
+                    self.is_draw = False
+                    self.current_player = (self.current_player + self.game_direction) % self.player_count
+                    self.reset()
+                    self.turn_count = self.turn_count + 1
+                else:
+                    self.draw_animation(self.current_player)
+                    self.player_hands[0].append(self.remain_cards.pop())
+                    self.current_player = (self.current_player + self.game_direction) % self.player_count
+                    self.reset()
+                    self.turn_count = self.turn_count + 1
+
             if Mouse.getMouseState() == MouseState.CLICK:
                 self.clicked_card_index, self.clicked_card = get_clicked_card(self.player_hands[0],
                                                                               self.user_coordinate[0], self.user_coordinate[1], self.user_spacing, mouse_x, mouse_y, self.max_per_row)
@@ -292,10 +325,11 @@ class SingleGameYhj:
                 # next_turn_button 클릭 확인
                 self.clicked_next_turn_button = self.next_turn_button_rect.collidepoint(mouse_x, mouse_y)
                 # change 클릭 확인
-                self.clicked_change_index, self.clicked_change = get_clicked_change(self.change_color_list, self.x5, self.y5, self.spacing5, mouse_x,
-                                                                          mouse_y)
+                self.clicked_change_index, self.clicked_change = get_clicked_change(self.change_color_list, self.x5, self.y5, self.spacing5, mouse_x, mouse_y)
+
             # 카드를 드로우함
             if self.clicked_remain_cards and self.new_drawn_card is None and self.pop_card is None:
+                self.is_draw = True
                 self.draw_animation(self.current_player)
                 self.turn_start_time = pygame.time.get_ticks()
                 self.player_hands[0].append(self.remain_cards.pop())
@@ -303,212 +337,132 @@ class SingleGameYhj:
             # 카드를 드로우 하고 턴을 넘기는 함수.
             elif self.new_drawn_card is not None and self.clicked_next_turn_button:
                 self.current_player = (self.current_player + self.game_direction) % self.player_count
+                self.reset()
                 self.turn_count = self.turn_count + 1
             # 카드를 드로우 하고, 드로우한 카드를 내는 함수.
             elif self.new_drawn_card is not None and self.pop_card is None:
                 # 유효성 검사 및 클릭카드가 new_drawn_card인지 확인
-                if self.new_drawn_card is not None and is_valid_move(self.new_drawn_card,
-                                                                     self.top_card) and self.clicked_card == self.new_drawn_card and self.pop_card is None:
+                if self.new_drawn_card is not None and is_valid_move(self.new_drawn_card, self.top_card) and self.clicked_card == self.new_drawn_card and self.pop_card is None:
                     self.place_animation(self.current_player)
-                    self.board_card, self.player_hands[self.current_player], self.pop_card = user_submit_card \
-                        (self.clicked_card, self.clicked_card_index, self.board_card,
-                         self.player_hands[self.current_player])
-                    self.uno_check = check_uno(self.player_hands[0])
-                    if self.uno_check:
-                        self.one_flags, self.uno_current_time, self.uno_delay_time = is_uno(self.one_flags,
-                                                                                            self.current_player)
+                    self.board_card, self.player_hands[self.current_player], self.pop_card = user_submit_card(self.clicked_card, self.clicked_card_index, self.board_card, self.player_hands[self.current_player])
             # 카드를 드로우하지 않고, 카드를 냄
-            if self.clicked_card is not None and is_valid_move(self.clicked_card, self.top_card):
+            elif self.clicked_card is not None and is_valid_move(self.clicked_card, self.top_card):
                 self.place_animation(self.current_player)
-                self.board_card, self.player_hands[self.current_player], self.pop_card = user_submit_card \
-                    (self.clicked_card, self.clicked_card_index, self.board_card,
-                     self.player_hands[self.current_player])
-                self.uno_check = check_uno(self.player_hands[0])
-                if self.uno_check:
-                    self.one_flags, self.uno_current_time, self.uno_delay_time = is_uno(self.one_flags,
-                                                                                        self.current_player)
-            if self.pop_card is not None:
-                self.hovered_card_index -= 1
-                # 우노일 경우
-                if self.uno_check:
-                    if self.user_uno_clicked:
-                        self.one_flags[0] = False
-                        self.card_playing()
-                else:
-                    self.card_playing()
+                self.board_card, self.player_hands[self.current_player], self.pop_card = user_submit_card(self.clicked_card, self.clicked_card_index, self.board_card, self.player_hands[self.current_player])
+
         # 컴퓨터 턴 처리
         if not self.user_turn:
-            if self.current_time >= self.computer_action_time:  # 설정한 시간이 되면 컴퓨터가 행동함
+            if self.turn_start_time is None:
+                self.turn_start_time = pygame.time.get_ticks()
+            if self.current_time - self.turn_start_time >= self.delay_time:  # 설정한 시간이 되면 컴퓨터가 행동함
                 # 처음 유효성 검사
                 if self.new_drawn_card is None and self.pop_card is None:
-                    self.playable, self.pop_card_index = computer_playable_card(
-                        self.player_hands[self.current_player], self.board_card)
+                    self.playable, self.pop_card_index = computer_playable_card(self.player_hands[self.current_player], self.board_card)
                 # 카드를 낼 수 있을 때 낸다.
                 if self.playable and self.new_drawn_card is None and self.pop_card is None:
                     self.place_animation(self.current_player)
                     self.pop_card = self.player_hands[self.current_player][self.pop_card_index]
-                    self.board_card, self.player_hands[self.current_player] = com_submit_card \
-                        (self.pop_card, self.pop_card_index, self.board_card,
-                         self.player_hands[self.current_player])
-                    self.uno_check = check_uno(self.player_hands[self.current_player])
-                    if self.uno_check:
-                        self.one_flags, self.uno_current_time, self.uno_delay_time = is_uno(self.one_flags,
-                                                                                            self.current_player)
+                    self.board_card, self.player_hands[self.current_player] = com_submit_card(self.pop_card, self.pop_card_index, self.board_card, self.player_hands[self.current_player])
                 # 카드를 낼 수 없을 때 드로우 한다.
                 elif not self.playable and self.new_drawn_card is None and self.pop_card is None:
                     self.draw_animation(self.current_player)
                     self.new_drawn_card = self.remain_cards.pop()
                     self.player_hands[self.current_player].append(self.new_drawn_card)
+                    self.turn_start_time = pygame.time.get_ticks()
                     self.turn_count = self.turn_count + 1
                 # 드로우한 카드가 낼 수 있는 경우
-                elif self.new_drawn_card is not None and is_valid_move(self.new_drawn_card,
-                                                                       self.top_card) and self.pop_card is None:
+                elif self.new_drawn_card is not None and is_valid_move(self.new_drawn_card, self.top_card) and self.pop_card is None:
                     if self.current_time - self.turn_start_time >= self.delay_time2:
                         self.place_animation(self.current_player)
                         self.pop_card = self.new_drawn_card
                         self.pop_card_index = self.player_hands[self.current_player].index(self.pop_card)
-                        self.board_card, self.player_hands[self.current_player] = com_submit_card \
-                            (self.pop_card, self.pop_card_index, self.board_card,
-                             self.player_hands[self.current_player])
-                        self.uno_check = check_uno(self.player_hands[self.current_player])
-                        if self.uno_check:
-                            self.one_flags, self.uno_current_time, self.uno_delay_time = is_uno(self.one_flags,
-                                                                                                self.current_player)
+                        self.board_card, self.player_hands[self.current_player] = com_submit_card(self.pop_card, self.pop_card_index, self.board_card, self.player_hands[self.current_player])
                 # 드로우한 카드를 낼 수 없는 경우
-                elif self.new_drawn_card is not None and not is_valid_move(self.new_drawn_card,
-                                                                           self.top_card) and self.pop_card is None:
+                elif self.new_drawn_card is not None and not is_valid_move(self.new_drawn_card, self.top_card) and self.pop_card is None:
                     if self.current_time - self.turn_start_time >= self.delay_time2:
                         self.current_player = (self.current_player + self.game_direction) % self.player_count
+                        self.reset()
                         self.new_drawn_card = None
-                        self.computer_action_time = pygame.time.get_ticks() + self.delay_time
-                        self.turn_start_time = pygame.time.get_ticks()
-                        self.turn_count = self.turn_count + 1
-                # 컴퓨터가 우노이고, 유저가 우노를 클릭했을 경우
-                elif self.uno_check:
-                    if self.user_uno_clicked:
-                        self.draw_animation(self.current_player)
-                        self.one_flags[self.current_player] = False
-                        self.uno_drawn_card = self.remain_cards.pop()
-                        self.player_hands[self.current_player].append(self.uno_drawn_card)
-                        # 컴퓨터가 낸 카드가 special일 경우
-                        if self.pop_card.is_special() and self.pop_card.value != "change":
-                            self.current_player, self.game_direction = apply_special_card_effects(self.pop_card,
-                                                                                                  self.current_player,
-                                                                                                  self.game_direction,
-                                                                                                  self.player_hands,
-                                                                                                  self.remain_cards,
-                                                                                                  self.player_count)
-                            self.animation_method[self.pop_card.value](self.current_player)
-                            self.turn_count = self.turn_count + 1
-                        # 컴퓨터가 낸 카드가 change일 경우
-                        elif self.pop_card.value == "change":
-                            self.change_index = random.randint(0, 3)
-                            self.color_change = self.change_color_list[self.change_index]
-                            self.board_card.append(self.color_change)
-                            self.current_player, self.game_direction = apply_special_card_effects(self.pop_card,
-                                                                                                  self.current_player,
-                                                                                                  self.game_direction,
-                                                                                                  self.player_hands,
-                                                                                                  self.remain_cards,
-                                                                                                  self.player_count)
-                            self.animation_method[self.pop_card.value](self.current_player)
-                            self.turn_count = self.turn_count + 1
-                        # 컴퓨터가 낸 카드가 special이 아닌 경우
-                        elif not self.pop_card.is_special():
-                            self.current_player = (self.current_player + self.game_direction) % self.player_count
-                            self.turn_count = self.turn_count + 1
-                # 컴퓨터가 우노가 아니고, 컴퓨터가 카드를 낸 경우
-                elif not self.uno_check and self.pop_card is not None:
-                    # 내는 카드가 special이고 change가 아닐 경우
-                    if self.pop_card.is_special() and self.pop_card.value != "change":
-                        self.current_player, self.game_direction = apply_special_card_effects(self.pop_card,
-                                                                                              self.current_player,
-                                                                                              self.game_direction,
-                                                                                              self.player_hands,
-                                                                                              self.remain_cards,
-                                                                                              self.player_count)
-                        self.animation_method[self.pop_card.value](self.current_player)
-                        self.turn_count = self.turn_count + 1
-                    # 내는 카드가 special이고, change일 경우
-                    elif self.pop_card.is_special() and self.pop_card.value == "change":
-                        if self.current_time - self.turn_start_time >= self.delay_time3:
-                            self.change_index = random.randint(0, 3)
-                            self.color_change = self.change_color_list[self.change_index]
-                            self.current_player, self.game_direction = apply_special_card_effects(self.pop_card,
-                                                                                                  self.current_player,
-                                                                                                  self.game_direction,
-                                                                                                  self.player_hands,
-                                                                                                  self.remain_cards,
-                                                                                                  self.player_count)
-                            self.animation_method[self.pop_card.value](self.current_player)
-                            self.board_card.append(self.color_change)
-                            self.turn_count = self.turn_count + 1
-                    # 내는 카드가 special이 아닌 경우
-                    elif not self.pop_card.is_special():
-                        self.current_player = (self.current_player + self.game_direction) % self.player_count
-                        self.turn_count = self.turn_count + 1
 
-            # 컴퓨터의 턴일 때 시간이 초과되면 우노를 넘긴다.
-            if any(self.one_flags[1:]) and not self.user_turn:
+    def is_uno(self):
+        if len(self.player_hands[self.current_player]) == 1:
+            if not self.uno_check and not self.uno_flags[self.current_player]:
+                self.uno_check = True
+                self.uno_current_time = pygame.time.get_ticks()
+                self.uno_delay_time = random.randint(500, 3000)
+        else:
+            self.uno_flags[self.current_player] = False
+            self.uno_check = False
+            self.uno_current_time = None
+            self.uno_delay_time = None
+
+    def uno_time_check(self):
+        if self.uno_check:
+            if self.user_turn:
                 if self.current_time - self.uno_current_time >= self.uno_delay_time:
-                    # 내는 카드가 special이고, change가 아닐 경우
-                    if self.pop_card.is_special() and self.pop_card.value != "change":
+                    self.Uno_button_music.set_volume(self.sound_volume * self.effect_volume)
+                    self.Uno_button_music.play(1)
+                    self.draw_animation(self.current_player)
+                    self.player_hands[self.current_player].append(self.remain_cards.pop())
+                else:
+                    if self.uno_flags[self.current_player]:
+                        self.uno_check = False
+
+            else:
+                if self.current_time - self.uno_current_time >= self.uno_delay_time:
+                    self.Uno_button_music.set_volume(self.sound_volume * self.effect_volume)
+                    self.Uno_button_music.play(1)
+                    self.uno_check = False
+                    self.uno_flags[self.current_player] = True
+                else:
+                    if self.uno_flags[self.current_player]:
+                        self.draw_animation(self.current_player)
+                        self.player_hands[self.current_player].append(self.remain_cards.pop())
+
+    def card_playing(self):
+        if self.pop_card is not None and not self.uno_check:
+            if self.user_turn:
+                self.hovered_card_index -= 1
+            if self.pop_card.is_special() and self.pop_card.value != "change":
+                self.current_player, self.game_direction = apply_special_card_effects(self.pop_card,
+                                                                                      self.current_player,
+                                                                                      self.game_direction,
+                                                                                      self.player_hands,
+                                                                                      self.remain_cards,
+                                                                                      self.player_count)
+                self.animation_method[self.pop_card.value](self.current_player)
+                self.reset()
+                self.turn_count = self.turn_count + 1
+            # 내는 카드가 special이고, change일 경우
+            elif self.pop_card.is_special() and self.pop_card.value == "change":
+                if self.user_turn:
+                    self.change_card = True
+                    if self.clicked_change_index is not None:
+                        self.color_change = self.change_color_list[self.clicked_change_index]
+                        self.current_player, self.game_direction = apply_special_card_effects(
+                            self.pop_card, self.current_player, self.game_direction,
+                            self.player_hands, self.remain_cards, self.player_count)
+                        self.animation_method[self.pop_card.value](self.current_player)
+                        self.board_card.append(self.color_change)
+                        self.reset()
+                        self.turn_count = self.turn_count + 1
+                else:
+                    self.change_index = random.randint(0, 3)
+                    self.color_change = self.change_color_list[self.change_index]
+                    if self.current_time - self.turn_start_time >= self.delay_time3:
                         self.current_player, self.game_direction = apply_special_card_effects(
                             self.pop_card, self.current_player, self.game_direction, self.player_hands,
                             self.remain_cards,
                             self.player_count)
                         self.animation_method[self.pop_card.value](self.current_player)
+                        self.board_card.append(self.color_change)
+                        self.reset()
                         self.turn_count = self.turn_count + 1
-
-                    # 내는 카드가 special이고 change인 경우
-                    elif self.pop_card.is_special() and self.pop_card.value == "change":
-                        self.change_index = random.randint(0, 3)
-                        self.color_change = self.change_color_list[self.change_index]
-                        if self.current_time - self.turn_start_time >= self.delay_time3:
-                            self.current_player, self.game_direction = apply_special_card_effects(
-                                self.pop_card, self.current_player, self.game_direction, self.player_hands,
-                                self.remain_cards,
-                                self.player_count)
-                            self.animation_method[self.pop_card.value](self.current_player)
-                            self.board_card.append(self.color_change)
-                            self.turn_count = self.turn_count + 1
-                    # 내는 카드가 special이 아닌 경우
-                    elif not self.pop_card.is_special():
-                        self.current_player = (self.current_player + self.game_direction) % self.player_count
-                        self.turn_count = self.turn_count + 1
-
-    def is_uno(self, hand_deck):
-        if len(hand_deck) == 1:
-            pass
-
-    def time_over(self):
-        return True if self.current_time - self.turn_start_time <= self.time_limit else False
-
-    def card_playing(self):
-        if self.pop_card.is_special() and self.pop_card.value != "change":
-            self.current_player, self.game_direction = apply_special_card_effects(self.pop_card,
-                                                                                  self.current_player,
-                                                                                  self.game_direction,
-                                                                                  self.player_hands,
-                                                                                  self.remain_cards,
-                                                                                  self.player_count)
-            self.animation_method[self.pop_card.value](self.current_player)
-            self.turn_count = self.turn_count + 1
-        # 내는 카드가 special이고, change일 경우
-        elif self.pop_card.is_special() and self.pop_card.value == "change":
-            self.change_card = True
-            if self.clicked_change_index is not None:
-                self.color_change = self.change_color_list[self.clicked_change_index]
-                self.current_player, self.game_direction = apply_special_card_effects(
-                    self.pop_card, self.current_player, self.game_direction,
-                    self.player_hands, self.remain_cards, self.player_count)
-                self.animation_method[self.pop_card.value](self.current_player)
-                self.board_card.append(self.color_change)
+            # 내는 카드가 special이 아닌 경우
+            elif not self.pop_card.is_special():
+                self.current_player = (self.current_player + self.game_direction) % self.player_count
+                self.reset()
                 self.turn_count = self.turn_count + 1
-        # 내는 카드가 special이 아닌 경우
-        elif not self.pop_card.is_special():
-            self.current_player = (self.current_player + self.game_direction) % self.player_count
-            self.turn_count = self.turn_count + 1
 
     def win(self):
         popup = None
@@ -535,7 +489,7 @@ class SingleGameYhj:
                         self.running = False
                         popup_running = False
 
-    ### 일시정지 버튼 관련 매서드 ###
+    # 일시정지 버튼 관련 매서드
     def pause_popup(self):
         self.pause_popup_draw()
         self.settings_button.process()
@@ -600,8 +554,9 @@ class SingleGameYhj:
             else:
                 self.alreadyPressed = False
 
-    ### 일시정지 버튼 관련 메서드 끝 ###
+    # 일시정지 버튼 관련 메서드 끝
 
+    # 애니메이션 관련 매서드
     def place_animation(self, index):
         self.card_place_music.set_volume(self.sound_volume * self.effect_volume)
         self.card_place_music.play(1)
@@ -768,6 +723,8 @@ class SingleGameYhj:
         pygame.display.flip()
         time.sleep(0.7)
 
+    # 애니메이션 관련 매서드 끝
+
     def draw(self):
         self.screen.fill((111, 111, 111))
 
@@ -821,7 +778,7 @@ class SingleGameYhj:
             draw_change_card(self.screen, self.change_color_list, self.x5, self.y5, self.spacing5, self.hovered_change_index)  # 체인지 카드 그림
 
         # 우노 버튼 표시
-        if any(self.one_flags):
+        if self.uno_check and not self.uno_flags[self.current_player]:
             self.screen.blit(self.uno_button_img, self.uno_button_rect)
         else:
             self.screen.blit(self.uno_button_inactive_img, self.uno_button_inactive_rect)
@@ -840,12 +797,12 @@ class SingleGameYhj:
             self.screen.blit(self.next_turn_button_img, self.next_turn_button_rect)
 
         # 유저턴일때 표시될 사항. (시간제한, 턴 넘기기 버튼)
-        if self.user_turn and self.new_drawn_card is None and not self.one_flags[0]:
+        if self.user_turn and self.new_drawn_card is None and not self.uno_check and self.turn_start_time is not None:
             self.remaining_time = self.time_limit - (self.current_time - self.turn_start_time)
             self.remaining_time_text = f"턴 남은 시간: {self.remaining_time // 1000}초"
             draw_text(self.screen, self.remaining_time_text, self.font, (255, 255, 255), self.screen.get_rect().centerx/2, 30)
         # draw후 시간제한,턴 넘기기는 draw를 해야지 나옴.
-        elif self.user_turn and self.new_drawn_card is not None and not self.one_flags[0]:
+        elif self.user_turn and self.new_drawn_card is not None and not self.uno_check and self.turn_start_time is not None:
             self.after_draw_remaining_time = self.time_limit - (self.current_time - self.turn_start_time)
             self.after_draw_remaining_time_text = f"턴 남은 시간: {self.after_draw_remaining_time // 1000}초"
             draw_text(self.screen, self.after_draw_remaining_time_text, self.font, (255, 255, 255), self.screen.get_rect().centerx/2, 30)
@@ -861,18 +818,6 @@ class SingleGameYhj:
                                  (self.computer_coordinate[j][0] - self.turn_coordinate[2] - self.font_size[0] // 2,
                                   self.computer_coordinate[j][1] - self.turn_coordinate[3] + self.font_size[0] * 2))
                 j = j + 1
-        '''
-        # 유저 턴일때, uno버튼 시간
-        elif self.user_turn and self.one_flags[0]:
-            self.uno_remaining_time = self.uno_delay_time - (self.current_time - self.uno_current_time)
-            self.uno_remaining_time_text = f"우노버튼 남은 시간: {self.uno_remaining_time // 1000}초"
-            draw_text(self.screen, self.uno_remaining_time_text, self.font, (255, 255, 255), self.screen.get_rect().centerx, 30)
-        # 컴퓨터 턴일때, uno버튼 시간
-        elif not self.user_turn and any(self.one_flags[1:]):
-            self.com_uno_remaining_time = self.uno_delay_time - (self.current_time - self.uno_current_time)
-            self.com_uno_remaining_time_text = f"우노버튼 남은 시간: {self.com_uno_remaining_time // 1000}초"
-            draw_text(self.screen, self.com_uno_remaining_time_text, self.font, (255, 255, 255), self.screen.get_rect().centerx, 30)
-        '''
         # 키보드로 선택된 경우 체크 표시
         # 드로우
         if self.key_select_option == 0:
@@ -920,20 +865,20 @@ class SingleGameYhj:
                         elif self.key_select_option == 1:
                             self.key_select_option = 0
                         elif self.key_select_option == 2:
-                            if any(self.one_flags):
+                            if any(self.uno_flags):
                                 self.key_select_option = 1
                             else:
                                 self.key_select_option = 0
                         else:
                             if self.user_turn and self.new_drawn_card is not None:
                                 self.key_select_option = 2
-                            elif any(self.one_flags):
+                            elif any(self.uno_flags):
                                 self.key_select_option = 1
                             else:
                                 self.key_select_option = 0
                     elif event.key == self.key_setting['down']:
                         if self.key_select_option == 0:
-                            if any(self.one_flags):
+                            if any(self.uno_flags):
                                 self.key_select_option = 1
                             elif self.user_turn and self.new_drawn_card is not None:
                                 self.key_select_option = 2
@@ -959,8 +904,6 @@ class SingleGameYhj:
                             self.clicked_card_index, self.clicked_card \
                                 = self.hovered_card_index, self.player_hands[0][self.hovered_card_index]
 
-
-
     def run(self):
         self.setting()
         self.background_music.set_volume(self.sound_volume * self.background_volume)
@@ -976,8 +919,12 @@ class SingleGameYhj:
                 self.card_shuffle_music.set_volume(self.sound_volume * self.background_volume)
                 self.card_shuffle_music.play(1)
                 self.board_card, self.remain_cards = card_reshuffle(self.board_card, self.remain_cards)
+                self.turn_count = self.turn_count + 1
             if not self.paused:
                 self.game()
+                self.is_uno()
+                self.uno_time_check()
+                self.card_playing()
             self.draw()
             self.event()
             self.pause_button_process()
