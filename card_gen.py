@@ -22,7 +22,7 @@ class Card:
         return self.__str__()
 
     def is_special(self):
-        return self.value in ["skip", "reverse", "draw_2", "bomb", "one_more", "shield", "change"]
+        return self.value in ["skip", "reverse", "draw_2", "one_more", "bomb", "shield", "change"]
 
     def is_dummy(self):
         return False

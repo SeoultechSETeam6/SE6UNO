@@ -4,6 +4,7 @@ import random
 import math
 
 from single_game import SingleGame
+from single_game_yhj import SingleGameYhj
 from stage_logic import StageA, StageB, StageC
 from mouse import Mouse, MouseState
 from slider import Slider
@@ -175,7 +176,7 @@ class Lobby:
                 print("Start game")
                 computer_attends = [self.computer1_attend, self.computer2_attend, self.computer3_attend,
                                     self.computer4_attend, self.computer5_attend]
-                single_game = SingleGame(computer_attends, self.name)
+                single_game = SingleGameYhj(computer_attends, self.name)
                 single_game.run()
                 self.running = False
 
