@@ -3,7 +3,7 @@ import sys
 import pickle
 
 from scene.single_play_lobby import Lobby
-from scene.campaign_map import CampaignMap
+from scene.story_mode_map import StoryModeMap
 from controller.mouse_controller import Mouse
 from ui.button import Button
 from legacy_file import basic_option as basic

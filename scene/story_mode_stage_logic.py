@@ -1,4 +1,4 @@
-from single_game import SingleGame
+from scene.single_play import SinglePlay
 import pygame
 import random
 from controller.mouse_controller import Mouse, MouseState
@@ -22,14 +22,14 @@ from controller.game_utils import (
 )
 
 
-class StageA(SingleGame):
+class StageA(SinglePlay):
     def __init__(self):
         super().__init__([False, False, True, False, False], 'You')
         self.regular_cards, self.special_cards = generate_a_stage_cards(self.color_weakness, self.size_change)
         self.player_hands, self.remain_cards = stage_a_distribute(self.player_count, self.regular_cards, self.special_cards, self.card_count)
 
 
-class StageB(SingleGame):
+class StageB(SinglePlay):
     def __init__(self):
         super().__init__([True, False, True, False, True], 'You')
         self.turn_count = 1
@@ -462,7 +462,7 @@ class StageB(SingleGame):
                         self.turn_count = self.turn_count + 1
 
 
-class StageC(SingleGame):
+class StageC(SinglePlay):
     def __init__(self):
         super().__init__([True, False, True, False, False], 'You')
         self.turn_count = 1
@@ -882,7 +882,7 @@ class StageC(SingleGame):
                             self.board_card = random_top_card_color(self.top_card, self.dummy_cards, self.board_card, self.dummy_cards_c)
 
 
-class StageD(SingleGame):
+class StageD(SinglePlay):
     def __init__(self):
         super().__init__([False, True, True, True, True], 'You')
         self.cards = generate_d_stage_cards(self.color_weakness, self.size_change)

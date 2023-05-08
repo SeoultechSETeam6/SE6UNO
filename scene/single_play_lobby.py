@@ -1,7 +1,7 @@
 import pygame
 import pickle
 
-from single_game import SingleGame
+from scene.single_play import SinglePlay
 from controller.mouse_controller import Mouse, MouseState
 from ui.button import Button
 from legacy_file import save_option as save
@@ -185,7 +185,7 @@ class Lobby:
                 print("Start game")
                 computer_attends = [self.computer1_attend, self.computer2_attend, self.computer3_attend,
                                     self.computer4_attend, self.computer5_attend]
-                single_game = SingleGame(computer_attends, self.name)
+                single_game = SinglePlay(computer_attends, self.name)
                 single_game.run()
                 self.running = False
 

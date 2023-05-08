@@ -6,7 +6,7 @@ from controller.mouse_controller import Mouse
 from ui.button import Button
 
 from scene.single_play_lobby import Lobby
-from scene.campaign_map import CampaignMap
+from scene.story_mode_map import StoryModeMap
 from scene.settings import Settings
 
 
@@ -89,7 +89,7 @@ class Main:
     def event_story_mode(self):
         self.music.stop()
         print('스토리 모드 버튼 클릭됨')
-        CampaignMap().run()
+        StoryModeMap().run()
         # self.running = False
 
     def event_settings(self):

@@ -31,7 +31,7 @@ from controller.game_utils import (
 )
 
 
-class SingleGame:
+class SinglePlay:
     def __init__(self, computer_attends, username):
         # 저장된 설정 불러오기, 만약 파일이 비어있다면 기본 설정으로 세팅
         try:

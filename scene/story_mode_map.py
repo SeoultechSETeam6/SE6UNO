@@ -4,9 +4,10 @@ from controller.mouse_controller import Mouse
 from controller import game_data_controller, game_view_controller
 from ui.button import Button, ImageButton
 from ui.popup import Popup
-from scene.stage_logic import StageA, StageB, StageC, StageD
+from scene.story_mode_stage_logic import StageA, StageB, StageC, StageD
 
-class CampaignMap:
+
+class StoryModeMap:
     def __init__(self):
         # 게임 설정 불러오기
         self.settings_data = game_data_controller.load_settings_data()
@@ -41,12 +42,12 @@ class CampaignMap:
                                     self.ui_size["stage_button"][0],
                                     self.ui_size["stage_button"][1],
                                     self.screen,
-                                    "../resources/image/story_image/storygym_1.png",
+                                    "./resources/image/story_image/storygym_1.png",
                                     on_click_function=self.event_stage_1_popup)]
         
         self.clear_flags = []
         clear_flag = pygame.transform.scale(
-            (pygame.image.load("../resources/Image/story_image/clear_mark.png")),
+            (pygame.image.load("./resources/Image/story_image/clear_mark.png")),
             (self.ui_size["stage_button"][0] * 0.95, self.ui_size["stage_button"][1] * 0.5))
 
         # 클리어 체크 후 버튼 표시 및 클리어 여부 표시
@@ -56,7 +57,7 @@ class CampaignMap:
                                             self.ui_size["stage_button"][0],
                                             self.ui_size["stage_button"][1],
                                             self.screen,
-                                            "../resources/image/story_image/storygym_2.png",
+                                            "./resources/image/story_image/storygym_2.png",
                                             on_click_function=self.event_stage_2_popup))
             self.clear_flags.append(clear_flag)
         if self.clear_data["2nd"] > 0:
@@ -65,7 +66,7 @@ class CampaignMap:
                                             self.ui_size["stage_button"][0],
                                             self.ui_size["stage_button"][1],
                                             self.screen,
-                                            "../resources/image/story_image/storygym_3.png",
+                                            "./resources/image/story_image/storygym_3.png",
                                             on_click_function=self.event_stage_3_popup))
             self.clear_flags.append(clear_flag)
         if self.clear_data["3rd"] > 0:
@@ -74,7 +75,7 @@ class CampaignMap:
                                             self.ui_size["stage_button"][0],
                                             self.ui_size["stage_button"][1],
                                             self.screen,
-                                            "../resources/image/story_image/storygym_4.png",
+                                            "./resources/image/story_image/storygym_4.png",
                                             on_click_function=self.event_stage_4_popup))
             self.clear_flags.append(clear_flag)
         if self.clear_data["4th"] > 0:
@@ -153,7 +154,7 @@ class CampaignMap:
         self.screen.blit(title, (self.screen.get_width() * 0.67, self.screen.get_height() * 0.2))
 
         # 스테이지 설명
-        description_font = pygame.font.Font("../resources/maplestory_font.ttf", self.ui_size["font"][1] * 2)
+        description_font = pygame.font.Font(game_view_controller.FONT_PATH, self.ui_size["font"][1] * 2)
         description = ['내 이름은 김우노. 우노 마스터가 되기 위해서 4개의 도장을 차례로 격파하기위해 여행을 다니고 있어!',
                        '상대방이 나보다 더 기술카드를 더 많이 가져가고 기술카드를 조합해서 콤보를 사용을 할 수 있어서 조심해야해!',
                        '이 도장에서는 3명과 싸워야하고 첫 카드를 제외하고 모든 카드를 같은 수만큼 플레이어들에게 분배가 돼. 이 도장에서는 카드를 빨리 소모하는 것이 승리의 관건이야.',

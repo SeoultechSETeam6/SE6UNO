@@ -1,5 +1,5 @@
 import random
-from card_gen import generate_cards, Card
+from controller.card_gen import generate_cards, Card
 
 
 def shuffle_cards(cards):
