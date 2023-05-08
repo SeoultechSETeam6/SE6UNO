@@ -7,7 +7,9 @@ CHANGE_SIZE = [1, 0.83, 0.66]
 
 # 공통된 변수
 GAME_TITLE = "UNO Game"
+FONT_PATH = "../resources/maplestory_font.ttf"
 FPS = 60
+
 
 def set_size(width=1920):
     """
@@ -16,26 +18,26 @@ def set_size(width=1920):
     """
     if width == 1920:
         size = {
-            "button_size": BUTTON_SIZE[0],
-            "stage_button_size": STAGE_BUTTON_SIZE[0],
-            "font_size": FONT_SIZE[0],
-            "game_logo_size": GAME_LOGO_SIZE[0],
-            "change_size": CHANGE_SIZE[0]
+            "button": BUTTON_SIZE[0],
+            "stage": STAGE_BUTTON_SIZE[0],
+            "font": FONT_SIZE[0],
+            "logo": GAME_LOGO_SIZE[0],
+            "change": CHANGE_SIZE[0]
         }
     elif width == 1600:
         size = {
-            "button_size": BUTTON_SIZE[1],
-            "stage_button_size": STAGE_BUTTON_SIZE[1],
-            "font_size": FONT_SIZE[1],
-            "game_logo_size": GAME_LOGO_SIZE[1],
-            "change_size": CHANGE_SIZE[1]
+            "button": BUTTON_SIZE[1],
+            "stage_button": STAGE_BUTTON_SIZE[1],
+            "font": FONT_SIZE[1],
+            "logo": GAME_LOGO_SIZE[1],
+            "change": CHANGE_SIZE[1]
         }
     else:
         size = {
-            "button_size": BUTTON_SIZE[2],
-            "stage_button_size": STAGE_BUTTON_SIZE[2],
-            "font_size": FONT_SIZE[2],
-            "game_logo_size": GAME_LOGO_SIZE[2],
-            "change_size": CHANGE_SIZE[2]
+            "button": BUTTON_SIZE[2],
+            "stage_button": STAGE_BUTTON_SIZE[2],
+            "font": FONT_SIZE[2],
+            "logo": GAME_LOGO_SIZE[2],
+            "change": CHANGE_SIZE[2]
         }
     return size

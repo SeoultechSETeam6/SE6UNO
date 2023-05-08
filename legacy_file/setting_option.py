@@ -4,22 +4,22 @@ import math
 from controller.mouse_controller import Mouse
 from ui.slider import Slider
 from ui.button import Button
-from option import save_option as save
-from option import basic_option as basic
+from legacy_file import save_option as save
+from legacy_file import basic_option as basic
 
 
 class Option:
     def __init__(self):
         # 저장된 설정 불러오기, 만약 파일이 비어있다면 기본 설정으로 세팅
         try:
-            with open("./option/save_option.pickle", "rb") as f:
+            with open("./legacy_file/save_option.pickle", "rb") as f:
                 self.display_size = pickle.load(f)
                 self.color_weakness = pickle.load(f)
                 self.key_setting = pickle.load(f)
                 self.sound_volume = pickle.load(f)
                 self.background_volume = pickle.load(f)
                 self.effect_volume = pickle.load(f)
-            with open("./option/save_option.pickle", "rb") as f:
+            with open("./legacy_file/save_option.pickle", "rb") as f:
                 save.display_size = pickle.load(f)
                 save.color_weakness = pickle.load(f)
                 save.key_setting = pickle.load(f)
@@ -91,7 +91,8 @@ class Option:
         else:
             self.color_weakness_button = Button(self.screen.get_width() // 3 * 2, self.screen.get_height() // 8 * 2,
                                                 self.button_size[0],
-                                                self.button_size[1], "ON", self.color_weakness_event, self.font_size[1])
+                                                self.button_size[1], "ON", self.color_weakness_event,
+                                                self.font_size[1])
 
         # 키 설정 변경 버튼
         self.key_setting_button = [
@@ -196,7 +197,7 @@ class Option:
             "ENTER: " + pygame.key.name(save.key_setting['enter']), True, (0, 0, 0))
 
     def reset_event(self):
-        with open("./option/save_option.pickle", "wb") as rf:
+        with open("./legacy_file/save_option.pickle", "wb") as rf:
             pickle.dump(basic.display_size, rf)
             pickle.dump(basic.color_weakness, rf)
             pickle.dump(basic.key_setting, rf)
@@ -206,7 +207,7 @@ class Option:
         self.running = False
 
     def save_event(self):
-        with open("./option/save_option.pickle", "wb") as sf:
+        with open("./legacy_file/save_option.pickle", "wb") as sf:
             pickle.dump(save.display_size, sf)
             pickle.dump(save.color_weakness, sf)
             pickle.dump(save.key_setting, sf)

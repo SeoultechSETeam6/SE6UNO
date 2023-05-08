@@ -1,5 +1,5 @@
 import pygame
-from option import basic_option as basic
+from legacy_file import basic_option as basic
 
 # 색 카드 추가를 위한 리스트
 colors = ['red', 'green', 'blue', 'yellow']

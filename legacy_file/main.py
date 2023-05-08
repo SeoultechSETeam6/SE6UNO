@@ -6,11 +6,11 @@ from single_play_lobby import Lobby
 from scene.campaign_map import CampaignMap
 from controller.mouse_controller import Mouse
 from ui.button import Button
-from option import basic_option as basic
-from option.setting_option import Option
+from legacy_file import basic_option as basic
+from legacy_file.setting_option import Option
 
 
-class Main:
+class Main_Legacy:
     def __init__(self):
         # Pygame 초기화
         pygame.init()
@@ -34,7 +34,7 @@ class Main:
         self.key_setting_down = None
         self.key_setting_enter = None
 
-        self.background_music = pygame.mixer.Sound("./resources/Music/main.ogg")
+        self.background_music = pygame.mixer.Sound("../resources/Music/main.ogg")
         self.sound_volume = None
         self.background_volume = None
         self.effect_volume = None
@@ -66,7 +66,7 @@ class Main:
     def setting(self):
         # 게임 설정 불러오기
         try:
-            with open("./option/save_option.pickle", "rb") as f:
+            with open("save_option.pickle", "rb") as f:
                 self.display_size = pickle.load(f)
                 self.color_weakness = pickle.load(f)
                 self.key_setting = pickle.load(f)
@@ -103,13 +103,13 @@ class Main:
         pygame.display.set_caption(basic.game_title)
 
         # 로고 표시
-        self.logo = pygame.image.load("resources/Image/logo.png")
+        self.logo = pygame.image.load("../resources/Image/logo.png")
         self.logo = pygame.transform.scale(self.logo, self.logo_size)
         self.logo_rect = self.logo.get_rect()
         self.logo_rect.center = ((self.display_size[0] // 2), self.logo_rect.height // 2)
 
         # 버튼 조작 키 표시
-        self.font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[1])
+        self.font = pygame.font.Font("../resources/maplestory_font.ttf", self.font_size[1])
         self.key_setting_up = self.font.render("UP: " + pygame.key.name(self.key_setting['up']), True, (255, 255, 255))
         self.key_setting_down = self.font.render("DOWN: " + pygame.key.name(self.key_setting['down']), True, (255, 255, 255))
         self.key_setting_enter = self.font.render("Enter: " + pygame.key.name(self.key_setting['enter']), True, (255, 255, 255))

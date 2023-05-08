@@ -11,7 +11,7 @@ INIT_GAME_DATA = {
             "height": 1080
         },
         "color_weakness": False,
-        "key_setting": {
+        "key": {
             "up": pygame.K_UP,
             "down": pygame.K_DOWN,
             "left": pygame.K_LEFT,
@@ -33,7 +33,6 @@ INIT_GAME_DATA = {
     "achivement": {
     }
 }
-game_data = INIT_GAME_DATA
 
 
 # 설정 불러오기
@@ -50,9 +49,13 @@ def load_settings_data():
 
 
 # 설정 저장
-def save_settings_data():
+def save_settings_data(settings_data):
+    with open(FILEPATH, encoding='utf-8') as fr:
+        data = json.load(fr)
+        data["settings"] = settings_data
+
     with open(FILEPATH, 'w', encoding='utf-8') as fw:
-        json.dump(game_data, fw, indent=4)
+        json.dump(data, fw, indent=4)
 
 
 def load_stage_clear_data():
@@ -61,7 +64,7 @@ def load_stage_clear_data():
             clear_data = json.load(fr)["stage_clear_status"]
     except FileNotFoundError:
         with open(FILEPATH, 'w', encoding='utf-8') as fw:
-            json.dump(game_data, fw, indent=4)
+            json.dump(INIT_GAME_DATA, fw, indent=4)
             clear_data = INIT_GAME_DATA["stage_clear_status"]
 
     return clear_data

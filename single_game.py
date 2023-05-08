@@ -4,10 +4,10 @@ import random
 import time
 from controller.mouse_controller import Mouse, MouseState
 from ui.button import Button
-from option.setting_option import Option
+from legacy_file.setting_option import Option
 from card_gen import generate_cards, generate_for_change_cards
 from card_shuffle import shuffle_cards, distribute_cards
-from option import basic_option as basic
+from legacy_file import basic_option as basic
 from game_utils import (
     draw_cards_user,
     draw_cards_ai,
@@ -35,7 +35,7 @@ class SingleGame:
     def __init__(self, computer_attends, username):
         # 저장된 설정 불러오기, 만약 파일이 비어있다면 기본 설정으로 세팅
         try:
-            with open("./option/save_option.pickle", "rb") as f:
+            with open("legacy_file/save_option.pickle", "rb") as f:
                 self.display_size = pickle.load(f)
                 self.color_weakness = pickle.load(f)
                 self.key_setting = pickle.load(f)
@@ -317,7 +317,7 @@ class SingleGame:
 
     def setting(self):
         try:
-            with open("./option/save_option.pickle", "rb") as f:
+            with open("legacy_file/save_option.pickle", "rb") as f:
                 self.display_size = pickle.load(f)
                 self.color_weakness = pickle.load(f)
                 self.key_setting = pickle.load(f)

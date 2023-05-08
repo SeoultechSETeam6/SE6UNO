@@ -34,9 +34,6 @@ class Slider:
         self.circle = (int(self.x + (self.value - self.min) / (self.max - self.min) * self.width), self.y + self.height // 2)
         self.rect = pygame.Rect(self.x - image_size * 2, self.y, self.width, self.height)
 
-    def on_click_function(self):
-        pass
-
     def draw(self):
         pygame.draw.rect(self.screen, self.colour, (self.x, self.y, self.width, self.height))
         pygame.draw.circle(self.screen, self.colour, (self.x, self.y + self.height // 2), self.radius)
@@ -45,7 +42,7 @@ class Slider:
         self.circle = (int(self.x + (self.value - self.min) / (self.max - self.min) * self.width), self.y + self.height // 2)
         pygame.draw.circle(self.screen, self.handleColour, self.circle, self.handleRadius)
 
-    def process(self):
+    def detect_event(self):
         mouseState = Mouse.getMouseState()
         x, y = Mouse.getMousePos()
 

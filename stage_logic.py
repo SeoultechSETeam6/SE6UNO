@@ -4,7 +4,7 @@ import random
 from controller.mouse_controller import Mouse, MouseState
 from card_gen import generate_cards, generate_a_stage_cards, generate_c_stage_cards, generate_c_for_change_cards, generate_d_stage_cards
 from card_shuffle import shuffle_cards, distribute_cards, stage_a_distribute
-from option import basic_option as basic
+from legacy_file import basic_option as basic
 from game_utils import (
     find_hovered_card,
     find_hovered_change,

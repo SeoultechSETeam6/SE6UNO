@@ -4,15 +4,15 @@ import pickle
 from single_game import SingleGame
 from controller.mouse_controller import Mouse, MouseState
 from ui.button import Button
-from option import save_option as save
-from option import basic_option as basic
+from legacy_file import save_option as save
+from legacy_file import basic_option as basic
 
 
 class Lobby:
     def __init__(self):
         # 저장된 설정 불러오기, 만약 파일이 비어있다면 기본 설정으로 세팅
         try:
-            with open("./option/save_option.pickle", "rb") as f:
+            with open("legacy_file/save_option.pickle", "rb") as f:
                 self.display_size = pickle.load(f)
                 self.color_weakness = pickle.load(f)
                 self.key_setting = pickle.load(f)
