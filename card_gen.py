@@ -3,7 +3,7 @@ from option import basic_option as basic
 
 # 색 카드 추가를 위한 리스트
 colors = ['red', 'green', 'blue', 'yellow']
-values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'skip', 'reverse', 'draw_2', 'bomb', 'one_more']
+values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'skip', 'reverse', 'draw_2', 'one_more', 'bomb']
 change_colors = ['red', 'green', 'blue', 'yellow']
 change_value = None
 
@@ -22,7 +22,7 @@ class Card:
         return self.__str__()
 
     def is_special(self):
-        return self.value in ["skip", "reverse", "draw_2", "bomb", "one_more", "shield", "change"]
+        return self.value in ["skip", "reverse", "draw_2", "one_more", "bomb", "shield", "change"]
 
     def is_dummy(self):
         return False
@@ -46,11 +46,11 @@ def generate_cards(color_weakness, size_by):
     for i in range(2):
         for color in colors:
             for value in values:
+                if value == "bomb" and i == 1:
+                    break  # bom카드 생성 후 다음 카드로 넘어감
                 card_image = basic.scale_by(pygame.image.load(f"{card_folder}/{color}_{value}.png"), size_by)
                 card = Card(color, value, card_image, card_back_image)
                 cards.append(card)
-                if value == "bomb":
-                    break  # bom카드 생성 후 다음 카드로 넘어감
 
     # 색 없는 실드카드를 한 번에 추가합니다.
     for i in range(2):
@@ -59,12 +59,20 @@ def generate_cards(color_weakness, size_by):
         cards.append(card)
 
     # 색 없는 색변경 카드를 추가
-    for i in range(2):
+    for i in range(40):
         card_image = basic.scale_by(pygame.image.load(f"./resources/Image/card_images/none_change.png"), size_by)
         card = Card('none', 'change', card_image, card_back_image)
         cards.append(card)
     return cards
 
+
+def reload_cards(cards, color_weakness, size_by):
+    card_folder = "./resources/Image/cw_card_images" if color_weakness else "./resources/Image/card_images"
+    # 색약 모드와 경로 차별화
+    for card in cards:
+        card.card_img_back = basic.scale_by(pygame.image.load("./resources/Image/card_images/card_back.png"), size_by)
+        card.card_image = basic.scale_by(pygame.image.load(f"{card_folder}/{card.color}_{card.value}.png"), size_by)
+    return cards
 
 # 체인지카드 발동시 유저한테 보여질 카드.
 def generate_for_change_cards(color_weakness, size_by):

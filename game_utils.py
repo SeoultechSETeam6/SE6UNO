@@ -128,14 +128,6 @@ def is_valid_move(card, top_card):
     return False
 
 
-# 우노 인지 체크
-def check_uno(now_player_hands):
-    if len(now_player_hands) == 1:
-        return True
-    else:
-        return False
-
-
 def computer_uno(one_flags, uno_current_player):
     one_flags[uno_current_player] = True
     com_uno_current_time = pygame.time.get_ticks()
@@ -155,13 +147,6 @@ def computer_playable_card(now_player_hands, board_card):
         playable = False
         card_index = None
     return playable, card_index
-
-
-def is_uno(one_flags, current_player):
-    one_flags[current_player] = True
-    uno_current_time = pygame.time.get_ticks()
-    uno_delay_time = random.randint(2000, 4000)
-    return one_flags, uno_current_time, uno_delay_time
 
 
 def user_submit_card(card, card_index, board_card, now_player_hand):
