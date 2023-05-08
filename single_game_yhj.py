@@ -5,7 +5,7 @@ import time
 from mouse import Mouse, MouseState
 from button import Button
 from option.setting_option import Option
-from card_gen import generate_cards, generate_for_change_cards, generate_c_stage_cards, generate_c_for_change_cards
+from card_gen import generate_cards, generate_for_change_cards, reload_cards, generate_c_stage_cards, generate_c_for_change_cards
 from card_shuffle import shuffle_cards, distribute_cards
 from option import basic_option as basic
 from game_utils import (
@@ -21,13 +21,10 @@ from game_utils import (
     get_top_card,
     draw_board_card,
     is_valid_move,
-    check_uno,
     computer_playable_card,
-    is_uno,
     user_submit_card,
     com_submit_card,
     apply_special_card_effects,
-    random_top_card_color,
     card_reshuffle
 )
 
@@ -77,7 +74,7 @@ class SingleGameYhj:
 
         # single_game 변수
         self.player_count = 1  # 플레이어 수
-        self.card_count = 2  # 처음 시작하는 카드 수
+        self.card_count = 7  # 처음 시작하는 카드 수
 
         # 플레이어 이름
         self.player_name = self.font.render(username, True, (0, 0, 0))
@@ -251,7 +248,139 @@ class SingleGameYhj:
         self.key_select_option = 3
 
     def setting(self):
-        pass
+        try:
+            with open("./option/save_option.pickle", "rb") as f:
+                self.display_size = pickle.load(f)
+                self.color_weakness = pickle.load(f)
+                self.key_setting = pickle.load(f)
+                self.sound_volume = pickle.load(f)
+                self.background_volume = pickle.load(f)
+                self.effect_volume = pickle.load(f)
+        except EOFError:
+            self.display_size = basic.display_size
+            self.color_weakness = basic.color_weakness
+            self.key_setting = basic.key_setting
+            self.sound_volume = basic.sound_volume
+            self.background_volume = basic.background_volume
+            self.effect_volume = basic.effect_volume
+
+        # 회면 크기 별 폰트와 버튼 크기 설정
+        if self.display_size[0] == 1920:
+            self.size_change = basic.change_size[0]
+            self.font_size = basic.font_size[0]
+            self.button_size = basic.button_size[0]
+        elif self.display_size[0] == 1600:
+            self.size_change = basic.change_size[1]
+            self.font_size = basic.font_size[1]
+            self.button_size = basic.button_size[1]
+        else:
+            self.size_change = basic.change_size[2]
+            self.font_size = basic.font_size[2]
+            self.button_size = basic.button_size[2]
+
+        # pygame 초기화
+        pygame.init()
+        self.font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[0])
+        self.small_font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[1])
+
+        self.screen = pygame.display.set_mode(self.display_size)
+
+        # 게임 이미지를 로드
+        self.pause_button_img = basic.scale_by(
+            pygame.image.load("./resources/Image/button_images/pause.png").convert_alpha(), self.size_change)
+        self.resume_button_img = basic.scale_by(
+            pygame.image.load("./resources/Image/button_images/resume.png").convert_alpha(), self.size_change)
+        self.direction_img = basic.scale_by(
+            pygame.image.load("./resources/Image/direction_images/direction.png").convert_alpha(), self.size_change)
+        self.direction_reverse_img = basic.scale_by(pygame.image.load(
+            "./resources/Image/direction_images/direction_reverse.png").convert_alpha(), self.size_change)
+        self.turn_arrow_img = basic.scale_by(
+            pygame.image.load("./resources/Image/direction_images/turn_arrow.png").convert_alpha(), self.size_change)
+        self.next_turn_button_img = basic.scale_by(
+            pygame.image.load("./resources/Image/button_images/next_turn.png").convert_alpha(), self.size_change)
+        self.uno_button_img = basic.scale_by(
+            pygame.image.load("./resources/Image/button_images/uno_button.png").convert_alpha(), self.size_change)
+        self.uno_button_inactive_img = basic.scale_by(pygame.image.load(
+            "./resources/Image/button_images/uno_button_inactive.png").convert_alpha(), self.size_change)
+        self.card_back_image = basic.scale_by(pygame.image.load("resources/Image/card_images/card_back.png"),
+                                              self.size_change)
+        self.selected_image = basic.scale_by(pygame.image.load("./resources/Image/selected_check.png"),
+                                             self.size_change * 0.2)
+
+        # 색변경 카드 사용시 None 나오는거 경로가 다름
+        # 카드 생성 및 셔플
+        self.cards = reload_cards(self.cards, self.color_weakness, self.size_change)
+        self.remain_cards = reload_cards(self.remain_cards, self.color_weakness, self.size_change)
+        self.board_card = reload_cards(self.board_card, self.color_weakness, self.size_change)
+        for i in range(self.player_count):
+            self.player_hands[i] = reload_cards(self.player_hands[i], self.color_weakness, self.size_change)
+
+        # 화면 중앙 좌표 계산
+        self.image_width, self.image_height = self.direction_img.get_size()
+        self.center_x = (self.display_size[0] - self.image_width) // 2
+        self.center_y = (self.display_size[1] - self.image_height) // 2
+
+        self.computer_color = ["red", "blue", "green", "yellow"]
+
+        # 컴퓨터 초기 좌표와 카드 색 선호도.
+        self.user_coordinate = []
+        self.computer_coordinate = []
+        self.max_per_row = 15 * self.size_change
+        self.max_per_row_com = 20 * self.size_change
+        self.user_coordinate.append(30)
+        self.user_coordinate.append(self.display_size[1] * 0.7)
+        self.user_spacing = self.display_size[1] * 0.08
+        self.turn_coordinate = [70, 150 * self.size_change, 150 * self.size_change, 80]
+        self.next_turn_co = [0, 150 * self.size_change]
+        if self.computer_attends[0]:
+            self.computer_coordinate.append([self.display_size[0] * 0.65, self.display_size[1] * 0.03])
+            self.computer1_color = self.computer_color[random.randint(0, 3)]
+            print("computer1_color", self.computer1_color)
+        if self.computer_attends[1]:
+            self.computer_coordinate.append(
+                [self.display_size[0] * 0.65, (self.display_size[1] * 0.03) + self.display_size[1] * 0.2])
+            self.computer2_color = self.computer_color[random.randint(0, 3)]
+            print("computer2_color", self.computer2_color)
+        if self.computer_attends[2]:
+            self.computer_coordinate.append(
+                [self.display_size[0] * 0.65, (self.display_size[1] * 0.03) + (self.display_size[1] * 0.4)])
+            self.computer3_color = self.computer_color[random.randint(0, 3)]
+            print("computer3_color", self.computer3_color)
+        if self.computer_attends[3]:
+            self.computer_coordinate.append(
+                [self.display_size[0] * 0.65, (self.display_size[1] * 0.03) + (self.display_size[1] * 0.6)])
+            self.computer4_color = self.computer_color[random.randint(0, 3)]
+            print("computer4_color", self.computer4_color)
+        if self.computer_attends[4]:
+            self.computer_coordinate.append(
+                [self.display_size[0] * 0.65, (self.display_size[1] * 0.03) + (self.display_size[1] * 0.8)])
+            self.computer5_color = self.computer_color[random.randint(0, 3)]
+            print("computer5_color", self.computer5_color)
+
+        # change카드 좌표, spacing은 공백
+        self.x5 = 100
+        self.y5 = 100
+        self.spacing5 = 200
+        # 플레이어들이 카드를 뽑고 남은 카드들의 위치를 잡는데 사용
+        self.remain_cards_x_position = (self.screen.get_rect().centerx - 100)
+        self.remain_cards_y_position = (self.screen.get_rect().centery - 50)
+        self.remain_pos = pygame.Vector2(self.screen.get_rect().centerx, self.screen.get_rect().centery - 100)
+        # remain카드
+        self.remain_cards_rect = self.remain_cards[0].card_img_back.get_rect()
+        self.remain_cards_rect.topleft = (self.remain_cards_x_position, self.remain_cards_y_position)
+        # pause버튼
+        self.pause_button_rect = self.pause_button_img.get_rect()
+        self.pause_button_rect.topleft = (25, 25)
+        # next_turn버튼
+        self.next_turn_button_rect = self.next_turn_button_img.get_rect()
+        self.next_turn_button_rect.topleft = (
+        self.user_coordinate[0] - self.next_turn_co[0], self.user_coordinate[1] - self.next_turn_co[1])
+        # uno_button
+        self.uno_button_rect = self.uno_button_img.get_rect()
+        self.uno_button_rect.topleft = (150, self.display_size[1] * 0.5)
+        self.uno_button_inactive_rect = self.uno_button_inactive_img.get_rect()
+        self.uno_button_inactive_rect.topleft = (150, self.display_size[1] * 0.5)
+        self.play_drawn_card_button = pygame.Rect(0, 0, 430, 110)
 
     def reset(self):
         self.is_draw = False
@@ -310,6 +439,9 @@ class SingleGameYhj:
                     self.current_player = (self.current_player + self.game_direction) % self.player_count
                     self.reset()
                     self.turn_count = self.turn_count + 1
+                elif self.change_card:
+                    self.user_turn = False
+                    self.card_playing()
                 else:
                     self.draw_animation(self.current_player)
                     self.player_hands[0].append(self.remain_cards.pop())
@@ -345,10 +477,12 @@ class SingleGameYhj:
                 if self.new_drawn_card is not None and is_valid_move(self.new_drawn_card, self.top_card) and self.clicked_card == self.new_drawn_card and self.pop_card is None:
                     self.place_animation(self.current_player)
                     self.board_card, self.player_hands[self.current_player], self.pop_card = user_submit_card(self.clicked_card, self.clicked_card_index, self.board_card, self.player_hands[self.current_player])
+                    self.turn_start_time = pygame.time.get_ticks()
             # 카드를 드로우하지 않고, 카드를 냄
-            elif self.clicked_card is not None and is_valid_move(self.clicked_card, self.top_card):
+            elif self.pop_card is None and self.clicked_card is not None and is_valid_move(self.clicked_card, self.top_card):
                 self.place_animation(self.current_player)
                 self.board_card, self.player_hands[self.current_player], self.pop_card = user_submit_card(self.clicked_card, self.clicked_card_index, self.board_card, self.player_hands[self.current_player])
+                self.turn_start_time = pygame.time.get_ticks()
 
         # 컴퓨터 턴 처리
         if not self.user_turn:
@@ -702,7 +836,7 @@ class SingleGameYhj:
 
     def one_more_animation(self, index):
         self.draw()
-        self.screen.blit(basic.scale_by(pygame.image.load("./resources/Image/animation/-1.png"), self.size_change),
+        self.screen.blit(basic.scale_by(pygame.image.load("./resources/Image/animation/_1.png"), self.size_change),
                          (self.center_x, self.center_y))
         pygame.display.flip()
         time.sleep(0.7)
@@ -797,15 +931,10 @@ class SingleGameYhj:
             self.screen.blit(self.next_turn_button_img, self.next_turn_button_rect)
 
         # 유저턴일때 표시될 사항. (시간제한, 턴 넘기기 버튼)
-        if self.user_turn and self.new_drawn_card is None and not self.uno_check and self.turn_start_time is not None:
+        if self.user_turn and not self.uno_check and self.turn_start_time is not None:
             self.remaining_time = self.time_limit - (self.current_time - self.turn_start_time)
             self.remaining_time_text = f"턴 남은 시간: {self.remaining_time // 1000}초"
             draw_text(self.screen, self.remaining_time_text, self.font, (255, 255, 255), self.screen.get_rect().centerx/2, 30)
-        # draw후 시간제한,턴 넘기기는 draw를 해야지 나옴.
-        elif self.user_turn and self.new_drawn_card is not None and not self.uno_check and self.turn_start_time is not None:
-            self.after_draw_remaining_time = self.time_limit - (self.current_time - self.turn_start_time)
-            self.after_draw_remaining_time_text = f"턴 남은 시간: {self.after_draw_remaining_time // 1000}초"
-            draw_text(self.screen, self.after_draw_remaining_time_text, self.font, (255, 255, 255), self.screen.get_rect().centerx/2, 30)
 
         # 유저 이름 그리기
         self.screen.blit(self.player_name,
