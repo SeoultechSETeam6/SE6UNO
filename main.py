@@ -1,13 +1,28 @@
 import pygame
 import sys
 import pickle
+import json
+import os
 
+from achievement import Achievement
 from single_play_lobby import Lobby
 from campaign_map import CampaignMap
 from mouse import Mouse
 from button import Button
 from option import basic_option as basic
 from option.setting_option import Option
+
+
+def load_default_game_data():
+    with open('default_game_data.json', 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+
+def create_game_data_if_not_exists():
+    if not os.path.exists('game_data.json'):
+        default_game_data = load_default_game_data()
+        with open('game_data.json', 'w', encoding='utf-8') as f:
+            json.dump(default_game_data, f, indent=4)
 
 
 class Main:
@@ -48,6 +63,13 @@ class Main:
         print('설정 버튼 클릭됨')
         option = Option()
         option.run()
+        self.setting()
+
+    def achievement_button_click_event(self):
+        self.background_music.stop()
+        print('업적 버튼 클릭 됨')
+        achievement = Achievement()
+        achievement.run()
         self.setting()
 
     def exit_button_click_event(self):
@@ -120,8 +142,10 @@ class Main:
             Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.3, self.button_size[0],
                    self.button_size[1], '싱글 플레이', self.in_game_button_click_event, self.font_size[1]),
             Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.5, self.button_size[0],
-                   self.button_size[1], '설정', self.settings_button_click_event, self.font_size[1]),
+                   self.button_size[1], '업적', self.achievement_button_click_event, self.font_size[1]),
             Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.7, self.button_size[0],
+                   self.button_size[1], '설정', self.settings_button_click_event, self.font_size[1]),
+            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.9, self.button_size[0],
                    self.button_size[1], '나가기', self.exit_button_click_event, self.font_size[1])]
 
         self.selected_button_index = 0
@@ -173,5 +197,7 @@ class Main:
         sys.exit()
 
 
-main = Main()
-main.run()
+if __name__ == '__main__':
+    create_game_data_if_not_exists()
+    main = Main()
+    main.run()

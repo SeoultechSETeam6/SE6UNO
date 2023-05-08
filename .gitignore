@@ -131,3 +131,5 @@ dmypy.json
 .idea/
 *.pickle
 *.json
+
+!default_game_data.json
