@@ -100,7 +100,7 @@ class Achievement:
             self.terrorist_coordinate = (400, 450)
             self.adequate_defense_coordinate = (800, 450)
             self.greedy_man_coordinate = (1200, 450)
-            self.exit_button_coordinate = (1300, 800)
+            self.exit_button_coordinate = (1300, 850)
         else:
             self.achievement_folder = "./resources/Image/achievements/small"
             self.single_player_winner_coordinate = (0, 100)

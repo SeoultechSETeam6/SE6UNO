@@ -142,9 +142,9 @@ class Main:
             Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.3, self.button_size[0],
                    self.button_size[1], '싱글 플레이', self.in_game_button_click_event, self.font_size[1]),
             Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.5, self.button_size[0],
-                   self.button_size[1], '설정', self.settings_button_click_event, self.font_size[1]),
-            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.7, self.button_size[0],
                    self.button_size[1], '업적', self.achievement_button_click_event, self.font_size[1]),
+            Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.7, self.button_size[0],
+                   self.button_size[1], '설정', self.settings_button_click_event, self.font_size[1]),
             Button(self.display_size[0] // 2, self.display_size[1] // 2 * 1.9, self.button_size[0],
                    self.button_size[1], '나가기', self.exit_button_click_event, self.font_size[1])]
 
