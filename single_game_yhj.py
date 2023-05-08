@@ -5,7 +5,7 @@ import time
 from mouse import Mouse, MouseState
 from button import Button
 from option.setting_option import Option
-from card_gen import generate_cards, generate_for_change_cards, reload_cards, generate_c_stage_cards, generate_c_for_change_cards
+from card_gen import generate_cards, generate_for_change_cards, generate_c_stage_cards, generate_c_for_change_cards
 from card_shuffle import shuffle_cards, distribute_cards
 from option import basic_option as basic
 from game_utils import (
@@ -185,9 +185,9 @@ class SingleGameYhj:
         self.y5 = 100
         self.spacing5 = 200
         # 플레이어들이 카드를 뽑고 남은 카드들의 위치를 잡는데 사용
-        self.remain_cards_x_position = (self.screen.get_rect().centerx - 100)
-        self.remain_cards_y_position = (self.screen.get_rect().centery - 50)
-        self.remain_pos = pygame.Vector2(self.screen.get_rect().centerx, self.screen.get_rect().centery - 100)
+        self.remain_cards_x_position = (self.screen.get_rect().centerx - 151 * self.size_change)
+        self.remain_cards_y_position = (self.screen.get_rect().centery - 75 * self.size_change)
+        self.remain_pos = pygame.Vector2(self.screen.get_rect().centerx, self.screen.get_rect().centery - 151 * self.size_change)
         # remain카드
         self.remain_cards_rect = self.remain_cards[0].card_img_back.get_rect()
         self.remain_cards_rect.topleft = (self.remain_cards_x_position, self.remain_cards_y_position)
@@ -246,6 +246,14 @@ class SingleGameYhj:
 
         # 0: 드로우, 1: 우노버튼, 2: 턴 넘기기, 3. 덱
         self.key_select_option = 3
+
+    def reload_card(self, deck):
+        for card in deck:
+            if self.color_weakness:
+                card.card_img = basic.scale_by(card.image_cw, self.size_change)
+            else:
+                card.card_img = basic.scale_by(card.image, self.size_change)
+            card.card_img_back = basic.scale_by(card.image_back, self.size_change)
 
     def setting(self):
         try:
@@ -308,12 +316,12 @@ class SingleGameYhj:
                                              self.size_change * 0.2)
 
         # 색변경 카드 사용시 None 나오는거 경로가 다름
-        # 카드 생성 및 셔플
-        self.cards = reload_cards(self.cards, self.color_weakness, self.size_change)
-        self.remain_cards = reload_cards(self.remain_cards, self.color_weakness, self.size_change)
-        self.board_card = reload_cards(self.board_card, self.color_weakness, self.size_change)
+        # 카드 크기 줄이기
+        self.reload_card(self.change_color_list)
+        self.reload_card(self.remain_cards)
+        self.reload_card(self.board_card)
         for i in range(self.player_count):
-            self.player_hands[i] = reload_cards(self.player_hands[i], self.color_weakness, self.size_change)
+            self.reload_card(self.player_hands[i])
 
         # 화면 중앙 좌표 계산
         self.image_width, self.image_height = self.direction_img.get_size()
@@ -362,9 +370,9 @@ class SingleGameYhj:
         self.y5 = 100
         self.spacing5 = 200
         # 플레이어들이 카드를 뽑고 남은 카드들의 위치를 잡는데 사용
-        self.remain_cards_x_position = (self.screen.get_rect().centerx - 100)
-        self.remain_cards_y_position = (self.screen.get_rect().centery - 50)
-        self.remain_pos = pygame.Vector2(self.screen.get_rect().centerx, self.screen.get_rect().centery - 100)
+        self.remain_cards_x_position = (self.screen.get_rect().centerx - 151 * self.size_change)
+        self.remain_cards_y_position = (self.screen.get_rect().centery - 75 * self.size_change)
+        self.remain_pos = pygame.Vector2(self.screen.get_rect().centerx, self.screen.get_rect().centery - 151 * self.size_change)
         # remain카드
         self.remain_cards_rect = self.remain_cards[0].card_img_back.get_rect()
         self.remain_cards_rect.topleft = (self.remain_cards_x_position, self.remain_cards_y_position)
@@ -503,7 +511,6 @@ class SingleGameYhj:
                     self.new_drawn_card = self.remain_cards.pop()
                     self.player_hands[self.current_player].append(self.new_drawn_card)
                     self.turn_start_time = pygame.time.get_ticks()
-                    self.turn_count = self.turn_count + 1
                 # 드로우한 카드가 낼 수 있는 경우
                 elif self.new_drawn_card is not None and is_valid_move(self.new_drawn_card, self.top_card) and self.pop_card is None:
                     if self.current_time - self.turn_start_time >= self.delay_time2:
@@ -514,9 +521,9 @@ class SingleGameYhj:
                 # 드로우한 카드를 낼 수 없는 경우
                 elif self.new_drawn_card is not None and not is_valid_move(self.new_drawn_card, self.top_card) and self.pop_card is None:
                     if self.current_time - self.turn_start_time >= self.delay_time2:
+                        self.turn_count = self.turn_count + 1
                         self.current_player = (self.current_player + self.game_direction) % self.player_count
                         self.reset()
-                        self.new_drawn_card = None
 
     def is_uno(self):
         if len(self.player_hands[self.current_player]) == 1:
@@ -654,7 +661,10 @@ class SingleGameYhj:
         self.background_music.set_volume(self.sound_volume * self.background_volume)
         self.background_music.play(-1)
         print('일시정지 해제')
-        self.turn_start_time += pygame.time.get_ticks() - self.pause_start_time
+        if self.turn_start_time is None:
+            pass
+        else:
+            self.turn_start_time += pygame.time.get_ticks() - self.pause_start_time
         self.paused = False
 
     def pause_popup_exit_button_event(self):
@@ -722,7 +732,7 @@ class SingleGameYhj:
             pygame.display.flip()
 
     def draw_animation(self, index):
-        remain_pos = pygame.Vector2(self.remain_cards_x_position, self.screen.get_rect().centery - 100)
+        remain_pos = pygame.Vector2(self.remain_cards_x_position, self.screen.get_rect().centery - 151 * self.size_change)
         self.card_place_music.set_volume(self.sound_volume * self.effect_volume)
         self.card_place_music.play(1)
         if index == 0:
@@ -889,16 +899,16 @@ class SingleGameYhj:
             self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[4][0]-self.turn_coordinate[2], self.computer_coordinate[4][1]-self.turn_coordinate[3]))
 
         # 남은 카드 더미 그리기
-        self.screen.blit(self.remain_cards[0].card_img_back, (self.remain_cards_x_position, self.screen.get_rect().centery - 100))
+        self.screen.blit(self.remain_cards[0].card_img_back, (self.remain_cards_x_position, self.screen.get_rect().centery - 151 * self.size_change))
         # 엎은 카드 그리기
-        draw_board_card(self.screen, self.board_card[-1], self.screen.get_rect().centerx, self.screen.get_rect().centery - 100)
+        draw_board_card(self.screen, self.board_card[-1], self.screen.get_rect().centerx, self.screen.get_rect().centery - 151 * self.size_change)
         # 유저 카드 그리기
         draw_cards_user(self.screen, self.player_hands[0], self.user_coordinate[0], self.user_coordinate[1], self.max_per_row,
                         self.user_spacing, self.hovered_card_index)
         # 현재 색 그리기
         card_folder = "./resources/Image/select_color_cw" if self.color_weakness else "./resources/Image/select_color"
         card_color = basic.scale_by(pygame.image.load(f"{card_folder}/{self.top_card.color}.png"), self.size_change)
-        self.screen.blit(card_color, (self.remain_cards_x_position, self.screen.get_rect().centery - 250))
+        self.screen.blit(card_color, (self.remain_cards_x_position, self.screen.get_rect().centery - 350 * self.size_change))
         # ai의 카드를 그린다.
         for i in range(len(self.player_hands) - 1):
             draw_cards_ai(self.screen, self.player_hands[i + 1], self.computer_coordinate[i][0],
