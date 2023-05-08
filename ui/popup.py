@@ -1,4 +1,6 @@
 import pygame
+
+from controller import game_view_controller
 from ui.button import Button
 
 # 색상 설정
@@ -50,7 +52,7 @@ class Popup:
 
         self.pop = False
 
-        self.font = pygame.font.Font("../resources/maplestory_font.ttf", text_size)
+        self.font = pygame.font.Font(game_view_controller.FONT_PATH, text_size)
         self.font = self.font.render(text, True, 0x000000)
         self.surface.fill(gray)
 

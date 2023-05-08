@@ -2,10 +2,10 @@ from single_game import SingleGame
 import pygame
 import random
 from controller.mouse_controller import Mouse, MouseState
-from card_gen import generate_cards, generate_a_stage_cards, generate_c_stage_cards, generate_c_for_change_cards, generate_d_stage_cards
-from card_shuffle import shuffle_cards, distribute_cards, stage_a_distribute
+from controller.card_gen import generate_cards, generate_a_stage_cards, generate_c_stage_cards, generate_c_for_change_cards, generate_d_stage_cards
+from controller.card_shuffle import shuffle_cards, distribute_cards, stage_a_distribute
 from legacy_file import basic_option as basic
-from game_utils import (
+from controller.game_utils import (
     find_hovered_card,
     find_hovered_change,
     get_clicked_card,
@@ -890,10 +890,10 @@ class StageD(SingleGame):
     def win(self):
         popup = None
         if len(self.player_hands[0]) == 0 or any(len(player_hand) >= 15 for player_hand in self.player_hands[1:]):
-            popup = basic.scale_by(pygame.image.load("./resources/Image/win.png"), self.size_change)
+            popup = basic.scale_by(pygame.image.load("../resources/Image/win.png"), self.size_change)
             self.game_over = True
         elif any(len(player_hand) == 0 for player_hand in self.player_hands[1:]) or len(self.player_hands[0]) == 15:
-            popup = basic.scale_by(pygame.image.load("./resources/Image/lose.png"), self.size_change)
+            popup = basic.scale_by(pygame.image.load("../resources/Image/lose.png"), self.size_change)
             self.game_over = True
         if self.game_over:
             self.background_music.stop()

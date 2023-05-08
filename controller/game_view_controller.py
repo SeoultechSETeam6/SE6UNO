@@ -7,7 +7,7 @@ CHANGE_SIZE = [1, 0.83, 0.66]
 
 # 공통된 변수
 GAME_TITLE = "UNO Game"
-FONT_PATH = "../resources/maplestory_font.ttf"
+FONT_PATH = "./resources/maplestory_font.ttf"
 FPS = 60
 
 

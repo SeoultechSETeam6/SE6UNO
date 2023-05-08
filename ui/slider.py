@@ -28,7 +28,7 @@ class Slider:
         self.radius = self.height // 2
         self.handleRadius = int(self.height / 1.3)
 
-        self.selected_image = pygame.image.load("../resources/Image/selected_check.png")
+        self.selected_image = pygame.image.load("./resources/Image/selected_check.png")
         self.selected_image = pygame.transform.scale(self.selected_image, (image_size * 1.5, image_size * 1.5))
 
         self.circle = (int(self.x + (self.value - self.min) / (self.max - self.min) * self.width), self.y + self.height // 2)

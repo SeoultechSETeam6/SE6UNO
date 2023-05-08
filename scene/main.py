@@ -5,7 +5,7 @@ from controller import game_data_controller, game_view_controller
 from controller.mouse_controller import Mouse
 from ui.button import Button
 
-from single_play_lobby import Lobby
+from scene.single_play_lobby import Lobby
 from scene.campaign_map import CampaignMap
 from scene.settings import Settings
 
@@ -28,13 +28,13 @@ class Main:
         self.font = pygame.font.Font(game_view_controller.FONT_PATH, self.ui_size["font"][1])
 
         # 로고 표시
-        self.logo = pygame.image.load("../resources/Image/logo.png")
+        self.logo = pygame.image.load("./resources/Image/logo.png")
         self.logo = pygame.transform.scale(self.logo, self.ui_size["logo"])
         self.logo_rect = self.logo.get_rect()
         self.logo_rect.center = ((self.screen.get_width() // 2), self.logo_rect.height // 2)
 
         # 음악
-        self.music = pygame.mixer.Sound("../resources/Music/main.ogg")
+        self.music = pygame.mixer.Sound("./resources/Music/main.ogg")
         self.music.set_volume(self.settings_data["volume"]["sound"] * self.settings_data["volume"]["background"])
         self.music.play(-1)
 
@@ -43,6 +43,7 @@ class Main:
         self.key_setting_down = self.font.render("DOWN: " + pygame.key.name(self.settings_data["key"]['down']), True, (255, 255, 255))
         self.key_setting_enter = self.font.render("Enter: " + pygame.key.name(self.settings_data["key"]['enter']), True, (255, 255, 255))
         self.screen.get_height()
+
         # 버튼
         self.buttons = [
             Button(self.screen.get_width() // 2,

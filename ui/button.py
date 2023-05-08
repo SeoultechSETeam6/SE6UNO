@@ -1,5 +1,6 @@
 import pygame
 from controller.mouse_controller import Mouse, MouseState
+from controller import game_view_controller
 
 
 class Button:
@@ -24,7 +25,7 @@ class Button:
         self.screen = screen
         self.on_click_function = on_click_function
         self.alreadyPressed = False
-        self.selected_image = pygame.image.load("../resources/Image/selected_check.png")
+        self.selected_image = pygame.image.load("./resources/Image/selected_check.png")
         self.selected_image = pygame.transform.scale(self.selected_image, (width * 0.5, width * 0.5))
         # self.color = color
         self.text = text
@@ -75,7 +76,7 @@ class Button:
         화면이 매 프레임마다 업데이트 되므로 버튼이 표시되려면 무한 반복하는 부분에서 메서드를 사용해야합니다.
         :return: None
         """
-        rendered_text = pygame.font.Font("../resources/maplestory_font.ttf", self.text_size) \
+        rendered_text = pygame.font.Font(game_view_controller.FONT_PATH, self.text_size) \
             .render(self.text, True, self.text_color)
         if self.__text_len > 0:
             self.surface.blit(rendered_text, [self.rect.width / 2 - rendered_text.get_rect().width / 2,

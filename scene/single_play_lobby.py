@@ -12,7 +12,7 @@ class Lobby:
     def __init__(self):
         # 저장된 설정 불러오기, 만약 파일이 비어있다면 기본 설정으로 세팅
         try:
-            with open("legacy_file/save_option.pickle", "rb") as f:
+            with open("../legacy_file/save_option.pickle", "rb") as f:
                 self.display_size = pickle.load(f)
                 self.color_weakness = pickle.load(f)
                 self.key_setting = pickle.load(f)
@@ -44,34 +44,48 @@ class Lobby:
         pygame.display.set_caption(basic.game_title)
         self.clock = pygame.time.Clock()
         self.running = True
-        self.font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[0])
-        self.small_font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[1])
+        self.font = pygame.font.Font("../resources/maplestory_font.ttf", self.font_size[0])
+        self.small_font = pygame.font.Font("../resources/maplestory_font.ttf", self.font_size[1])
 
         if self.display_size[0] == 1920:
             # 컴퓨터 이미지 가져오기
-            self.computer1_img = pygame.image.load("./resources/Image/lobby_images/big/computer1.png").convert_alpha()
-            self.computer2_img = pygame.image.load("./resources/Image/lobby_images/big/computer2.png").convert_alpha()
-            self.computer3_img = pygame.image.load("./resources/Image/lobby_images/big/computer3.png").convert_alpha()
-            self.computer4_img = pygame.image.load("./resources/Image/lobby_images/big/computer4.png").convert_alpha()
-            self.computer5_img = pygame.image.load("./resources/Image/lobby_images/big/computer5.png").convert_alpha()
-            self.enter_img = pygame.image.load("./resources/Image/lobby_images/big/computer_enter.png").convert_alpha()
-            self.start_img = pygame.image.load("./resources/Image/lobby_images/big/game_start.png").convert_alpha()
+            self.computer1_img = pygame.image.load("../resources/Image/lobby_images/big/computer1.png").convert_alpha()
+            self.computer2_img = pygame.image.load("../resources/Image/lobby_images/big/computer2.png").convert_alpha()
+            self.computer3_img = pygame.image.load("../resources/Image/lobby_images/big/computer3.png").convert_alpha()
+            self.computer4_img = pygame.image.load("../resources/Image/lobby_images/big/computer4.png").convert_alpha()
+            self.computer5_img = pygame.image.load("../resources/Image/lobby_images/big/computer5.png").convert_alpha()
+            self.enter_img = pygame.image.load("../resources/Image/lobby_images/big/computer_enter.png").convert_alpha()
+            self.start_img = pygame.image.load("../resources/Image/lobby_images/big/game_start.png").convert_alpha()
         elif self.display_size[0] == 1600:
-            self.computer1_img = pygame.image.load("./resources/Image/lobby_images/middle/computer1.png").convert_alpha()
-            self.computer2_img = pygame.image.load("./resources/Image/lobby_images/middle/computer2.png").convert_alpha()
-            self.computer3_img = pygame.image.load("./resources/Image/lobby_images/middle/computer3.png").convert_alpha()
-            self.computer4_img = pygame.image.load("./resources/Image/lobby_images/middle/computer4.png").convert_alpha()
-            self.computer5_img = pygame.image.load("./resources/Image/lobby_images/middle/computer5.png").convert_alpha()
-            self.enter_img = basic.scale_by(pygame.image.load("./resources/Image/lobby_images/middle/computer_enter.png").convert_alpha(), basic.change_size[1])
-            self.start_img = basic.scale_by(pygame.image.load("./resources/Image/lobby_images/middle/game_start.png").convert_alpha(), basic.change_size[1])
+            self.computer1_img = pygame.image.load(
+                "../resources/Image/lobby_images/middle/computer1.png").convert_alpha()
+            self.computer2_img = pygame.image.load(
+                "../resources/Image/lobby_images/middle/computer2.png").convert_alpha()
+            self.computer3_img = pygame.image.load(
+                "../resources/Image/lobby_images/middle/computer3.png").convert_alpha()
+            self.computer4_img = pygame.image.load(
+                "../resources/Image/lobby_images/middle/computer4.png").convert_alpha()
+            self.computer5_img = pygame.image.load(
+                "../resources/Image/lobby_images/middle/computer5.png").convert_alpha()
+            self.enter_img = basic.scale_by(pygame.image.load(
+                "../resources/Image/lobby_images/middle/computer_enter.png").convert_alpha(), basic.change_size[1])
+            self.start_img = basic.scale_by(pygame.image.load(
+                "../resources/Image/lobby_images/middle/game_start.png").convert_alpha(), basic.change_size[1])
         else:
-            self.computer1_img = pygame.image.load("./resources/Image/lobby_images/small/computer1.png").convert_alpha()
-            self.computer2_img = pygame.image.load("./resources/Image/lobby_images/small/computer2.png").convert_alpha()
-            self.computer3_img = pygame.image.load("./resources/Image/lobby_images/small/computer3.png").convert_alpha()
-            self.computer4_img = pygame.image.load("./resources/Image/lobby_images/small/computer4.png").convert_alpha()
-            self.computer5_img = pygame.image.load("./resources/Image/lobby_images/small/computer5.png").convert_alpha()
-            self.enter_img = basic.scale_by(pygame.image.load("./resources/Image/lobby_images/small/computer_enter.png").convert_alpha(), basic.change_size[2])
-            self.start_img = basic.scale_by(pygame.image.load("./resources/Image/lobby_images/small/game_start.png").convert_alpha(), basic.change_size[2])
+            self.computer1_img = pygame.image.load(
+                "../resources/Image/lobby_images/small/computer1.png").convert_alpha()
+            self.computer2_img = pygame.image.load(
+                "../resources/Image/lobby_images/small/computer2.png").convert_alpha()
+            self.computer3_img = pygame.image.load(
+                "../resources/Image/lobby_images/small/computer3.png").convert_alpha()
+            self.computer4_img = pygame.image.load(
+                "../resources/Image/lobby_images/small/computer4.png").convert_alpha()
+            self.computer5_img = pygame.image.load(
+                "../resources/Image/lobby_images/small/computer5.png").convert_alpha()
+            self.enter_img = basic.scale_by(pygame.image.load(
+                "../resources/Image/lobby_images/small/computer_enter.png").convert_alpha(), basic.change_size[2])
+            self.start_img = basic.scale_by(pygame.image.load(
+                "../resources/Image/lobby_images/small/game_start.png").convert_alpha(), basic.change_size[2])
 
         # 이미지 크기 가져오기
         self.computer1_size = self.computer1_img.get_size()

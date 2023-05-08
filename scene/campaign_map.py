@@ -4,7 +4,7 @@ from controller.mouse_controller import Mouse
 from controller import game_data_controller, game_view_controller
 from ui.button import Button, ImageButton
 from ui.popup import Popup
-from stage_logic import StageA, StageB, StageC, StageD
+from scene.stage_logic import StageA, StageB, StageC, StageD
 
 class CampaignMap:
     def __init__(self):

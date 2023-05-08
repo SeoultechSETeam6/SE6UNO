@@ -2,7 +2,7 @@ import pygame
 import sys
 import pickle
 
-from single_play_lobby import Lobby
+from scene.single_play_lobby import Lobby
 from scene.campaign_map import CampaignMap
 from controller.mouse_controller import Mouse
 from ui.button import Button

@@ -3,7 +3,7 @@ import pygame
 
 
 # 게임 설정 기본값
-FILEPATH = "../game_settings.json"
+FILEPATH = "./game_settings.json"
 INIT_GAME_DATA = {
     "settings": {
         "resolution": {
