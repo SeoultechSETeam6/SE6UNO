@@ -30,7 +30,55 @@ INIT_GAME_DATA = {
         "3rd": 0,
         "4th": 0
     },
-    "achivement": {
+    "achievements": {
+        "single_player_winner": {
+            "name": "승리",
+            "description": "싱글 플레이어 대전에서 승리",
+            "achieved": False,
+            "achieved_date": None
+        },
+        "stage_all_clear": {
+            "name": "스테이지 마스터",
+            "description": "모든 스테이지 클리어",
+            "achieved": False,
+            "achieved_date": None
+        },
+        "speed_racer": {
+            "name": "스피드 레이서",
+            "description": "싱글 플레이어 게임에서 10턴안에 승리",
+            "achieved": False,
+            "achieved_date": None
+        },
+        "chivalry": {
+            "name": "기사도",
+            "description": "기술카드 사용 안하고 승리",
+            "achieved": False,
+            "achieved_date": None
+        },
+        "win_by_a_nose": {
+            "name": "간발의 차",
+            "description": "다른 플레이어가 UNO선언한 뒤에 승리",
+            "achieved": False,
+            "achieved_date": None
+        },
+        "terrorist": {
+            "name": "테러리스트",
+            "description": "폭탄 카드 사용",
+            "achieved": False,
+            "achieved_date": None
+        },
+        "adequate_defense": {
+            "name": "적절한 방어",
+            "description": "방어 카드로 공격 막음",
+            "achieved": False,
+            "achieved_date": None
+        },
+        "greedy_man": {
+            "name": "욕심쟁이",
+            "description": "one_more 카드 사용",
+            "achieved": False,
+            "achieved_date": None
+        }
     }
 }
 
