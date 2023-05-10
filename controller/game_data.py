@@ -3,7 +3,7 @@ import pygame
 
 
 # 게임 설정 기본값
-FILEPATH = "./game_settings.json"
+FILEPATH = "./game_data.json"
 INIT_GAME_DATA = {
     "settings": {
         "resolution": {
@@ -24,7 +24,7 @@ INIT_GAME_DATA = {
             "effect": 1.0
         }
     },
-    "stage_clear_status": {
+    "stage_clear_count": {
         "1st": 0,
         "2nd": 0,
         "3rd": 0,
@@ -84,7 +84,7 @@ INIT_GAME_DATA = {
 
 
 # 설정 불러오기
-def load_settings_data():
+def load_settings():
     try:
         with open(FILEPATH, encoding='utf-8') as fr:
             settings_data = json.load(fr)["settings"]
@@ -97,7 +97,7 @@ def load_settings_data():
 
 
 # 설정 저장
-def save_settings_data(settings_data):
+def save_settings(settings_data):
     with open(FILEPATH, encoding='utf-8') as fr:
         data = json.load(fr)
         data["settings"] = settings_data
@@ -106,13 +106,13 @@ def save_settings_data(settings_data):
         json.dump(data, fw, indent=4)
 
 
-def load_stage_clear_data():
+def load_stage_clear():
     try:
         with open(FILEPATH, encoding='utf-8') as fr:
-            clear_data = json.load(fr)["stage_clear_status"]
+            clear_data = json.load(fr)["stage_clear_count"]
     except FileNotFoundError:
         with open(FILEPATH, 'w', encoding='utf-8') as fw:
             json.dump(INIT_GAME_DATA, fw, indent=4)
-            clear_data = INIT_GAME_DATA["stage_clear_status"]
+            clear_data = INIT_GAME_DATA["stage_clear_count"]
 
     return clear_data

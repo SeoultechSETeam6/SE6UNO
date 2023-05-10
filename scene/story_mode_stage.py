@@ -1,10 +1,9 @@
-from scene.single_play import SinglePlay
+from scene.single_play_legacy import SinglePlay
 import pygame
 import random
-from controller.mouse_controller import Mouse, MouseState
+from controller.mouse import Mouse, MouseState
 from controller.card_gen import generate_cards, generate_a_stage_cards, generate_c_stage_cards, generate_c_for_change_cards, generate_d_stage_cards
 from controller.card_shuffle import shuffle_cards, distribute_cards, stage_a_distribute
-from legacy_file import basic_option as basic
 from controller.game_utils import (
     find_hovered_card,
     find_hovered_change,

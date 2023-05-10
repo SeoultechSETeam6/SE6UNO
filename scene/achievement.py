@@ -75,8 +75,8 @@ class Achievement:
         pygame.display.set_caption(basic.game_title)
         self.clock = pygame.time.Clock()
         self.running = True
-        self.font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[0])
-        self.small_font = pygame.font.Font("./resources/maplestory_font.ttf", self.font_size[1])
+        self.font = pygame.font.Font("../resources/maplestory_font.ttf", self.font_size[0])
+        self.small_font = pygame.font.Font("../resources/maplestory_font.ttf", self.font_size[1])
 
         # 화면 크기에 맞춰 이미지 경로 수정 및 좌표수정
         if self.display_size[0] == 1920:

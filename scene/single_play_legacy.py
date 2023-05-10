@@ -2,12 +2,10 @@ import pygame
 import pickle
 import random
 import time
-from controller.mouse_controller import Mouse, MouseState
+from controller.mouse import Mouse, MouseState
 from ui.button import Button
-from legacy_file.setting_option import Option
 from controller.card_gen import generate_cards, generate_for_change_cards
 from controller.card_shuffle import shuffle_cards, distribute_cards
-from legacy_file import basic_option as basic
 from controller.game_utils import (
     draw_cards_user,
     draw_cards_ai,

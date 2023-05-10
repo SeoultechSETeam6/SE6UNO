@@ -1,3 +1,5 @@
+import pygame
+
 # 화면 크기 변경시 같이 크기가 변경되어야 할 변수
 BUTTON_SIZE = [[200, 75], [167, 62.5], [125, 46.875]]
 STAGE_BUTTON_SIZE = [[500, 347], [417.5, 290], [312.5, 217]]
@@ -41,3 +43,10 @@ def set_size(width=1920):
             "change": CHANGE_SIZE[2]
         }
     return size
+
+
+def scale_by(surface, scale_factor):
+    width, height = surface.get_size()
+    new_width = int(width * scale_factor)
+    new_height = int(height * scale_factor)
+    return pygame.transform.scale(surface, (new_width, new_height))

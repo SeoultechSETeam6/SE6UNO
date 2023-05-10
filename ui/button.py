@@ -1,6 +1,6 @@
 import pygame
-from controller.mouse_controller import Mouse, MouseState
-from controller import game_view_controller
+from controller.mouse import Mouse, MouseState
+from controller import game_view
 
 
 class Button:
@@ -76,7 +76,7 @@ class Button:
         화면이 매 프레임마다 업데이트 되므로 버튼이 표시되려면 무한 반복하는 부분에서 메서드를 사용해야합니다.
         :return: None
         """
-        rendered_text = pygame.font.Font(game_view_controller.FONT_PATH, self.text_size) \
+        rendered_text = pygame.font.Font(game_view.FONT_PATH, self.text_size) \
             .render(self.text, True, self.text_color)
         if self.__text_len > 0:
             self.surface.blit(rendered_text, [self.rect.width / 2 - rendered_text.get_rect().width / 2,
@@ -104,14 +104,6 @@ class ImageButton(Button):
         self.image = pygame.transform.scale(pygame.image.load(img_path), (width, height))
         self.img_rect = self.image.get_rect()
         self.img_rect.center = (x, y)
-
-    # Override
-    def detect_event_1(self):
-        if self.rect.collidepoint(self.__mouse_pos):
-            self.surface.set_alpha(75)
-        else:
-            self.surface.set_alpha(0)
-        super().detect_event()
 
     def draw(self):
         super().draw()

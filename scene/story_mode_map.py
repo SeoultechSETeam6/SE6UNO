@@ -1,31 +1,48 @@
 import pygame
 
-from controller.mouse_controller import Mouse
-from controller import game_data_controller, game_view_controller
+from controller.mouse import Mouse
+from controller import game_data, game_view
 from ui.button import Button, ImageButton
 from ui.popup import Popup
-from scene.story_mode_stage_logic import StageA, StageB, StageC, StageD
+# from scene.story_mode_stage import StageA, StageB, StageC, StageD
 
 
 class StoryModeMap:
     def __init__(self):
         # 게임 설정 불러오기
-        self.settings_data = game_data_controller.load_settings_data()
-        
+        self.settings_data = game_data.load_settings()
+
         # 클리어 데이터 불러오기
-        self.clear_data = game_data_controller.load_stage_clear_data()
+        self.clear_data = game_data.load_stage_clear()
 
         # Pygame 초기화
         pygame.init()
-        pygame.display.set_caption(game_view_controller.GAME_TITLE + ": Select Stage")
-        self.ui_size = game_view_controller.set_size(self.settings_data["resolution"]["width"])
+        pygame.display.set_caption(game_view.GAME_TITLE + ": Select Stage")
+        self.ui_size = game_view.set_size(self.settings_data["resolution"]["width"])
         self.screen = pygame.display.set_mode((self.settings_data["resolution"]["width"],
                                                self.settings_data["resolution"]["height"]))
         self.clock = pygame.time.Clock()
         self.running = True
 
+        # 설명창 영역
+        self.description_section = pygame.Surface((self.screen.get_width() * 0.35, self.screen.get_height()))
+        self.description_section.fill((50, 50, 50))
+
         # 글꼴 설정
-        self.font = pygame.font.Font(game_view_controller.FONT_PATH, self.ui_size["font"][0])
+        self.font = pygame.font.Font(game_view.FONT_PATH, self.ui_size["font"][0])
+
+        # 스테이지 이름
+        self.font_title = pygame.font.Font(game_view.FONT_PATH, self.ui_size["font"][1] * 3)
+        self.text_title = ['캠페인 모드', '1. 기술 도장', '2. 카드러시 도장', '3. 무지개 도장', '4. 난투 도장']
+
+        # 스테이지 설명
+        self.font_description = pygame.font.Font(game_view.FONT_PATH, self.ui_size["font"][1] * 2)
+        self.text_description = [
+            '내 이름은 김우노. 우노 마스터가 되기 위해서 4개의 도장을 차례로 격파하기위해 여행을 다니고 있어!',
+            '상대방이 나보다 더 기술카드를 더 많이 가져가고 기술카드를 조합해서 콤보를 사용을 할 수 있어서 조심해야해!',
+            '이 도장에서는 3명과 싸워야하고 첫 카드를 제외하고 모든 카드를 같은 수만큼 플레이어들에게 분배가 돼. 이 도장에서는 카드를 빨리 소모하는 것이 승리의 관건이야.',
+            '2명의 상대와 대전하고 5턴마다 낼 수 있는 카드의 색상이 무작위로 변경되야해서 주의해야해!',
+            '이 곳에서는 쉴드 카드를 사용할 수 없게 되고, 새로운 공격카드가 추가되고 카드가 일정 매수가 넘어가면 게임오버가 되니까 주의해야 해!']
 
         # 버튼
         self.buttons = [Button(self.screen.get_width() * 0.07,
@@ -44,7 +61,7 @@ class StoryModeMap:
                                     self.screen,
                                     "./resources/image/story_image/storygym_1.png",
                                     on_click_function=self.event_stage_1_popup)]
-        
+
         self.clear_flags = []
         clear_flag = pygame.transform.scale(
             (pygame.image.load("./resources/Image/story_image/clear_mark.png")),
@@ -104,23 +121,22 @@ class StoryModeMap:
 
     def event_stage_entry(self):
         self.popup.pop = False
-        if self.selected_stage_number == 1:
-            stage_1 = StageA()
-            stage_1.run()
-        elif self.selected_stage_number == 2:
-            stage_2 = StageB()
-            stage_2.run()
-        elif self.selected_stage_number == 3:
-            stage_3 = StageC()
-            stage_3.run()
-        else:
-            stage_4 = StageD()
-            stage_4.run()
+        # if self.selected_stage_number == 1:
+        #     stage_1 = StageA()
+        #     stage_1.run()
+        # elif self.selected_stage_number == 2:
+        #     stage_2 = StageB()
+        #     stage_2.run()
+        # elif self.selected_stage_number == 3:
+        #     stage_3 = StageC()
+        #     stage_3.run()
+        # else:
+        #     stage_4 = StageD()
+        #     stage_4.run()
 
     def event_stage_1_popup(self):
         print('1스테이지 입장버튼 클릭됨')
         self.selected_stage_number = 1
-        self.popup.text = '1스테이지에 정말 입장하시겠습니까?'
         self.popup.pop = True
 
     def event_stage_2_popup(self):
@@ -143,25 +159,16 @@ class StoryModeMap:
         self.screen.fill((255, 255, 255))
 
         # 설명창 영역
-        description_section = pygame.Surface((self.screen.get_width() * 0.35, self.screen.get_height()))
-        description_section.fill((50, 50, 50))
-        self.screen.blit(description_section, (self.screen.get_width() * 0.65, 0))
+        self.screen.blit(self.description_section, (self.screen.get_width() * 0.65, 0))
 
         # 스테이지 이름
-        title_font = pygame.font.Font(game_view_controller.FONT_PATH, self.ui_size["font"][1] * 3)
-        title_text = ['캠페인 모드', '1. 기술 도장', '2. 카드러시 도장', '3. 무지개 도장', '4. 난투 도장']
-        title = title_font.render(title_text[self.selected_button_index], True, pygame.Color('white'))
+        title = self.font_title.render(self.text_title[self.selected_button_index], True, pygame.Color('white'))
         self.screen.blit(title, (self.screen.get_width() * 0.67, self.screen.get_height() * 0.2))
 
         # 스테이지 설명
-        description_font = pygame.font.Font(game_view_controller.FONT_PATH, self.ui_size["font"][1] * 2)
-        description = ['내 이름은 김우노. 우노 마스터가 되기 위해서 4개의 도장을 차례로 격파하기위해 여행을 다니고 있어!',
-                       '상대방이 나보다 더 기술카드를 더 많이 가져가고 기술카드를 조합해서 콤보를 사용을 할 수 있어서 조심해야해!',
-                       '이 도장에서는 3명과 싸워야하고 첫 카드를 제외하고 모든 카드를 같은 수만큼 플레이어들에게 분배가 돼. 이 도장에서는 카드를 빨리 소모하는 것이 승리의 관건이야.',
-                       '2명의 상대와 대전하고 5턴마다 낼 수 있는 카드의 색상이 무작위로 변경되야해서 주의해야해!',
-                       '이 곳에서는 쉴드 카드를 사용할 수 없게 되고, 새로운 공격카드가 추가되고 카드가 일정 매수가 넘어가면 게임오버가 되니까 주의해야 해!']
-        self.blit_text(self.screen, description[self.selected_button_index],
-                       (self.screen.get_width() * 0.67, self.screen.get_height() * 0.4), description_font, pygame.Color('white'))
+        self.blit_text(self.screen, self.text_description[self.selected_button_index],
+                       (self.screen.get_width() * 0.67, self.screen.get_height() * 0.4), self.font_description,
+                       pygame.Color('white'))
 
         # 버튼 표시
         for button in self.buttons:
@@ -224,6 +231,6 @@ class StoryModeMap:
         # 메인 화면 표시
         while self.running:
             Mouse.updateMouseState()
-            self.clock.tick(game_view_controller.FPS)
+            self.clock.tick(game_view.FPS)
             self.event()
             self.draw()

@@ -1,11 +1,11 @@
 import pygame
 import sys
 
-from controller import game_data_controller, game_view_controller
-from controller.mouse_controller import Mouse
+from controller import game_data, game_view
+from controller.mouse import Mouse
 from ui.button import Button
 
-from scene.single_play_lobby import Lobby
+from scene.single_play_lobby import SinglePlayLobby
 from scene.story_mode_map import StoryModeMap
 from scene.settings import Settings
 
@@ -13,19 +13,19 @@ from scene.settings import Settings
 class Main:
     def __init__(self):
         # 게임 설정 불러오기
-        self.settings_data = game_data_controller.load_settings_data()
+        self.settings_data = game_data.load_settings()
 
         # pygame 초기화
         pygame.init()
-        pygame.display.set_caption(game_view_controller.GAME_TITLE)
-        self.ui_size = game_view_controller.set_size(self.settings_data["resolution"]["width"])
+        pygame.display.set_caption(game_view.GAME_TITLE)
+        self.ui_size = game_view.set_size(self.settings_data["resolution"]["width"])
         self.screen = pygame.display.set_mode((self.settings_data["resolution"]["width"],
                                                self.settings_data["resolution"]["height"]))
         self.clock = pygame.time.Clock()
         self.running = True
 
         # 글꼴 설정
-        self.font = pygame.font.Font(game_view_controller.FONT_PATH, self.ui_size["font"][1])
+        self.font = pygame.font.Font(game_view.FONT_PATH, self.ui_size["font"][1])
 
         # 로고 표시
         self.logo = pygame.image.load("./resources/Image/logo.png")
@@ -105,12 +105,12 @@ class Main:
     def event_single_play_mode(self):
         self.music.stop()
         print('싱글 플레이 버튼 클릭됨')
-        single_game_instance = Lobby()
-        single_game_instance.run()
+        SinglePlayLobby().run()
 
     def draw(self):
         # 배경 색상
         self.screen.fill((20, 20, 20))
+
         # 버튼 조작 키 업데이트
         self.screen.blit(self.key_setting_up, (50, self.screen.get_height() // 30 * 26))
         self.screen.blit(self.key_setting_down, (50, self.screen.get_height() // 30 * 27))
@@ -124,7 +124,8 @@ class Main:
         # 매 프레임마다 화면 업데이트
         pygame.display.flip()
 
-    def event(self):
+    # 키 입력 감지
+    def detect_key_event(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -144,13 +145,10 @@ class Main:
         # 메인 화면 표시
         while self.running:
             Mouse.updateMouseState()
-            self.clock.tick(game_view_controller.FPS)
-            self.event()
+            self.clock.tick(game_view.FPS)
+            self.detect_key_event()
             self.draw()
+
         # 나가기
         pygame.quit()
         sys.exit()
-
-
-if __name__ == '__main__':
-    Main().run()

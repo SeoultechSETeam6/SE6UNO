@@ -1,173 +1,192 @@
 import pygame
 
-from controller import game_data_controller, game_view_controller
-from controller.mouse_controller import Mouse, MouseState
+from controller import game_data, game_view
+from controller.mouse import Mouse
 from ui.button import Button, ImageButton
+from ui.popup import Popup
 
-from scene.single_play_legacy import SinglePlay
-from scene.story_mode_stage import StageA, StageB, StageC
-from scene.single_play import SinglePlay
+# from scene.single_play import SinglePlay
 
-class Lobby:
+
+class SinglePlayLobby:
     def __init__(self):
         # 게임 설정 불러오기
-        self.settings_data = game_data_controller.load_settings_data()
+        self.settings_data = game_data.load_settings()
 
         # pygame 초기화
         pygame.init()
-        pygame.display.set_caption(game_view_controller.GAME_TITLE + ": Single Play Lobby")
-        self.ui_size = game_view_controller.set_size(self.settings_data["resolution"]["width"])
+        pygame.display.set_caption(game_view.GAME_TITLE + ": Single Play Lobby")
+        self.ui_size = game_view.set_size(self.settings_data["resolution"]["width"])
         self.screen = pygame.display.set_mode((self.settings_data["resolution"]["width"],
                                                self.settings_data["resolution"]["height"]))
         self.clock = pygame.time.Clock()
         self.running = True
 
         # 글꼴 설정
-        self.font = pygame.font.Font(game_view_controller.FONT_PATH, self.ui_size["font"][0])
-        self.small_font = pygame.font.Font(game_view_controller.FONT_PATH, self.ui_size["font"][1])
+        self.font = pygame.font.Font(game_view.FONT_PATH, self.ui_size["font"][0])
+        self.small_font = pygame.font.Font(game_view.FONT_PATH, self.ui_size["font"][1])
 
         # 컴퓨터 추가 버튼
-        self.buttons_computer = [ImageButton(self.screen.get_width() * 0.7,
-                                             self.screen.get_height() * 0.2,
+        self.buttons_computer = [ImageButton(self.screen.get_width() * 0.9,
+                                             self.screen.get_height() * 0.1,
                                              self.screen.get_width() // 6,
                                              self.screen.get_height() // 6,
                                              self.screen,
-                                             "./resources/Image/lobby_images/big/computer1.png",
-                                             on_click_function=self.event_join_ai_player),
-                                 ImageButton(self.screen.get_width() * 0.7,
-                                             self.screen.get_height() * 0.4,
+                                             "./resources/Image/lobby_images/computer1.png",
+                                             on_click_function=self.event_join_computer_1),
+                                 ImageButton(self.screen.get_width() * 0.9,
+                                             self.screen.get_height() * 0.3,
                                              self.screen.get_width() // 6,
                                              self.screen.get_height() // 6,
                                              self.screen,
-                                             "./resources/Image/lobby_images/big/computer2.png",
-                                             on_click_function=self.event_join_ai_player),
-                                 ImageButton(self.screen.get_width() * 0.7,
-                                             self.screen.get_height() * 0.6,
+                                             "./resources/Image/lobby_images/computer2.png",
+                                             on_click_function=self.event_join_computer_2),
+                                 ImageButton(self.screen.get_width() * 0.9,
+                                             self.screen.get_height() * 0.5,
                                              self.screen.get_width() // 6,
                                              self.screen.get_height() // 6,
                                              self.screen,
-                                             "./resources/Image/lobby_images/big/computer3.png",
-                                             on_click_function=self.event_join_ai_player),
-                                 ImageButton(self.screen.get_width() * 0.7,
-                                             self.screen.get_height() * 0.8,
+                                             "./resources/Image/lobby_images/computer3.png",
+                                             on_click_function=self.event_join_computer_3),
+                                 ImageButton(self.screen.get_width() * 0.9,
+                                             self.screen.get_height() * 0.7,
                                              self.screen.get_width() // 6,
                                              self.screen.get_height() // 6,
                                              self.screen,
-                                             "./resources/Image/lobby_images/big/computer4.png",
-                                             on_click_function=self.event_join_ai_player),
-                                 ImageButton(self.screen.get_width() * 0.7,
-                                             self.screen.get_height() * 1,
+                                             "./resources/Image/lobby_images/computer4.png",
+                                             on_click_function=self.event_join_computer_4),
+                                 ImageButton(self.screen.get_width() * 0.9,
+                                             self.screen.get_height() * 0.9,
                                              self.screen.get_width() // 6,
                                              self.screen.get_height() // 6,
                                              self.screen,
-                                             "./resources/Image/lobby_images/big/computer5.png",
-                                             on_click_function=self.event_join_ai_player)]
+                                             "./resources/Image/lobby_images/computer5.png",
+                                             on_click_function=self.event_join_computer_5)]
 
+        # 시작 버튼
         self.button_start = ImageButton(self.screen.get_width() // 2,
                                         self.screen.get_height() // 2,
                                         self.screen.get_width() // 4,
                                         self.screen.get_height() // 4,
                                         self.screen,
-                                        "./resources/Image/lobby_images/big/computer5.png",
+                                        "./resources/Image/lobby_images/game_start.png",
                                         on_click_function=self.event_start)
 
-        self.computer1_attend = False
-        self.computer2_attend = False
-        self.computer3_attend = False
-        self.computer4_attend = False
-        self.computer5_attend = False
+        # 이름 변경 버튼
+        self.button_change_player_name = Button(self.screen.get_width() * 0.07,
+                                                self.screen.get_height() * 0.13,
+                                                self.ui_size["button"][0],
+                                                self.ui_size["button"][1],
+                                                self.screen,
+                                                0xffffff,
+                                                'User 이름 변경',
+                                                self.ui_size["font"][1],
+                                                on_click_function=self.event_change_player_name)
 
         # 이름 변경 버튼
-        self.change_name_button = Button(self.display_size[0] // 2, self.display_size[1] // 4, self.button_size[0],
-                                         self.button_size[1], 'User 이름 변경', self.change_name_event, self.ui_size["font"][1])
-        self.name = "You"
-        self.name_display = self.font.render("User name : " + self.name, True, (0, 0, 0))
+        self.button_exit = Button(self.screen.get_width() * 0.07,
+                                  self.screen.get_height() * 0.93,
+                                  self.ui_size["button"][0],
+                                  self.ui_size["button"][1],
+                                  self.screen,
+                                  0xffffff,
+                                  '나가기',
+                                  self.ui_size["font"][1],
+                                  on_click_function=self.event_exit)
 
-    def change_name_event(self):
-        self.name = ""
-        popup = self.font.render("바꿀 이름을 입력하고 " + pygame.key.name(save.key_setting['enter']) + "키를 입력하시오.", True, (0, 0, 0))
-        self.screen.fill((255, 255, 255))
-        self.screen.blit(popup, (self.screen.get_width() // 2 - popup.get_size()[0] // 2,
-                                 self.screen.get_height() // 2))
-        pygame.display.flip()
-        popup_running = True
-        while popup_running:
-            for popup_event in pygame.event.get():
-                if popup_event.type == pygame.KEYDOWN:
-                    if popup_event.key == self.key_setting['enter']:
-                        popup_running = False
-                        break
-                    self.name = self.name + pygame.key.name(popup_event.key)
+        # 컴퓨터 플레이어 추가완료 이미지
+        self.image_joined = pygame.transform.scale(
+            pygame.image.load("./resources/Image/lobby_images/computer_enter.png"),
+            (self.ui_size["logo"][0] * 0.5, self.ui_size["logo"][1] * 0.4))
 
-    def check_computer_click(self):
-        mouse_x, mouse_y = Mouse.getMousePos()
-        mouse_state = Mouse.getMouseState()
+        # 이름 설정 기본 값
+        self.player_name = "You"
+        self.player_name_temp = ""
+        self.name_display = self.font.render("Player name : " + self.player_name, True, (0, 0, 0))
 
-        computer_numbers = [1, 2, 3, 4, 5]
-        for i in computer_numbers:
-            computer_coordinate = getattr(self, f"computer{i}_coordinate")
-            computer_size = getattr(self, f"computer{i}_size")
+        # 컴퓨터 참여 정보 리스트
+        self.computers_attend_flag = [False, False, False, False, False]
 
-            if (computer_coordinate[0] <= mouse_x <= computer_coordinate[0] + computer_size[0]
-                    and computer_coordinate[1] <= mouse_y <= computer_coordinate[1] + computer_size[1]):
-                if mouse_state == MouseState.CLICK:
-                    print(f"Computer {i} clicked")
-                    current_attend_status = getattr(self, f"computer{i}_attend")
-                    setattr(self, f"computer{i}_attend", not current_attend_status)
-                    break
+        # 이름 변경 팝업창
+        self.popup = Popup(self.screen.get_width() // 2,
+                           self.screen.get_height() // 2,
+                           self.screen.get_width() * 0.4,
+                           self.screen.get_height() * 0.4,
+                           self.screen,
+                           '바꿀 이름을 입력하고 확인 버튼을 눌러주세요.',
+                           self.ui_size["font"][1],
+                           self.event_save_player_name)
 
-    def all_computers_unattended(self):
-        computer_numbers = [1, 2, 3, 4, 5]
-        for i in computer_numbers:
-            if getattr(self, f"computer{i}_attend"):
-                return False
-        return True
+    # 플레이어 이름 변경 버튼 이벤트
+    def event_change_player_name(self):
+        self.player_name_temp = ""
+        self.popup.pop = True
 
-    def check_start_click(self):
-        mouse_x, mouse_y = Mouse.getMousePos()
-        mouse_state = Mouse.getMouseState()
+    # 컴퓨터 플레이어 클릭 시 참여 플래그 토글 이벤트
+    def event_join_computer_1(self):
+        self.computers_attend_flag[0] = not self.computers_attend_flag[0]
 
-        if (self.start_coordinate[0] <= mouse_x <= self.start_coordinate[0] + self.start_img_size[0]
-                and self.start_coordinate[1] <= mouse_y <= self.start_coordinate[1] + self.start_img_size[1]):
-            if mouse_state == MouseState.CLICK and not self.all_computers_unattended():
-                print("Start game")
-                computer_attends = [self.computer1_attend, self.computer2_attend, self.computer3_attend,
-                                    self.computer4_attend, self.computer5_attend]
-<<<<<<< HEAD:scene/single_play_lobby.py
-                single_game = SinglePlay(computer_attends, self.name)
-=======
-                single_game = SingleGameYhj(computer_attends, self.name)
->>>>>>> main:single_play_lobby.py
-                single_game.run()
-                self.running = False
+    def event_join_computer_2(self):
+        self.computers_attend_flag[1] = not self.computers_attend_flag[1]
+
+    def event_join_computer_3(self):
+        self.computers_attend_flag[2] = not self.computers_attend_flag[2]
+
+    def event_join_computer_4(self):
+        self.computers_attend_flag[3] = not self.computers_attend_flag[3]
+
+    def event_join_computer_5(self):
+        self.computers_attend_flag[4] = not self.computers_attend_flag[4]
+
+    # 플레이어 이름 변경 팝업창에서 확인 클릭 시 이벤트
+    def event_save_player_name(self):
+        print('플레이어 이름 변경 확인 버튼 클릭됨')
+        if len(self.player_name_temp) > 0:
+            self.player_name = self.player_name_temp
+        self.popup.pop = False
+
+    # 게임 시작 버튼 이벤트
+    def event_start(self):
+        print("게임 시작")
+        # SinglePlay(self.computers_attend_flag, self.name).run()
+        self.running = False
+
+    # 게임 나가기 버튼 이벤트
+    def event_exit(self):
+        self.running = False
 
     def draw(self):
         self.screen.fill((111, 111, 111))
-        self.screen.blit(self.computer1_img, self.computer1_coordinate)
-        self.screen.blit(self.computer2_img, self.computer2_coordinate)
-        self.screen.blit(self.computer3_img, self.computer3_coordinate)
-        self.screen.blit(self.computer4_img, self.computer4_coordinate)
-        self.screen.blit(self.computer5_img, self.computer5_coordinate)
 
-        if self.computer1_attend:
-            self.screen.blit(self.enter_img, self.computer1_coordinate)
-        if self.computer2_attend:
-            self.screen.blit(self.enter_img, self.computer2_coordinate)
-        if self.computer3_attend:
-            self.screen.blit(self.enter_img, self.computer3_coordinate)
-        if self.computer4_attend:
-            self.screen.blit(self.enter_img, self.computer4_coordinate)
-        if self.computer5_attend:
-            self.screen.blit(self.enter_img, self.computer5_coordinate)
+        # 컴퓨터 플레이어 버튼 그림
+        for i, button in enumerate(self.buttons_computer):
+            button.draw()
+            if not self.popup.pop:
+                button.detect_event()
+            if self.computers_attend_flag[i]:
+                self.screen.blit(self.image_joined, (button.x, button.y))
 
-        if not self.all_computers_unattended():
-            self.screen.blit(self.start_img, self.start_coordinate)
+        # 컴퓨터 플레이어 참여 버튼 그리기
+        self.button_change_player_name.draw()
 
-        self.change_name_button.process()
-        self.screen.blit(self.change_name_button.surface, self.change_name_button.rect)
+        # 게임 시작 버튼 그리기
+        self.button_start.draw()
 
-        self.name_display = self.font.render("User name : " + self.name, True, (0, 0, 0))
-        self.screen.blit(self.name_display, (100, 100))
+        # 나가기 버튼 그리기
+        self.button_exit.draw()
+
+        # 이름 변경 팝업이 열렸을 경우 버튼 클릭 방지
+        if not self.popup.pop:
+            self.button_change_player_name.detect_event()
+            self.button_start.detect_event()
+            self.button_exit.detect_event()
+        else:
+            self.popup.open()
+            temp_name_display = self.small_font.render("변경할 이름: " + self.player_name_temp, True, (0, 0, 0))
+            self.screen.blit(temp_name_display, (self.screen.get_width() // 2.4, self.screen.get_height() // 2))
+
+        self.name_display = self.font.render("User name: " + self.player_name, True, (0, 0, 0))
+        self.screen.blit(self.name_display, (self.screen.get_width() * 0.02, self.screen.get_height() * 0.02))
 
         pygame.display.flip()
 
@@ -176,8 +195,14 @@ class Lobby:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+                if self.popup.pop:
+                    if event.type == pygame.KEYDOWN:
+                        # 백스페이스 누르면 한 글자 씩 지움
+                        if event.key == pygame.K_BACKSPACE:
+                            self.player_name_temp = self.player_name_temp[0:len(self.player_name_temp) - 1]
+                        else:
+                            self.player_name_temp = self.player_name_temp + pygame.key.name(event.key)
+
             Mouse.updateMouseState()
-            self.clock.tick(basic.fps)
+            self.clock.tick(game_view.FPS)
             self.draw()
-            self.check_computer_click()
-            self.check_start_click()  # start_img 클릭 확인

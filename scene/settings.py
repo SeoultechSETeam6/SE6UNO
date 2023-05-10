@@ -1,8 +1,8 @@
 import math
 import pygame
 
-from controller import game_data_controller, game_view_controller
-from controller.mouse_controller import Mouse
+from controller import game_data, game_view
+from controller.mouse import Mouse
 from ui.button import Button
 from ui.slider import Slider
 from ui.popup import Popup
@@ -11,20 +11,20 @@ from ui.popup import Popup
 class Settings:
     def __init__(self):
         # 게임 설정 불러오기
-        self.settings_data = game_data_controller.load_settings_data()
+        self.settings_data = game_data.load_settings()
 
         # pygame 초기화
         pygame.init()
-        pygame.display.set_caption(game_view_controller.GAME_TITLE + ": Settings")
-        self.ui_size = game_view_controller.set_size(self.settings_data["resolution"]["width"])
+        pygame.display.set_caption(game_view.GAME_TITLE + ": Settings")
+        self.ui_size = game_view.set_size(self.settings_data["resolution"]["width"])
         self.screen = pygame.display.set_mode((self.settings_data["resolution"]["width"],
                                                self.settings_data["resolution"]["height"]))
         self.clock = pygame.time.Clock()
         self.running = True
 
         # 글꼴 설정
-        self.font = pygame.font.Font(game_view_controller.FONT_PATH, self.ui_size["font"][0])
-        self.font_small = pygame.font.Font(game_view_controller.FONT_PATH, self.ui_size["font"][1])
+        self.font = pygame.font.Font(game_view.FONT_PATH, self.ui_size["font"][0])
+        self.font_small = pygame.font.Font(game_view.FONT_PATH, self.ui_size["font"][1])
 
         # 텍스트 설정
         self.text_resolution = self.font.render("해상도 변경", True, (255, 255, 255))
@@ -275,7 +275,7 @@ class Settings:
 
     # 리셋 버튼 이벤트
     def event_reset(self):
-        game_data_controller.save_settings_data(game_data_controller.INIT_GAME_DATA["settings"])
+        game_data.save_settings(game_data.INIT_GAME_DATA["settings"])
         self.running = False
 
     # 나가기 버튼 이벤트
@@ -289,7 +289,7 @@ class Settings:
         self.settings_data["volume"]["background"] = self.slider_volume[1].value
         self.settings_data["volume"]["effect"] = self.slider_volume[2].value
 
-        game_data_controller.save_settings_data(self.settings_data)
+        game_data.save_settings(self.settings_data)
         self.running = False
 
     # 버튼과 글자, 기타 오브젝트를 그리는 메서드
@@ -400,6 +400,6 @@ class Settings:
     def run(self):
         while self.running:
             Mouse.updateMouseState()
-            self.clock.tick(game_view_controller.FPS)
+            self.clock.tick(game_view.FPS)
             self.draw()
             self.event()
