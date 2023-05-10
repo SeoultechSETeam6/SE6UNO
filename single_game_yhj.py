@@ -416,14 +416,18 @@ class SingleGameYhj:
         mouse_x, mouse_y = Mouse.getMousePos()
         # 현재 플레이어 결정
         self.top_card = get_top_card(self.board_card)
-        # 현재 시각 불러옴
-        self.current_time = pygame.time.get_ticks()
 
         # 플레이어턴, 컴퓨터턴 결정
         if self.current_player == 0:
             self.user_turn = True
         else:
             self.user_turn = False
+
+        # 플레이어, 컴퓨터 메소드 호출
+        if self.user_turn:
+            self.user_turn_method()  # 여기서 user_turn_method 메소드를 호출
+        else:
+            self.computer_turn_method()
 
         if Mouse.getMouseState() == MouseState.CLICK:
             if self.uno_button_rect.collidepoint(mouse_x, mouse_y) and self.uno_check:
@@ -435,9 +439,31 @@ class SingleGameYhj:
             return
 
         self.hovered_card_index = find_hovered_card(self.player_hands[0], self.user_coordinate[0],
-                                                    self.user_coordinate[1], self.user_spacing, mouse_x, mouse_y, self.max_per_row, self.hovered_card_index)
-        self.hovered_change_index = find_hovered_change(self.change_color_list, self.x5, self.y5, self.spacing5, mouse_x, mouse_y, self.hovered_card_index)
+                                                    self.user_coordinate[1], self.user_spacing, mouse_x, mouse_y,
+                                                    self.max_per_row, self.hovered_card_index)
+        self.hovered_change_index = find_hovered_change(self.change_color_list, self.x5, self.y5, self.spacing5,
+                                                        mouse_x, mouse_y, self.hovered_card_index)
 
+    def user_turn_method(self):
+        # 마우스의 위치를 가져옴
+        mouse_x, mouse_y = Mouse.getMousePos()
+        # 현재 시각 불러옴
+        self.current_time = pygame.time.get_ticks()
+
+        if Mouse.getMouseState() == MouseState.CLICK:
+            if self.uno_button_rect.collidepoint(mouse_x, mouse_y) and self.uno_check:
+                self.Uno_button_music.set_volume(self.sound_volume * self.effect_volume)
+                self.Uno_button_music.play(1)
+                self.uno_flags[self.current_player] = True
+
+        if self.uno_check:
+            return
+
+        # 플레이어턴, 컴퓨터턴 결정
+        if self.current_player == 0:
+            self.user_turn = True
+        else:
+            self.user_turn = False
         if self.user_turn:
             if self.turn_start_time is None:
                 self.turn_start_time = pygame.time.get_ticks()
@@ -491,6 +517,13 @@ class SingleGameYhj:
                 self.place_animation(self.current_player)
                 self.board_card, self.player_hands[self.current_player], self.pop_card = user_submit_card(self.clicked_card, self.clicked_card_index, self.board_card, self.player_hands[self.current_player])
                 self.turn_start_time = pygame.time.get_ticks()
+
+    def computer_turn_method(self):
+        # 현재 시각 불러옴
+        self.current_time = pygame.time.get_ticks()
+
+        if self.uno_check:
+            return
 
         # 컴퓨터 턴 처리
         if not self.user_turn:

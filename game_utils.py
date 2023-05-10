@@ -149,6 +149,20 @@ def computer_playable_card(now_player_hands, board_card):
     return playable, card_index
 
 
+def playable_attack_card(now_player_hands, board_card):
+    top_card = get_top_card(board_card)
+    playable_attack_cards = [card for card in playable if is_valid_move(card, top_card) and (card.value == 'draw_2' or
+                                                                                             card.value == 'bomb')]
+    if playable_attack_cards:
+        selected_card = random.choice(playable_attack_cards)
+        playable = True
+        card_index = now_player_hands.index(selected_card)
+    else:
+        playable = False
+        card_index = None
+    return playable, card_index
+
+
 def user_submit_card(card, card_index, board_card, now_player_hand):
     board_card.append(card)
     now_player_hand.pop(card_index)
