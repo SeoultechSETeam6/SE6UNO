@@ -52,7 +52,7 @@ class Main:
                    self.ui_size["button"][1],
                    self.screen,
                    0xffffff,
-                   '캠페인',
+                   '스토리 모드',
                    self.ui_size["font"][1],
                    on_click_function=self.event_story_mode),
             Button(self.screen.get_width() // 2,
