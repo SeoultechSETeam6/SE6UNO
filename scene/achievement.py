@@ -3,39 +3,14 @@ import pickle
 import json
 
 from controller.mouse import Mouse, MouseState
-from option import basic_option as basic
-from button import Button
+from controller import game_data, game_view
+from ui.button import Button
 
 
 class Achievement:
     def __init__(self):
-        # 저장된 설정 불러오기, 만약 파일이 비어있다면 기본 설정으로 세팅
-        try:
-            with open("./option/save_option.pickle", "rb") as f:
-                self.display_size = pickle.load(f)
-                self.color_weakness = pickle.load(f)
-                self.key_setting = pickle.load(f)
-                self.sound_volume = pickle.load(f)
-                self.background_volume = pickle.load(f)
-                self.effect_volume = pickle.load(f)
-        except EOFError:
-            self.display_size = basic.display_size
-            self.color_weakness = basic.color_weakness
-            self.key_setting = basic.key_setting
-            self.sound_volume = basic.sound_volume
-            self.background_volume = basic.background_volume
-            self.effect_volume = basic.effect_volume
-
-        # 회면 크기 별 폰트와 버튼 크기 설정
-        if self.display_size[0] == 1920:
-            self.font_size = basic.font_size[0]
-            self.button_size = basic.button_size[0]
-        elif self.display_size[0] == 1600:
-            self.font_size = basic.font_size[1]
-            self.button_size = basic.button_size[1]
-        else:
-            self.font_size = basic.font_size[2]
-            self.button_size = basic.button_size[2]
+        # 게임 설정 불러오기
+        self.settings_data = game_data.load_settings()
 
         # 이미지 변수 초기화
         self.achievement_image = None
@@ -70,16 +45,35 @@ class Achievement:
         self.adequate_defense_image_height = None
         self.greedy_man_image_height = None
 
+        # pygame 초기화
         pygame.init()
-        self.screen = pygame.display.set_mode(self.display_size)
-        pygame.display.set_caption(basic.game_title)
+        pygame.display.set_caption(game_view.GAME_TITLE + ": Achievement")
+        self.ui_size = game_view.set_size(self.settings_data["resolution"]["width"])
+        self.screen = pygame.display.set_mode((self.settings_data["resolution"]["width"],
+                                               self.settings_data["resolution"]["height"]))
         self.clock = pygame.time.Clock()
         self.running = True
-        self.font = pygame.font.Font("../resources/maplestory_font.ttf", self.font_size[0])
-        self.small_font = pygame.font.Font("../resources/maplestory_font.ttf", self.font_size[1])
+
+        # 글꼴 설정
+        self.font = pygame.font.Font(game_view.FONT_PATH, self.ui_size["font"][0])
+        self.small_font = pygame.font.Font(game_view.FONT_PATH, self.ui_size["font"][1])
+        
+        # 나가기 버튼
+        self.button_quit = Button(self.screen.get_width() * 0.07,
+                                  self.screen.get_height() * 0.06,
+                                  self.ui_size["button"][0],
+                                  self.ui_size["button"][1],
+                                  self.screen,
+                                  0xffffff,
+                                  "나가기",
+                                  self.ui_size["font"][1],
+                                  on_click_function=self.event_quit)
+
+        # 업적 이미지
+        self.image_achievements = []
 
         # 화면 크기에 맞춰 이미지 경로 수정 및 좌표수정
-        if self.display_size[0] == 1920:
+        if self.settings_data["resoultion"][0] == 1920:
             self.achievement_folder = "./resources/Image/achievements/big"
             self.single_player_winner_coordinate = (0, 100)
             self.stage_all_clear_coordinate = (300, 100)
@@ -90,7 +84,7 @@ class Achievement:
             self.adequate_defense_coordinate = (400, 450)
             self.greedy_man_coordinate = (800, 450)
             self.exit_button_coordinate = (1700, 900)
-        elif self.display_size[0] == 1600:
+        elif self.settings_data["resoultion"][0] == 1600:
             self.achievement_folder = "./resources/Image/achievements/middle"
             self.single_player_winner_coordinate = (0, 100)
             self.stage_all_clear_coordinate = (300, 100)
@@ -113,11 +107,7 @@ class Achievement:
             self.greedy_man_coordinate = (900, 350)
             self.exit_button_coordinate = (1100, 700)
 
-        # 나가기 버튼
-        self.exit_button = Button(self.exit_button_coordinate[0], self.exit_button_coordinate[1], self.button_size[0],
-                                  self.button_size[1], "나가기", self.exit_event, self.font_size[1])
-
-    def exit_event(self):
+    def event_quit(self):
         print('나가기')
         self.running = False
 
@@ -226,7 +216,7 @@ class Achievement:
         self.screen.fill((20, 20, 20))
 
         # 업적 로고 표시
-        self.screen.blit(self.achievement_image, (((self.display_size[0]/2) - (self.achievement_image_width/2)), 0))
+        self.screen.blit(self.achievement_image, (((self.settings_data["resoultion"][0]/2) - (self.achievement_image_width/2)), 0))
 
 
         # 업적 표시
@@ -293,7 +283,7 @@ class Achievement:
             if event.type == pygame.QUIT:
                 self.running = False
             if event.type == pygame.KEYDOWN:
-                if event.key == self.key_setting['enter']:
+                if event.key == self.settings_data["key"]['enter']:
                     self.exit_button.on_click_function()
                 elif event.key == pygame.K_ESCAPE:
                     self.exit_button.on_click_function()
