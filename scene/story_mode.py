@@ -1,6 +1,7 @@
-from scene.single_play_legacy import SinglePlay
+from scene.single_play import SinglePlay
 import pygame
 import random
+from controller.game_view import scale_by
 from controller.mouse import Mouse, MouseState
 from controller.card_gen import generate_cards, generate_a_stage_cards, generate_c_stage_cards, generate_c_for_change_cards, generate_d_stage_cards
 from controller.card_shuffle import shuffle_cards, distribute_cards, stage_a_distribute
@@ -22,7 +23,7 @@ from controller.game_utils import (
 class StageA(SinglePlay):
     def __init__(self):
         super().__init__([False, False, True, False, False], 'You')
-        self.regular_cards, self.special_cards = generate_a_stage_cards(self.color_weakness, self.size_change)
+        self.regular_cards, self.special_cards = generate_a_stage_cards(self.settings_data["color_weakness"], self.ui_size["change"])
         self.player_hands, self.remain_cards = stage_a_distribute(self.player_count, self.regular_cards, self.special_cards, self.card_count)
 
 
@@ -30,7 +31,7 @@ class StageB(SinglePlay):
     def __init__(self):
         super().__init__([True, False, True, False, True], 'You')
         self.turn_count = 1
-        self.cards = generate_cards(self.color_weakness, self.size_change)
+        self.cards = generate_cards(self.settings_data["color_weakness"], self.ui_size["change"])
         self.shuffled_cards = shuffle_cards(self.cards)
         self.card_count = 28
         self.player_hands, self.remain_cards = distribute_cards(self.shuffled_cards, self.player_count, self.card_count)
@@ -463,8 +464,8 @@ class StageC(SinglePlay):
     def __init__(self):
         super().__init__([True, False, True, False, False], 'You')
         self.turn_count = 1
-        self.dummy_cards = generate_c_stage_cards(self.color_weakness, self.size_change)
-        self.dummy_cards_c = generate_c_for_change_cards(self.color_weakness, self.size_change)
+        self.dummy_cards = generate_c_stage_cards(self.settings_data["color_weakness"], self.ui_size["change"])
+        self.dummy_cards_c = generate_c_for_change_cards(self.settings_data["color_weakness"], self.ui_size["change"])
 
     def game(self):
         # 마우스의 위치를 가져옴
@@ -882,19 +883,19 @@ class StageC(SinglePlay):
 class StageD(SinglePlay):
     def __init__(self):
         super().__init__([False, True, True, True, True], 'You')
-        self.cards = generate_d_stage_cards(self.color_weakness, self.size_change)
+        self.cards = generate_d_stage_cards(self.settings_data["color_weakness"], self.ui_size["change"])
 
     def win(self):
         popup = None
         if len(self.player_hands[0]) == 0 or any(len(player_hand) >= 15 for player_hand in self.player_hands[1:]):
-            popup = basic.scale_by(pygame.image.load("../resources/Image/win.png"), self.size_change)
+            popup = scale_by(pygame.image.load("./resources/Image/win.png"), self.ui_size["change"])
             self.game_over = True
         elif any(len(player_hand) == 0 for player_hand in self.player_hands[1:]) or len(self.player_hands[0]) == 15:
-            popup = basic.scale_by(pygame.image.load("../resources/Image/lose.png"), self.size_change)
+            popup = scale_by(pygame.image.load("./resources/Image/lose.png"), self.ui_size["change"])
             self.game_over = True
         if self.game_over:
             self.background_music.stop()
-            self.card_shuffle_music.stop()
+            self.sound_shuffle.stop()
             self.screen.fill((0, 0, 0))
             self.screen.blit(popup, (self.screen.get_width() // 2 - popup.get_size()[0] // 2,
                                      self.screen.get_height() // 2 - popup.get_size()[1] // 2))

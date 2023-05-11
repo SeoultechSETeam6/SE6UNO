@@ -74,7 +74,7 @@ class SinglePlayLobby:
 
         # 이름 변경 버튼
         self.button_change_player_name = Button(self.screen.get_width() * 0.07,
-                                                self.screen.get_height() * 0.13,
+                                                self.screen.get_height() * 0.87,
                                                 self.ui_size["button"][0],
                                                 self.ui_size["button"][1],
                                                 self.screen,
@@ -85,7 +85,7 @@ class SinglePlayLobby:
 
         # 이름 변경 버튼
         self.button_exit = Button(self.screen.get_width() * 0.07,
-                                  self.screen.get_height() * 0.93,
+                                  self.screen.get_height() * 0.07,
                                   self.ui_size["button"][0],
                                   self.ui_size["button"][1],
                                   self.screen,
@@ -182,11 +182,12 @@ class SinglePlayLobby:
         self.running = False
 
     def draw(self):
-        self.screen.fill((111, 111, 111))
+        self.screen.fill((100, 100, 100))
 
         # 컴퓨터 플레이어 버튼 그림
         for i, button in enumerate(self.buttons_computer):
             button.draw()
+            # 팝업 떠있을 경우 감지하지 않음
             if not self.popup.pop:
                 button.detect_event()
             if self.computers_attend_flag[i]:
@@ -214,7 +215,7 @@ class SinglePlayLobby:
             self.screen.blit(temp_name_display, (self.screen.get_width() // 2.4, self.screen.get_height() // 2))
 
         self.name_display = self.font.render("User name: " + self.player_name, True, (0, 0, 0))
-        self.screen.blit(self.name_display, (self.screen.get_width() * 0.02, self.screen.get_height() * 0.02))
+        self.screen.blit(self.name_display, (self.screen.get_width() * 0.02, self.screen.get_height() * 0.92))
 
         pygame.display.flip()
 
@@ -228,6 +229,9 @@ class SinglePlayLobby:
                         # 백스페이스 누르면 한 글자 씩 지움
                         if event.key == pygame.K_BACKSPACE:
                             self.player_name_temp = self.player_name_temp[0:len(self.player_name_temp) - 1]
+                        # 엔터 누르면 닉네임 변경 저장
+                        elif event.key == pygame.K_RETURN:
+                            self.event_save_player_name()
                         else:
                             self.player_name_temp = self.player_name_temp + pygame.key.name(event.key)
 

@@ -266,7 +266,7 @@ class Settings:
         self.current_setting_key = "enter", 4
 
     # 키 설정 팝업의 확인 버튼 이벤트
-    # 확인을 눌러야 램에 반영하고, 저장을 눌러야 최종적으로 게임 전체에 반영
+    # 확인을 눌러야 램에 반영하고, 저장을 눌러야 최종적으로 게임 파일에 반영
     def event_save_key(self):
         self.settings_data["key"] = self.selected_key
         self.button_key[self.current_setting_key[1]].text =\
