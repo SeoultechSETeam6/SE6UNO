@@ -2,7 +2,7 @@ import pygame
 import pickle
 import json
 
-from mouse import Mouse, MouseState
+from controller.mouse import Mouse, MouseState
 from option import basic_option as basic
 from button import Button
 

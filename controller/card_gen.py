@@ -1,5 +1,5 @@
 import pygame
-from game_view import scale_by
+from controller.game_view import scale_by
 
 # 색 카드 추가를 위한 리스트
 colors = ['red', 'green', 'blue', 'yellow']
@@ -56,26 +56,26 @@ def generate_cards(color_weakness, size_by):
                 card_image = pygame.image.load(f"{card_folder}/{color}_{value}.png")
                 card = Card(color, value, card_image, card_image_cw, card_back_image)
                 if color_weakness:
-                    card.card_image = basic.scale_by(card_image_cw, size_by)
+                    card.card_image = scale_by(card_image_cw, size_by)
                 else:
-                    card.card_image = basic.scale_by(card_image, size_by)
-                card.card_img_back = basic.scale_by(card_back_image, size_by)
+                    card.card_image = scale_by(card_image, size_by)
+                card.card_img_back = scale_by(card_back_image, size_by)
                 cards.append(card)
 
     # 색 없는 실드카드를 한 번에 추가합니다.
     for i in range(2):
         card_image = pygame.image.load(f"./resources/Image/card_images/none_shield.png")
         card = Card('none', 'shield', card_image, card_image, card_back_image)
-        card.card_image = basic.scale_by(card_image, size_by)
-        card.card_img_back = basic.scale_by(card_back_image, size_by)
+        card.card_image = scale_by(card_image, size_by)
+        card.card_img_back = scale_by(card_back_image, size_by)
         cards.append(card)
 
     # 색 없는 색변경 카드를 추가
     for i in range(2):
         card_image = pygame.image.load(f"./resources/Image/card_images/none_change.png")
         card = Card('none', 'change', card_image, card_image, card_back_image)
-        card.card_image = basic.scale_by(card_image, size_by)
-        card.card_img_back = basic.scale_by(card_back_image, size_by)
+        card.card_image = scale_by(card_image, size_by)
+        card.card_img_back = scale_by(card_back_image, size_by)
         cards.append(card)
     return cards
 
@@ -92,10 +92,10 @@ def generate_for_change_cards(color_weakness, size_by):
         card_image = pygame.image.load(f"{change_card_folder}/{color}_{change_value}.png")
         for_change_card = Card(color, change_value, card_image, card_image_cw, card_back_image)
         if color_weakness:
-            for_change_card.card_image = basic.scale_by(card_image_cw, size_by)
+            for_change_card.card_image = scale_by(card_image_cw, size_by)
         else:
-            for_change_card.card_image = basic.scale_by(card_image, size_by)
-        for_change_card.card_img_back = basic.scale_by(card_back_image, size_by)
+            for_change_card.card_image = scale_by(card_image, size_by)
+        for_change_card.card_img_back = scale_by(card_back_image, size_by)
         for_change_cards.append(for_change_card)
 
     return for_change_cards

@@ -129,7 +129,4 @@ dmypy.json
 .pyre/
 
 .idea/
-*.pickle
 *.json
-
-!default_game_data.json

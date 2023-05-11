@@ -5,7 +5,7 @@ from controller.mouse import Mouse
 from ui.button import Button, ImageButton
 from ui.popup import Popup
 
-# from scene.single_play import SinglePlay
+from scene.single_play import SinglePlay
 
 
 class SinglePlayLobby:
@@ -106,6 +106,7 @@ class SinglePlayLobby:
 
         # 컴퓨터 참여 정보 리스트
         self.computers_attend_flag = [False, False, False, False, False]
+        self.computers_attend_count = 0
 
         # 이름 변경 팝업창
         self.popup = Popup(self.screen.get_width() // 2,
@@ -124,19 +125,44 @@ class SinglePlayLobby:
 
     # 컴퓨터 플레이어 클릭 시 참여 플래그 토글 이벤트
     def event_join_computer_1(self):
-        self.computers_attend_flag[0] = not self.computers_attend_flag[0]
+        if self.computers_attend_flag[0]:
+            self.computers_attend_flag[0] = False
+            self.computers_attend_count -= 1
+        else:
+            self.computers_attend_flag[0] = True
+            self.computers_attend_count += 1
 
     def event_join_computer_2(self):
-        self.computers_attend_flag[1] = not self.computers_attend_flag[1]
+        if self.computers_attend_flag[1]:
+            self.computers_attend_flag[1] = False
+            self.computers_attend_count -= 1
+        else:
+            self.computers_attend_flag[1] = True
+            self.computers_attend_count += 1
 
     def event_join_computer_3(self):
-        self.computers_attend_flag[2] = not self.computers_attend_flag[2]
+        if self.computers_attend_flag[2]:
+            self.computers_attend_flag[2] = False
+            self.computers_attend_count -= 1
+        else:
+            self.computers_attend_flag[2] = True
+            self.computers_attend_count += 1
 
     def event_join_computer_4(self):
-        self.computers_attend_flag[3] = not self.computers_attend_flag[3]
+        if self.computers_attend_flag[3]:
+            self.computers_attend_flag[3] = False
+            self.computers_attend_count -= 1
+        else:
+            self.computers_attend_flag[3] = True
+            self.computers_attend_count += 1
 
     def event_join_computer_5(self):
-        self.computers_attend_flag[4] = not self.computers_attend_flag[4]
+        if self.computers_attend_flag[4]:
+            self.computers_attend_flag[4] = False
+            self.computers_attend_count -= 1
+        else:
+            self.computers_attend_flag[4] = True
+            self.computers_attend_count += 1
 
     # 플레이어 이름 변경 팝업창에서 확인 클릭 시 이벤트
     def event_save_player_name(self):
@@ -148,7 +174,7 @@ class SinglePlayLobby:
     # 게임 시작 버튼 이벤트
     def event_start(self):
         print("게임 시작")
-        # SinglePlay(self.computers_attend_flag, self.name).run()
+        SinglePlay(self.computers_attend_flag, self.player_name).run()
         self.running = False
 
     # 게임 나가기 버튼 이벤트
@@ -166,11 +192,12 @@ class SinglePlayLobby:
             if self.computers_attend_flag[i]:
                 self.screen.blit(self.image_joined, (button.x, button.y))
 
-        # 컴퓨터 플레이어 참여 버튼 그리기
+        # 플레이어 이름 변경 버튼 그리기
         self.button_change_player_name.draw()
 
         # 게임 시작 버튼 그리기
-        self.button_start.draw()
+        if self.computers_attend_count > 0:
+            self.button_start.draw()
 
         # 나가기 버튼 그리기
         self.button_exit.draw()
@@ -178,7 +205,8 @@ class SinglePlayLobby:
         # 이름 변경 팝업이 열렸을 경우 버튼 클릭 방지
         if not self.popup.pop:
             self.button_change_player_name.detect_event()
-            self.button_start.detect_event()
+            if self.computers_attend_count > 0:
+                self.button_start.detect_event()
             self.button_exit.detect_event()
         else:
             self.popup.open()
