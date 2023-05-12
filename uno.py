@@ -4,9 +4,6 @@ import pygame
 import sys
 
 if __name__ == '__main__':
-    main = Main()
-    main.run()
-
     # 해상도 변경 이벤트 발생 시 game_view.resolution_changed = True가 되고,
     # 메인 화면 Scene을 닫으므로, 새로 만든 메인 화면 Scene 객체를 생성하여 다시 실행
     while game_view.resolution_changed:
