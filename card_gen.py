@@ -12,8 +12,8 @@ class Card:
     def __init__(self, color, value, card_img, card_img_cw, card_img_back):
         self.color = color  # 색
         self.value = value  # 숫자
-        self.card_img = None  # 플레이어가 볼 자신의 카드 이미지
-        self.card_img_back = None  # 상대방 에게 보여질 카드 뒷면
+        self.card_img = card_img  # 플레이어가 볼 자신의 카드 이미지
+        self.card_img_back = card_img_back  # 상대방 에게 보여질 카드 뒷면
         self.image = card_img
         self.image_cw = card_img_cw
         self.image_back = card_img_back
@@ -32,8 +32,8 @@ class Card:
 
 
 class Dummy(Card):
-    def __init__(self, color, value, card_img, card_img_back):
-        super().__init__(color, value, card_img, card_img_back)
+    def __init__(self, color, value, card_img, card_img_cw, card_img_back):
+        super().__init__(color, value, card_img, card_img_cw, card_img_back)
 
     def is_dummy(self):
         return True
@@ -138,30 +138,43 @@ def generate_a_stage_cards(color_weakness, size_by):
     return regular_cards, special_cards
 
 
-
 def generate_c_stage_cards(color_weakness, size_by):
     cards = []
     card_back_image = basic.scale_by(pygame.image.load("resources/Image/card_images/card_back.png"), size_by)
 
-    card_folder = "resources/image/cw_card_images" if color_weakness else "resources/image/card_images"
     # 색약 모드와 경로 차별화
+    card_folder_cw = "./resources/Image/cw_card_images"
+    card_folder = "./resources/Image/card_images"
 
     for color in colors:
         for value in values:
             card_image = basic.scale_by(pygame.image.load(f"{card_folder}/{color}_{value}.png"), size_by)
-            card = Dummy(color, value, card_image, card_back_image)
+            card_image_cw = pygame.image.load(f"{card_folder_cw}/{color}_{value}.png")
+            card = Dummy(color, value, card_image, card_image_cw, card_back_image)
+            if color_weakness:
+                card.card_image = basic.scale_by(card_image_cw, size_by)
+            else:
+                card.card_image = basic.scale_by(card_image, size_by)
+            card.card_img_back = basic.scale_by(card_back_image, size_by)
             cards.append(card)
     return cards
 
 
 def generate_c_for_change_cards(color_weakness, size_by):
     for_change_cards = []
-    change_card_folder = "./resources/Image/colorshow_icon" if color_weakness else "./resources/Image/colorshow"
+    change_card_folder_cw = "./resources/Image/colorshow_icon"
+    change_card_folder = "./resources/Image/colorshow"
     card_back_image = basic.scale_by(pygame.image.load("resources/Image/card_images/card_back.png"), size_by)
 
     for color in change_colors:
+        card_image_cw = pygame.image.load(f"{change_card_folder_cw}/{color}_{change_value}.png")
         card_image = basic.scale_by(pygame.image.load(f"{change_card_folder}/{color}_{change_value}.png"), size_by)
-        for_change_card = Dummy(color, change_value, card_image, card_back_image)
+        for_change_card = Dummy(color, change_value, card_image, card_image_cw, card_back_image)
+        if color_weakness:
+            for_change_card.card_image = basic.scale_by(card_image_cw, size_by)
+        else:
+            for_change_card.card_image = basic.scale_by(card_image, size_by)
+        for_change_card.card_img_back = basic.scale_by(card_back_image, size_by)
         for_change_cards.append(for_change_card)
     return for_change_cards
 
@@ -222,3 +235,20 @@ if __name__ == "__main__":
     cards = generate_c_stage_cards(False,)
     print_cards(cards)
 '''
+
+
+def examine_dummy_card(color_weakness, size_by):
+    # 더미 카드 생성
+    card_image = pygame.image.load(f"./resources/Image/card_images/none_change.png")
+    card = Dummy('none', 'change', card_image, card_image, card_image)
+    card.card_image = basic.scale_by(card_image, size_by)
+    card.card_img_back = basic.scale_by(card_image, size_by)
+
+    # 더미 카드 특성 확인
+    print("Is this card a dummy card? ", card.is_dummy())
+    print("Color of the card: ", card.color)
+    print("Value of the card: ", card.value)
+    print("card_image of the card: ", card.card_image)
+
+
+examine_dummy_card(color_weakness=True, size_by=1)  # color_weakness와 size_by는 예시입니다. 실제 필요한 값을 넣어주세요.

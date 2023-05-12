@@ -5,7 +5,7 @@ import time
 from mouse import Mouse, MouseState
 from button import Button
 from option.setting_option import Option
-from card_gen import generate_cards, generate_for_change_cards, generate_c_stage_cards, generate_c_for_change_cards
+from card_gen import generate_cards, generate_for_change_cards
 from card_shuffle import shuffle_cards, distribute_cards
 from option import basic_option as basic
 from game_utils import (
@@ -231,6 +231,7 @@ class SingleGameYhj:
         self.clicked_change_index = None
         self.change_index = None
         self.playable = False
+        self.playable_attack_check = False
         self.clicked_change = False
         self.color_change = None
 
@@ -400,6 +401,7 @@ class SingleGameYhj:
         self.clicked_change_index = None
         self.change_index = None
         self.playable = False
+        self.playable_attack_check = False
         self.clicked_change = False
         self.color_change = None
 
@@ -410,6 +412,15 @@ class SingleGameYhj:
         self.clicked_card = None  # 클릭 카드 초기값
         self.clicked_remain_cards = False  # remain_cards 클릭 여부 초기값
         self.clicked_next_turn_button = False  # 다음턴 클릭여부 초기값
+
+        self.check_reshuffle_method()
+
+    def check_reshuffle_method(self):
+        self.turn_count = self.turn_count + 1
+        if self.turn_count % 10 == 0:
+            self.card_shuffle_music.set_volume(self.sound_volume * self.background_volume)
+            self.card_shuffle_music.play(1)
+            self.board_card, self.remain_cards = card_reshuffle(self.board_card, self.remain_cards)
 
     def game(self):
         # 마우스의 위치를 가져옴
@@ -472,7 +483,6 @@ class SingleGameYhj:
                     self.is_draw = False
                     self.current_player = (self.current_player + self.game_direction) % self.player_count
                     self.reset()
-                    self.turn_count = self.turn_count + 1
                 elif self.change_card:
                     self.user_turn = False
                     self.card_playing()
@@ -481,7 +491,6 @@ class SingleGameYhj:
                     self.player_hands[0].append(self.remain_cards.pop())
                     self.current_player = (self.current_player + self.game_direction) % self.player_count
                     self.reset()
-                    self.turn_count = self.turn_count + 1
 
             if Mouse.getMouseState() == MouseState.CLICK:
                 self.clicked_card_index, self.clicked_card = get_clicked_card(self.player_hands[0],
@@ -504,7 +513,6 @@ class SingleGameYhj:
             elif self.new_drawn_card is not None and self.clicked_next_turn_button:
                 self.current_player = (self.current_player + self.game_direction) % self.player_count
                 self.reset()
-                self.turn_count = self.turn_count + 1
             # 카드를 드로우 하고, 드로우한 카드를 내는 함수.
             elif self.new_drawn_card is not None and self.pop_card is None:
                 # 유효성 검사 및 클릭카드가 new_drawn_card인지 확인
@@ -554,7 +562,6 @@ class SingleGameYhj:
                 # 드로우한 카드를 낼 수 없는 경우
                 elif self.new_drawn_card is not None and not is_valid_move(self.new_drawn_card, self.top_card) and self.pop_card is None:
                     if self.current_time - self.turn_start_time >= self.delay_time2:
-                        self.turn_count = self.turn_count + 1
                         self.current_player = (self.current_player + self.game_direction) % self.player_count
                         self.reset()
 
@@ -606,7 +613,6 @@ class SingleGameYhj:
                                                                                       self.player_count)
                 self.animation_method[self.pop_card.value](self.current_player)
                 self.reset()
-                self.turn_count = self.turn_count + 1
             # 내는 카드가 special이고, change일 경우
             elif self.pop_card.is_special() and self.pop_card.value == "change":
                 if self.user_turn:
@@ -619,7 +625,6 @@ class SingleGameYhj:
                         self.animation_method[self.pop_card.value](self.current_player)
                         self.board_card.append(self.color_change)
                         self.reset()
-                        self.turn_count = self.turn_count + 1
                 else:
                     self.change_index = random.randint(0, 3)
                     self.color_change = self.change_color_list[self.change_index]
@@ -631,12 +636,10 @@ class SingleGameYhj:
                         self.animation_method[self.pop_card.value](self.current_player)
                         self.board_card.append(self.color_change)
                         self.reset()
-                        self.turn_count = self.turn_count + 1
             # 내는 카드가 special이 아닌 경우
             elif not self.pop_card.is_special():
                 self.current_player = (self.current_player + self.game_direction) % self.player_count
                 self.reset()
-                self.turn_count = self.turn_count + 1
 
     def win(self):
         popup = None
@@ -1086,12 +1089,6 @@ class SingleGameYhj:
             self.win()
             Mouse.updateMouseState()
             self.clock.tick(basic.fps)
-            # 카드 섞기 발생
-            if self.turn_count % 10 == 0:
-                self.card_shuffle_music.set_volume(self.sound_volume * self.background_volume)
-                self.card_shuffle_music.play(1)
-                self.board_card, self.remain_cards = card_reshuffle(self.board_card, self.remain_cards)
-                self.turn_count = self.turn_count + 1
             if not self.paused:
                 self.game()
                 self.is_uno()

@@ -151,16 +151,18 @@ def computer_playable_card(now_player_hands, board_card):
 
 def playable_attack_card(now_player_hands, board_card):
     top_card = get_top_card(board_card)
-    playable_attack_cards = [card for card in playable if is_valid_move(card, top_card) and (card.value == 'draw_2' or
-                                                                                             card.value == 'bomb')]
+    playable_attack_cards = [card for card in now_player_hands if is_valid_move(card, top_card) and
+                             (card.value == 'draw_2' or card.value == 'bomb')]
     if playable_attack_cards:
         selected_card = random.choice(playable_attack_cards)
         playable = True
         card_index = now_player_hands.index(selected_card)
+        playable_attack_check = True
     else:
         playable = False
         card_index = None
-    return playable, card_index
+        playable_attack_check = False
+    return playable, card_index, playable_attack_check
 
 
 def user_submit_card(card, card_index, board_card, now_player_hand):
@@ -238,14 +240,16 @@ def apply_special_card_effects(card, current_player, direction, player_hands, re
         return current_player, direction
 
 
-def random_top_card_color(top_card, dummy_cards, board_card, dummy_cards_c):  # stage c애서 발동
+def random_top_card_color(top_card, dummy_cards, board_card, dummy_cards_for_change):  # stage c애서 발동
     color_list = ['red', 'blue', 'green', 'yellow']
     color = color_list[random.randint(0, 3)]
     if top_card.value != "change":
         dummy_card = [card for card in dummy_cards if card.value == top_card.value and card.color == color]
+        print("더미 카드: ", dummy_card)
+        print("더미 카드 색: ", dummy_card[0].card_img)
         board_card.append(dummy_card[0])
     elif top_card.value == "change":
-        dummy_card = dummy_cards_c[random.randint(0, 3)]
+        dummy_card = dummy_cards_for_change[random.randint(0, 3)]
         board_card.append(dummy_card)
     print(dummy_card)
     print(top_card)
