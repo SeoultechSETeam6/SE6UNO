@@ -1,32 +1,48 @@
-import pygame
 import socket
 import threading
+import pygame
 
 server_ip = '127.0.0.1'  # 서버 IP 주소 설정 (이 경우 로컬 IP)
 server_port = 10613  # 포트 번호 설정
 
-# 소켓 객체 생성 (TCP)
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# 주소 재사용을 위한 설정
-server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-# IP 주소와 포트를 바인딩
 server_socket.bind((server_ip, server_port))
-
-# 소켓이 연결 요청을 기다리도록 설정
 server_socket.listen(5)
 
-print(f"[*] Listening on {server_ip}:{server_port}")
+clients = []
+clients_lock = threading.Lock()
 
-# 클라이언트 연결 수락
-client_socket, client_address = server_socket.accept()
-print(f"[*] Accepted connection from {client_address[0]}:{client_address[1]}")
 
-# 클라이언트로부터 메시지 수신
-message = client_socket.recv(1024)
-print(f"[*] Received: {message.decode()}")
+def client_handler(client_socket, addr):
+    global clients
+    with clients_lock:
+        clients.append(client_socket)
 
-# 소켓 닫기
-client_socket.close()
-server_socket.close()
+    try:
+        while True:
+            msg = client_socket.recv(1024).decode('utf-8')
+            if msg == 'start_game':
+                with clients_lock:
+                    for client in clients:
+                        client.sendall('game_started'.encode('utf-8'))
+            else:
+                print(f"Message from {addr}: {msg}")
+    except:
+        print(f"Client {addr} disconnected")
+    finally:
+        with clients_lock:
+            clients.remove(client_socket)
+        client_socket.close()
+
+while True:
+    print("Waiting for clients...")
+    client_socket, addr = server_socket.accept()
+    print(f"Client {addr} connected")
+
+    if len(clients) == 0:
+        client_socket.sendall("you_are_host".encode('utf-8'))
+    else:
+        client_socket.sendall('you_are_guest'.encode('utf-8'))
+
+    thread = threading.Thread(target=client_handler, args=(client_socket, addr))
+    thread.start()
