@@ -12,6 +12,8 @@ GAME_TITLE = "UNO Game"
 FONT_PATH = "./resources/maplestory_font.ttf"
 FPS = 60
 
+# 해상도 설정이 변경됐는지 확인하는 변수
+resolution_changed = True
 
 def set_size(width=1920):
     """

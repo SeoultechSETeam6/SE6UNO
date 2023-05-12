@@ -83,9 +83,9 @@ class SinglePlayLobby:
                                                 self.ui_size["font"][1],
                                                 on_click_function=self.event_change_player_name)
 
-        # 이름 변경 버튼
+        # 나가기 버튼
         self.button_exit = Button(self.screen.get_width() * 0.07,
-                                  self.screen.get_height() * 0.07,
+                                  self.screen.get_height() * 0.06,
                                   self.ui_size["button"][0],
                                   self.ui_size["button"][1],
                                   self.screen,
@@ -114,7 +114,7 @@ class SinglePlayLobby:
                            self.screen.get_width() * 0.4,
                            self.screen.get_height() * 0.4,
                            self.screen,
-                           '바꿀 이름을 입력하고 확인 버튼을 눌러주세요.',
+                           '바꿀 이름을 입력하고 확인 버튼이나 Enter/Return 키를 눌러주세요.',
                            self.ui_size["font"][1],
                            self.event_save_player_name)
 

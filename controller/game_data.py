@@ -1,9 +1,41 @@
 import json
 import pygame
 
-
 # 게임 설정 기본값
 FILEPATH = "./game_data.json"
+ACHIEVEMENTS = [{
+        "name": "승리",
+        "description": "싱글 플레이에서 1회 승리",
+        "image": "single_player_winner.png"
+    }, {
+        "name": "스테이지 마스터",
+        "description": "스토리의 모든 스테이지 클리어",
+        "image": "single_player_winner.png"
+    }, {
+        "name": "스피드 레이서",
+        "description": "싱글 플레이에서 10턴안에 승리",
+        "image": "speed_racer.png"
+    }, {
+        "name": "기사도",
+        "description": "기술 카드를 사용하지 않고 승리",
+        "image": "chivalry.png"
+    }, {
+        "name": "간발의 차",
+        "description": "다른 플레이어가 UNO 선언한 뒤에 승리",
+        "image": "win_by_a_nose.png"
+    }, {
+        "name": "테러리스트",
+        "description": "폭탄 카드를 1회 사용",
+        "image": "terrorist.png"
+    }, {
+        "name": "적절한 방어",
+        "description": "방어 카드로 상대방의 공격을 방어",
+        "image": "adequate_defense.png"
+    }, {
+        "name": "욕심쟁이",
+        "description": "one_more 카드 사용",
+        "image": "greedy_man.png"
+    }]
 INIT_GAME_DATA = {
     "settings": {
         "resolution": {
@@ -30,52 +62,36 @@ INIT_GAME_DATA = {
         "3rd": 0,
         "4th": 0
     },
-    "achievements": {
-        "single_player_winner": {
-            "name": "승리",
-            "description": "싱글 플레이어 대전에서 승리",
+    "achievement": {
+        0: {
             "achieved": False,
             "achieved_date": None
         },
-        "stage_all_clear": {
-            "name": "스테이지 마스터",
-            "description": "모든 스테이지 클리어",
+        1: {
             "achieved": False,
             "achieved_date": None
         },
-        "speed_racer": {
-            "name": "스피드 레이서",
-            "description": "싱글 플레이어 게임에서 10턴안에 승리",
+        2: {
             "achieved": False,
             "achieved_date": None
         },
-        "chivalry": {
-            "name": "기사도",
-            "description": "기술카드 사용 안하고 승리",
+        3: {
             "achieved": False,
             "achieved_date": None
         },
-        "win_by_a_nose": {
-            "name": "간발의 차",
-            "description": "다른 플레이어가 UNO선언한 뒤에 승리",
+        4: {
             "achieved": False,
             "achieved_date": None
         },
-        "terrorist": {
-            "name": "테러리스트",
-            "description": "폭탄 카드 사용",
+        5: {
             "achieved": False,
             "achieved_date": None
         },
-        "adequate_defense": {
-            "name": "적절한 방어",
-            "description": "방어 카드로 공격 막음",
+        6: {
             "achieved": False,
             "achieved_date": None
         },
-        "greedy_man": {
-            "name": "욕심쟁이",
-            "description": "one_more 카드 사용",
+        7: {
             "achieved": False,
             "achieved_date": None
         }
@@ -116,3 +132,15 @@ def load_stage_clear():
             clear_data = INIT_GAME_DATA["stage_clear_count"]
 
     return clear_data
+
+
+def load_achieved_status():
+    try:
+        with open(FILEPATH, encoding='utf-8') as fr:
+            data = json.load(fr)["achievement"]
+    except FileNotFoundError:
+        with open(FILEPATH, 'w', encoding='utf-8') as fw:
+            json.dump(INIT_GAME_DATA, fw, indent=4)
+            data = INIT_GAME_DATA["achievement"]
+
+    return data

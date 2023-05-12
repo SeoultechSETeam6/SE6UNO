@@ -8,6 +8,7 @@ from ui.button import Button
 from scene.single_play_lobby import SinglePlayLobby
 from scene.story_mode_map import StoryModeMap
 from scene.settings import Settings
+from scene.achievement import Achievement
 
 
 class Main:
@@ -56,7 +57,7 @@ class Main:
                    self.ui_size["font"][1],
                    on_click_function=self.event_story_mode),
             Button(self.screen.get_width() // 2,
-                   self.screen.get_height() // 2 * 1.3,
+                   self.screen.get_height() // 2 * 1.28,
                    self.ui_size["button"][0],
                    self.ui_size["button"][1],
                    self.screen,
@@ -65,7 +66,16 @@ class Main:
                    self.ui_size["font"][1],
                    on_click_function=self.event_single_play_mode),
             Button(self.screen.get_width() // 2,
-                   self.screen.get_height() // 2 * 1.5,
+                   self.screen.get_height() // 2 * 1.46,
+                   self.ui_size["button"][0],
+                   self.ui_size["button"][1],
+                   self.screen,
+                   0xffffff,
+                   '업적',
+                   self.ui_size["font"][1],
+                   on_click_function=self.event_achievement),
+            Button(self.screen.get_width() // 2,
+                   self.screen.get_height() // 2 * 1.64,
                    self.ui_size["button"][0],
                    self.ui_size["button"][1],
                    self.screen,
@@ -74,14 +84,15 @@ class Main:
                    self.ui_size["font"][1],
                    on_click_function=self.event_settings),
             Button(self.screen.get_width() // 2,
-                   self.screen.get_height() // 2 * 1.7,
+                   self.screen.get_height() // 2 * 1.82,
                    self.ui_size["button"][0],
                    self.ui_size["button"][1],
                    self.screen,
                    0xffffff,
                    '나가기',
                    self.ui_size["font"][1],
-                   on_click_function=self.event_quit)]
+                   on_click_function=self.event_quit)
+        ]
 
         self.selected_button_index = 0
         self.buttons[self.selected_button_index].keyboard_selected = True
@@ -92,20 +103,26 @@ class Main:
         StoryModeMap().run()
         # self.running = False
 
-    def event_settings(self):
-        self.music.stop()
-        print('설정 버튼 클릭됨')
-        Settings().run()
-        # self.running = False
-
-    def event_quit(self):
-        print('나가기 버튼 클릭됨')
-        self.running = False
-
     def event_single_play_mode(self):
         self.music.stop()
         print('싱글 플레이 버튼 클릭됨')
         SinglePlayLobby().run()
+
+    def event_achievement(self):
+        self.music.stop()
+        print('업적 버튼 클릭됨')
+        Achievement().run()
+
+    def event_settings(self):
+        self.music.stop()
+        print('설정 버튼 클릭됨')
+        Settings().run()
+        if game_view.resolution_changed:
+            self.running = False
+
+    def event_quit(self):
+        print('나가기 버튼 클릭됨')
+        self.running = False
 
     def draw(self):
         # 배경 색상
@@ -148,7 +165,3 @@ class Main:
             self.clock.tick(game_view.FPS)
             self.detect_key_event()
             self.draw()
-
-        # 나가기
-        pygame.quit()
-        sys.exit()
