@@ -117,7 +117,8 @@ class Main:
         self.music.stop()
         print('설정 버튼 클릭됨')
         Settings().run()
-        self.running = False
+        if game_view.resolution_changed:
+            self.running = False
 
     def event_quit(self):
         print('나가기 버튼 클릭됨')
