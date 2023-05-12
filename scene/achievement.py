@@ -48,16 +48,15 @@ class Achievement:
                 {"image": game_view.scale_by(
                     pygame.image.load(self.image_path + achievement["image"]).convert_alpha(),
                     self.ui_size["change"]),
-                 "name": self.font.render(achievement["name"], True, (255, 255, 255)),
-                 "description": self.small_font.render(achievement["description"], True, (255, 255, 255))})
+                    "name": self.font.render(achievement["name"], True, (255, 255, 255)),
+                    "description": self.small_font.render(achievement["description"], True, (255, 255, 255))})
             self.achievements.append(achievement_obj)
 
         # 업적 달성 날짜
         self.achieved_data = game_data.load_achieved_status()
         self.texts_achieved_date = []
         for i, achievement in enumerate(self.achievements):
-            achievement.update({"date":
-                self.small_font.render(self.achieved_data[f"{i}"]["achieved_date"], True, (255, 255, 255))})
+            achievement.update({"date": self.small_font.render("달성 일시: " + str(self.achieved_data[f"{i}"]["achieved_date"]), True, (255, 255, 255))})
 
         # 상단 글자 이미지
         self.image_achievement_title = game_view.scale_by(
@@ -73,21 +72,6 @@ class Achievement:
         print('나가기')
         self.running = False
 
-    # 업적 정보
-    def draw_achievement_info(self, achievement_data, x, y):
-        name = achievement_data["name"]
-        description = achievement_data["description"]
-        achieved_date = achievement_data["achieved_date"]
-
-        name_text = self.font.render(name, True, (255, 255, 255))
-        description_text = self.small_font.render(description, True, (255, 255, 255))
-
-        if achieved_date:
-            achieved_date_text = self.small_font.render(achieved_date, True, (255, 255, 255))
-            self.screen.blit(achieved_date_text, (x, y + self.ui_size["font"][0] * 2))
-        self.screen.blit(name_text, (x, y))
-        self.screen.blit(description_text, (x, y + self.ui_size["font"][0]))
-
     def draw(self):
         self.screen.fill((20, 20, 20))
 
@@ -96,27 +80,24 @@ class Achievement:
                          (self.screen.get_width() / 2 - self.image_achievement_title.get_width() / 2, 0))
 
         # 업적 표시
-        x = self.screen.get_width() * 0.1
-        y = self.screen.get_height() * 0.1
+        x = self.screen.get_width() * 0.05
+        y = self.screen.get_height() * 0.2
         for i, achievement in enumerate(self.achievements):
-            self.screen.blit(achievement["name"], (x, y))
-            self.screen.blit(achievement["image"], (x, y + self.screen.get_height() * 0.1))
-            self.screen.blit(achievement["description"], (x, y + self.screen.get_height() * 0.15))
+            self.screen.blit(achievement["image"], (x, y))
+            self.screen.blit(achievement["name"], (x, y + self.screen.get_height() * 0.25))
+            self.screen.blit(achievement["description"], (x, y + self.screen.get_height() * 0.32))
             if self.achieved_data[f"{i}"]["achieved"]:
-                self.screen.blit(self.image_clear_mark, (x, y))
-                self.screen.blit(achievement["date"], (x, y + self.screen.get_height() * 0.2))
-            x += self.screen.get_width() // 5
+                self.screen.blit(self.image_clear_mark, (x, y + self.screen.get_height() * 0.05))
+                self.screen.blit(achievement["date"], (x, y + self.screen.get_height() * 0.35))
+            x += self.screen.get_width() // 4
             if x > self.screen.get_width():
-                x = 100
-                y += self.screen.get_height() // 5
+                x = self.screen.get_width() * 0.05
+                y += self.screen.get_height() // 2.5
 
         # 나가기 버튼
         self.button_quit.draw()
         self.button_quit.detect_event()
 
-        # 버튼 체크박스
-        # self.screen.blit(self.exit_button.selected_image, (self.exit_button.rect.x,
-        #                                                    self.exit_button.rect.y - self.ui_size["font"][1]))
         pygame.display.flip()
 
     def event(self):
@@ -133,4 +114,3 @@ class Achievement:
             Mouse.updateMouseState()
             self.clock.tick(game_view.FPS)
             self.draw()
-

@@ -129,4 +129,7 @@ dmypy.json
 .pyre/
 
 .idea/
+
+# UNO Game Files
 *.json
+*.exe
