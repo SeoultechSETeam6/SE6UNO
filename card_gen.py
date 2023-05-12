@@ -235,20 +235,3 @@ if __name__ == "__main__":
     cards = generate_c_stage_cards(False,)
     print_cards(cards)
 '''
-
-
-def examine_dummy_card(color_weakness, size_by):
-    # 더미 카드 생성
-    card_image = pygame.image.load(f"./resources/Image/card_images/none_change.png")
-    card = Dummy('none', 'change', card_image, card_image, card_image)
-    card.card_image = basic.scale_by(card_image, size_by)
-    card.card_img_back = basic.scale_by(card_image, size_by)
-
-    # 더미 카드 특성 확인
-    print("Is this card a dummy card? ", card.is_dummy())
-    print("Color of the card: ", card.color)
-    print("Value of the card: ", card.value)
-    print("card_image of the card: ", card.card_image)
-
-
-examine_dummy_card(color_weakness=True, size_by=1)  # color_weakness와 size_by는 예시입니다. 실제 필요한 값을 넣어주세요.

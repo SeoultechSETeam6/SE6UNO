@@ -890,7 +890,7 @@ class StageC(SingleGame):
                         self.reset()
                         print("턴 종료")
                         self.turn_count = self.turn_count + 1
-                        if self.turn_count%5 == 0:
+                        if self.turn_count % 5 == 0:
                             self.board_card = random_top_card_color(self.top_card, self.dummy_cards, self.board_card, self.dummy_cards_c)
 
 

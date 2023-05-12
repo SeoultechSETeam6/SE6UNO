@@ -6,7 +6,7 @@ from button import ButtonWithImg
 from button import Button
 from option import basic_option as basic
 from popup import Popup
-from stage_logic import StageA, StageB, StageC, StageD
+from campaign_game import StageA, StageB, StageC, StageD
 
 class CampaignMap:
     def __init__(self):
