@@ -218,6 +218,7 @@ class Settings:
         self.button_resolution[0].colors['normal'] = int(0xffffff * 0.3)
         self.button_resolution[1].colors['normal'] = 0xffffff
         self.button_resolution[2].colors['normal'] = 0xffffff
+        game_view.resolution_changed = True
 
     def event_change_resolution_1600(self):
         self.settings_data["resolution"]["width"] = 1600
@@ -225,6 +226,7 @@ class Settings:
         self.button_resolution[0].colors['normal'] = 0xffffff
         self.button_resolution[1].colors['normal'] = int(0xffffff * 0.3)
         self.button_resolution[2].colors['normal'] = 0xffffff
+        game_view.resolution_changed = True
 
     def event_change_resolution_1280(self):
         self.settings_data["resolution"]["width"] = 1280
@@ -232,6 +234,7 @@ class Settings:
         self.button_resolution[0].colors['normal'] = 0xffffff
         self.button_resolution[1].colors['normal'] = 0xffffff
         self.button_resolution[2].colors['normal'] = int(0xffffff * 0.3)
+        game_view.resolution_changed = True
 
     # 색약 설정 이벤트
     def event_color_weakness(self):
