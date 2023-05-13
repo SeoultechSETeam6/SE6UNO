@@ -149,6 +149,16 @@ def computer_playable_card(now_player_hands, board_card):
     return playable, card_index
 
 
+'''
+def computer_color_preference(now_player_hands, board_card, current_player):
+    top_card = get_top_card(board_card)
+    percentage = random.randint(1, 10)
+    if percentage < 6:
+        playable_cards = [card for card in now_player_hands if is_valid_move(card, top_card) and card]
+    elif percentage > 5:
+'''
+
+
 def playable_attack_card(now_player_hands, board_card):
     top_card = get_top_card(board_card)
     playable_attack_cards = [card for card in now_player_hands if is_valid_move(card, top_card) and
@@ -157,12 +167,28 @@ def playable_attack_card(now_player_hands, board_card):
         selected_card = random.choice(playable_attack_cards)
         playable = True
         card_index = now_player_hands.index(selected_card)
-        playable_attack_check = True
+        playable_special_check = True
     else:
         playable = False
         card_index = None
-        playable_attack_check = False
-    return playable, card_index, playable_attack_check
+        playable_special_check = False
+    return playable, card_index, playable_special_check
+
+
+def playable_special_card(now_player_hands, board_card):
+    top_card = get_top_card(board_card)
+    playable_special_cards = [card for card in now_player_hands if is_valid_move(card, top_card) and
+                             card.is_special() is True]
+    if playable_special_cards:
+        selected_card = random.choice(playable_special_cards)
+        playable = True
+        card_index = now_player_hands.index(selected_card)
+        playable_special_check = True
+    else:
+        playable = False
+        card_index = None
+        playable_special_check = False
+    return playable, card_index, playable_special_check
 
 
 def user_submit_card(card, card_index, board_card, now_player_hand):
@@ -179,13 +205,13 @@ def com_submit_card(card, card_index, board_card, now_player_hand):
 
 
 # 스페셜 카드 적용
-def apply_special_card_effects(card, current_player, direction, player_hands, remain_cards,
-                               player_count):
+def apply_special_card_effects(card, current_player, direction, player_hands, remain_cards, player_count, stage):
 
     # 역방향 카드
     if card.value == "reverse":
         direction *= -1
-        current_player = (current_player + direction) % player_count
+        if stage != "A":
+            current_player = (current_player + direction) % player_count
         return current_player, direction
 
     # 스킵 카드
@@ -196,7 +222,6 @@ def apply_special_card_effects(card, current_player, direction, player_hands, re
 
     # 2장 드로우 공격
     elif card.value == "draw_2":
-        change_card = False
         next_player = (current_player + direction) % player_count
         has_shield = next((check_card for check_card in player_hands[next_player] if check_card.value == "shield")
                           , None)
@@ -226,17 +251,20 @@ def apply_special_card_effects(card, current_player, direction, player_hands, re
             if i != current_player:
                 add_card = remain_cards.pop()
                 hand.append(add_card)
-        current_player = (current_player + direction) % player_count
+        if stage != "A":
+            current_player = (current_player + direction) % player_count
         return current_player, direction
 
     # 실드 카드(딘순히 내는 동작)
     elif card.value == "shield":
-        current_player = (current_player + direction) % player_count
+        if stage != "A":
+            current_player = (current_player + direction) % player_count
         return current_player, direction
 
     # 체인지 카드(카드색 바꿈)
     elif card.value == "change":
-        current_player = (current_player + direction) % player_count
+        if stage != "A":
+            current_player = (current_player + direction) % player_count
         return current_player, direction
 
 
@@ -254,30 +282,6 @@ def random_top_card_color(top_card, dummy_cards, board_card, dummy_cards_for_cha
     print(dummy_card)
     print(top_card)
     return board_card
-
-
-def find_combos(hand):
-    combos = []
-
-    # card.value 가 skip인 카드가 두 장 이상
-    skip_cards = [card for card in hand if card.value == 'skip']
-    draw_2_cards = [card for card in hand if card.value == 'draw_2']
-    for color in set(card.color for card in hand):
-        same_color_skip = next((card for card in skip_cards if card.color == color), None)
-        same_color_draw_2 = next((card for card in draw_2_cards if card.color == color), None)
-
-    if len(skip_cards) >= 2:
-        combos = (skip_cards[:2])
-
-    # card.value 가 draw_2인 카드 두 장 이상
-    elif len(draw_2_cards) >= 2:
-        combos = (draw_2_cards[:2])
-
-    # 서로 같은 card.color를 가지는 skip과 draw_2를 가지고 있을때
-    elif same_color_skip and same_color_draw_2:
-        combos = ([same_color_skip, same_color_draw_2])
-
-    return combos
 
 
 def card_reshuffle(board_card, remain_cards):

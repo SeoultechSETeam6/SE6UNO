@@ -104,17 +104,25 @@ def generate_for_change_cards(color_weakness, size_by):
 def generate_a_stage_cards(color_weakness, size_by):
     special_cards = []
     regular_cards = []
-    card_back_image = basic.scale_by(pygame.image.load("./resources/Image/card_images/card_back.png"),
-                                                size_by)
+    card_back_image = pygame.image.load("./resources/Image/card_images/card_back.png")
 
-    card_folder = "./resources/Image/cw_card_images" if color_weakness else "./resources/Image/card_images"
+    card_folder_cw = "./resources/Image/cw_card_images"
+    card_folder = "./resources/Image/card_images"
+
     # 색약 모드와 경로 차별화
-
     for i in range(2):
         for color in colors:
             for value in values:
-                card_image = basic.scale_by(pygame.image.load(f"{card_folder}/{color}_{value}.png"), size_by)
-                card = Card(color, value, card_image, card_back_image)
+                card_image_cw = pygame.image.load(f"{card_folder_cw}/{color}_{value}.png")
+                card_image = pygame.image.load(f"{card_folder}/{color}_{value}.png")
+                card = Card(color, value, card_image, card_image_cw, card_back_image)
+                if color_weakness:
+                    card.card_image = basic.scale_by(card_image_cw, size_by)
+                else:
+                    card.card_image = basic.scale_by(card_image, size_by)
+                card.card_img_back = basic.scale_by(card_back_image, size_by)
+
+                # 일반 카드와 기술 카드를 나눈다.
                 if card.is_special():
                     special_cards.append(card)
                 else:
@@ -122,17 +130,20 @@ def generate_a_stage_cards(color_weakness, size_by):
                 if value == "bomb":
                     break
 
-    # 색 없는 색변경 카드를 추가
+    # 색 없는 실드 카드를 추가
     for i in range(2):
-        card_image = basic.scale_by(
-            pygame.image.load(f"./resources/Image/card_images/none_change.png"), size_by)
-        card = Card('none', 'change', card_image, card_back_image)
+        card_image = pygame.image.load(f"./resources/Image/card_images/none_shield.png")
+        card = Card('none', 'shield', card_image, card_image, card_back_image)
+        card.card_image = basic.scale_by(card_image, size_by)
+        card.card_img_back = basic.scale_by(card_back_image, size_by)
         special_cards.append(card)
 
     # 색 없는 색변경 카드를 추가
     for i in range(2):
         card_image = pygame.image.load(f"resources/Image/card_images/none_change.png")
-        card = Card('none', 'change', card_image, card_back_image)
+        card = Card('none', 'change', card_image, card_image, card_back_image)
+        card.card_image = basic.scale_by(card_image, size_by)
+        card.card_img_back = basic.scale_by(card_back_image, size_by)
         special_cards.append(card)
 
     return regular_cards, special_cards
