@@ -118,7 +118,7 @@ def get_top_card(deck):
 # 카드 한 장 뽑아옴
 def draw_board_card(screen, card, x, y):
     if card:
-        screen.blit(card.image, (x, y))
+        screen.blit(card.card_img, (x, y))
 
 
 # 내는 카드 유효성 검사
