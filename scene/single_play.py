@@ -292,12 +292,9 @@ class SinglePlay:
         self.center_x = (self.settings_data["resolution"]["width"] - self.image_width) // 2
         self.center_y = (self.settings_data["resolution"]["height"] - self.image_height) // 2
 
-        self.select_color = ["red", "blue", "green", "yellow"]
-
         # 컴퓨터 초기 좌표와 카드 색 선호도.
         self.user_coordinate = []
         self.computer_coordinate = []
-        self.computer_color = [None]
         self.max_per_row = 15 * self.ui_size["change"]
         self.max_per_row_com = 20 * self.ui_size["change"]
         self.user_coordinate.append(30)
@@ -458,11 +455,15 @@ class SinglePlay:
 
             # 카드를 드로우함
             if self.clicked_remain_cards and self.new_drawn_card is None and self.pop_card is None:
-                self.is_draw = True
-                self.draw_animation(self.current_player)
-                self.turn_start_time = pygame.time.get_ticks()
-                self.player_hands[0].append(self.remain_cards.pop())
-                self.new_drawn_card = self.player_hands[0][-1]
+                if len(self.remain_cards) > 1:
+                    self.is_draw = True
+                    self.draw_animation(self.current_player)
+                    self.turn_start_time = pygame.time.get_ticks()
+                    self.player_hands[0].append(self.remain_cards.pop())
+                    self.new_drawn_card = self.player_hands[0][-1]
+                elif len(self.remain_cards) == 1:
+                    self.current_player = (self.current_player + self.game_direction) % self.player_count
+                    self.turn_end_method()
             # 카드를 드로우 하고 턴을 넘기는 함수.
             elif self.new_drawn_card is not None and self.clicked_next_turn_button:
                 self.current_player = (self.current_player + self.game_direction) % self.player_count
@@ -500,12 +501,16 @@ class SinglePlay:
                     self.place_animation(self.current_player)
                     self.pop_card = self.player_hands[self.current_player][self.pop_card_index]
                     self.board_card, self.player_hands[self.current_player] = com_submit_card(self.pop_card, self.pop_card_index, self.board_card, self.player_hands[self.current_player])
-                # 카드를 낼 수 없을 때 드로우 한다.
+                # 카드를 낼 수 없을 때 드로우 한다. (remain_cards가 2장 이상이면 카드를 가져오고, 한장만 존재하면 턴만 넘긴다.)
                 elif not self.playable and self.new_drawn_card is None and self.pop_card is None:
-                    self.draw_animation(self.current_player)
-                    self.new_drawn_card = self.remain_cards.pop()
-                    self.player_hands[self.current_player].append(self.new_drawn_card)
-                    self.turn_start_time = pygame.time.get_ticks()
+                    if len(self.remain_cards) > 2:
+                        self.draw_animation(self.current_player)
+                        self.new_drawn_card = self.remain_cards.pop()
+                        self.player_hands[self.current_player].append(self.new_drawn_card)
+                        self.turn_start_time = pygame.time.get_ticks()
+                    elif len(self.remain_cards) == 1:
+                        self.current_player = (self.current_player + self.game_direction) % self.player_count
+                        self.turn_end_method()
                 # 드로우한 카드가 낼 수 있는 경우
                 elif self.new_drawn_card is not None and is_valid_move(self.new_drawn_card, self.top_card) and self.pop_card is None:
                     if self.current_time - self.turn_start_time >= self.delay_time2:

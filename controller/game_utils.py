@@ -149,14 +149,32 @@ def computer_playable_card(now_player_hands, board_card):
     return playable, card_index
 
 
-'''
-def computer_color_preference(now_player_hands, board_card, current_player):
+def computer_color_preference(now_player_hands, board_card, color_preference):
     top_card = get_top_card(board_card)
     percentage = random.randint(1, 10)
+    # 1~5가 나오면, 랜덤하게 카드를 뽑고, 6~10이 나오면 자신의 색 선호도에 맞춰서 카드를 뽑는다.
     if percentage < 6:
-        playable_cards = [card for card in now_player_hands if is_valid_move(card, top_card) and card]
+        print("랜덤 카드를 뽑는다")
+        playable, card_index = computer_playable_card(now_player_hands, board_card)
+        playable_special_check = True
+        return playable, card_index, playable_special_check
     elif percentage > 5:
-'''
+        print("색 카드를 뽑는다", color_preference)
+        playable_cards = [card for card in now_player_hands if is_valid_move(card, top_card) and card.color == color_preference]
+        if playable_cards:
+            print("뽑을수 있는 색 카드 후보군", playable_cards)
+            selected_card = random.choice(playable_cards)
+            print("색 카드를 뽑을 수 있다.", selected_card)
+            playable = True
+            card_index = now_player_hands.index(selected_card)
+            playable_special_check = True
+        else:
+            print("색 카드를 뽑을 수 없다.")
+            playable = False
+            card_index = None
+            playable_special_check = False
+        return playable, card_index, playable_special_check
+
 
 
 def playable_attack_card(now_player_hands, board_card):

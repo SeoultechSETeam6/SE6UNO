@@ -25,6 +25,7 @@ from controller.game_utils import (
     draw_board_card,
     is_valid_move,
     computer_playable_card,
+    computer_color_preference,
     playable_attack_card,
     user_submit_card,
     com_submit_card,
@@ -33,6 +34,7 @@ from controller.game_utils import (
     card_reshuffle)
 
 
+# 콤보 사용, 기술 카드를 낼 수 있으면 기술카드를 먼저 냄
 class StageA(SinglePlay):
     def __init__(self):
         super().__init__([False, False, True, False, False], 'You')
@@ -154,6 +156,7 @@ class StageA(SinglePlay):
                 self.turn_and_reset()
 
 
+# 모든 카드를 플레이어들에게 나눠줌.
 class StageB(SinglePlay):
     def __init__(self):
         super().__init__([True, False, True, False, True], 'You')
@@ -175,8 +178,51 @@ class StageB(SinglePlay):
 
         self.stage = "B"
 
+    def computer_turn_method(self):
+        # 현재 시각 불러옴
+        self.current_time = pygame.time.get_ticks()
 
-# 5턴 마다 낼 수 있는 카드의 색상이 무작위로 변경됨, 컴퓨터는 낼 수 있는 카드 중 공격카드를 먼저 사용.
+        if self.uno_check:
+            return
+
+        # 컴퓨터 턴 처리
+        if not self.user_turn:
+            if self.turn_start_time is None:
+                self.turn_start_time = pygame.time.get_ticks()
+            if self.current_time - self.turn_start_time >= self.delay_time:  # 설정한 시간이 되면 컴퓨터가 행동함
+                # 확률에 따른 선택. 50퍼센트로 자신의 색 선호도에 맞춰서 카드를 뽑는다.
+                if self.new_drawn_card is None and self.pop_card is None and self.playable_special_check is False:
+                    self.playable, self.pop_card_index, self.playable_special_check = computer_color_preference(
+                        self.player_hands[self.current_player], self.board_card, self.computer_color[self.current_player])
+                # 낼 수 있는 카드 유효성 검사
+                if self.new_drawn_card is None and self.pop_card is None and self.playable_special_check is False:
+                    self.playable, self.pop_card_index = computer_playable_card(self.player_hands[self.current_player], self.board_card)
+                # 카드를 낼 수 있을 때 낸다.
+                if self.playable and self.new_drawn_card is None and self.pop_card is None:
+                    self.place_animation(self.current_player)
+                    self.pop_card = self.player_hands[self.current_player][self.pop_card_index]
+                    self.board_card, self.player_hands[self.current_player] = com_submit_card(self.pop_card, self.pop_card_index, self.board_card, self.player_hands[self.current_player])
+                # 카드를 낼 수 없을 때 드로우 한다.
+                elif not self.playable and self.new_drawn_card is None and self.pop_card is None:
+                    self.draw_animation(self.current_player)
+                    self.new_drawn_card = self.remain_cards.pop()
+                    self.player_hands[self.current_player].append(self.new_drawn_card)
+                    self.turn_start_time = pygame.time.get_ticks()
+                # 드로우한 카드가 낼 수 있는 경우
+                elif self.new_drawn_card is not None and is_valid_move(self.new_drawn_card, self.top_card) and self.pop_card is None:
+                    if self.current_time - self.turn_start_time >= self.delay_time2:
+                        self.place_animation(self.current_player)
+                        self.pop_card = self.new_drawn_card
+                        self.pop_card_index = self.player_hands[self.current_player].index(self.pop_card)
+                        self.board_card, self.player_hands[self.current_player] = com_submit_card(self.pop_card, self.pop_card_index, self.board_card, self.player_hands[self.current_player])
+                # 드로우한 카드를 낼 수 없는 경우
+                elif self.new_drawn_card is not None and not is_valid_move(self.new_drawn_card, self.top_card) and self.pop_card is None:
+                    if self.current_time - self.turn_start_time >= self.delay_time2:
+                        self.current_player = (self.current_player + self.game_direction) % self.player_count
+                        self.turn_end_method()
+
+
+# 5턴 마다 낼 수 있는 카드의 색상이 무작위로 변경됨
 class StageC(SinglePlay):
     def __init__(self):
         super().__init__([True, False, True, False, False], 'You')
@@ -255,7 +301,7 @@ class StageC(SinglePlay):
                         self.turn_end_method()
 
 
-# 공격 카드, 폭탄 카드가 다수 추가됨
+# 공격 카드, 폭탄 카드가 다수 추가됨. 공격, 폭탄카드 사용 가능시 먼저 사용
 class StageD(SinglePlay):
     def __init__(self):
         super().__init__([True, False, True, False, True], 'You')
