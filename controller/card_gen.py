@@ -5,7 +5,6 @@ from controller.game_view import scale_by
 colors = ['red', 'green', 'blue', 'yellow']
 values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'skip', 'reverse', 'draw_2', 'one_more', 'bomb']
 change_colors = ['red', 'green', 'blue', 'yellow']
-shield_card_value = 'shield'
 change_value = None
 
 
@@ -202,35 +201,53 @@ def generate_c_for_change_cards(color_weakness, size_by):
     return for_change_cards
 
 
-'''
 def generate_d_stage_cards(color_weakness, size_by):
     cards = []
-    card_back_image = scale_by(pygame.image.load("./resources/Image/card_images/card_back.png"), size_by)
+    card_back_image = pygame.image.load("./resources/Image/card_images/card_back.png")
 
-    card_folder = "./resources/Image/cw_card_images" if color_weakness else "./resources/Image/card_images"
+    card_folder_cw = "./resources/Image/cw_card_images"
+    card_folder = "./resources/Image/card_images"
     # 색약 모드와 경로 차별화
 
     for i in range(2):
         for color in colors:
             for value in values:
-                card_image = scale_by(pygame.image.load(f"{card_folder}/{color}_{value}.png"), size_by)
-                card = Card(color, value, card_image, card_back_image)
+                card_image_cw = pygame.image.load(f"{card_folder_cw}/{color}_{value}.png")
+                card_image = pygame.image.load(f"{card_folder}/{color}_{value}.png")
+                card = Card(color, value, card_image, card_image_cw, card_back_image)
+                if color_weakness:
+                    card.card_img = scale_by(card_image_cw, size_by)
+                else:
+                    card.card_img = scale_by(card_image, size_by)
+                card.card_img_back = scale_by(card_back_image, size_by)
                 cards.append(card)
 
+    # 공격카드, 폭탄카드를 색마다 2장씩 더 추가
     for i in range(2):
         for color in colors:
-                card_image = scale_by(pygame.image.load(f"{card_folder}/{color}_bomb.png"), size_by)
-                card = Card(color, "bomb", card_image, card_back_image)
-                cards.append(card)
+            card_image_cw = pygame.image.load(f"{card_folder_cw}/{color}_{value}.png")
+            card_image = pygame.image.load(f"{card_folder}/{color}_{value}.png")
+            card = Card(color, "bomb", card_image, card_image_cw, card_back_image)
+            cards.append(card)
         for color in colors:
-                card_image = scale_by(pygame.image.load(f"{card_folder}/{color}_draw_2.png"), size_by)
-                card = Card(color, "draw_2", card_image, card_back_image)
-                cards.append(card)
+            card_image_cw = pygame.image.load(f"{card_folder_cw}/{color}_{value}.png")
+            card_image = pygame.image.load(f"{card_folder}/{color}_{value}.png")
+            card = Card(color, "draw_2", card_image, card_image_cw, card_back_image)
+            cards.append(card)
+
+    # 색 없는 실드카드를 한 번에 추가합니다.
+    for i in range(2):
+        card_image = pygame.image.load(f"./resources/Image/card_images/none_shield.png")
+        card = Card(None, 'shield', card_image, card_image, card_back_image)
+        card.card_img = scale_by(card_image, size_by)
+        card.card_img_back = scale_by(card_back_image, size_by)
+        cards.append(card)
 
     # 색 없는 색변경 카드를 추가
     for i in range(2):
-        card_image = scale_by(pygame.image.load(f"./resources/Image/card_images/none_change.png"), size_by)
-        card = Card('none', 'change', card_image, card_back_image)
+        card_image = pygame.image.load(f"./resources/Image/card_images/none_change.png")
+        card = Card(None, 'change', card_image, card_image, card_back_image)
+        card.card_img = scale_by(card_image, size_by)
+        card.card_img_back = scale_by(card_back_image, size_by)
         cards.append(card)
     return cards
-'''

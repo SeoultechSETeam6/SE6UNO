@@ -4,7 +4,7 @@ from controller.mouse import Mouse
 from controller import game_data, game_view
 from ui.button import Button, ImageButton
 from ui.popup import Popup
-from scene.story_mode import StageA, StageB, StageC
+from scene.story_mode import StageA, StageB, StageC, StageD
 
 
 class StoryModeMap:
@@ -132,8 +132,8 @@ class StoryModeMap:
             stage_3.run()
         else:
             pass
-        #    stage_4 = StageD()
-        #    stage_4.run()
+            stage_4 = StageD()
+            stage_4.run()
 
     def event_stage_1_popup(self):
         print('1스테이지 입장버튼 클릭됨')
