@@ -274,7 +274,7 @@ def random_top_card_color(top_card, dummy_cards, board_card, dummy_cards_for_cha
     if top_card.value != "change":
         dummy_card = [card for card in dummy_cards if card.value == top_card.value and card.color == color]
         print("더미 카드: ", dummy_card)
-        print("더미 카드 색: ", dummy_card[0].card_img)
+        print("더미 카드 이미지: ", dummy_card[0].card_img)
         board_card.append(dummy_card[0])
     elif top_card.value == "change":
         dummy_card = dummy_cards_for_change[random.randint(0, 3)]

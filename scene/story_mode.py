@@ -192,7 +192,7 @@ class StageC(SinglePlay):
 
     def check_change_top_card_method(self):
         if self.turn_count % 5 == 0:
-            self.board_card = random_top_card_color(self.top_card, self.dummy_cards, self.board_card,
+            self.board_card = random_top_card_color(self.board_card[-1], self.dummy_cards, self.board_card,
                                                     self.dummy_cards_c)
 
     def computer_turn_method(self):

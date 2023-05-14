@@ -307,30 +307,14 @@ class SinglePlay:
         self.next_turn_co = [0, 150 * self.ui_size["change"]]
         if self.computer_attends[0]:
             self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, self.settings_data["resolution"]["height"] * 0.03])
-            self.computer1_color = self.select_color[random.randint(0, 3)]
-            self.computer_color.append(self.computer1_color)
-            print("computer1_color", self.computer1_color)
         if self.computer_attends[1]:
             self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + self.settings_data["resolution"]["height"] * 0.2])
-            self.computer2_color = self.select_color[random.randint(0, 3)]
-            self.computer_color.append(self.computer2_color)
-            print("computer2_color", self.computer2_color)
         if self.computer_attends[2]:
             self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.4)])
-            self.computer3_color = self.select_color[random.randint(0, 3)]
-            self.computer_color.append(self.computer3_color)
-            print("computer3_color", self.computer3_color)
         if self.computer_attends[3]:
             self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.6)])
-            self.computer4_color = self.select_color[random.randint(0, 3)]
-            self.computer_color.append(self.computer4_color)
-            print("computer4_color", self.computer4_color)
         if self.computer_attends[4]:
             self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.8)])
-            self.computer5_color = self.select_color[random.randint(0, 3)]
-            self.computer_color.append(self.computer5_color)
-            print("computer5_color", self.computer5_color)
-        print("computer color list", self.computer_color)
 
         # change카드 좌표, spacing은 공백
         self.x5 = 100

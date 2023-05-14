@@ -56,9 +56,9 @@ def generate_cards(color_weakness, size_by):
                 card_image = pygame.image.load(f"{card_folder}/{color}_{value}.png")
                 card = Card(color, value, card_image, card_image_cw, card_back_image)
                 if color_weakness:
-                    card.card_image = scale_by(card_image_cw, size_by)
+                    card.card_img = scale_by(card_image_cw, size_by)
                 else:
-                    card.card_image = scale_by(card_image, size_by)
+                    card.card_img = scale_by(card_image, size_by)
                 card.card_img_back = scale_by(card_back_image, size_by)
                 cards.append(card)
 
@@ -66,7 +66,7 @@ def generate_cards(color_weakness, size_by):
     for i in range(2):
         card_image = pygame.image.load(f"./resources/Image/card_images/none_shield.png")
         card = Card('none', 'shield', card_image, card_image, card_back_image)
-        card.card_image = scale_by(card_image, size_by)
+        card.card_img = scale_by(card_image, size_by)
         card.card_img_back = scale_by(card_back_image, size_by)
         cards.append(card)
 
@@ -74,7 +74,7 @@ def generate_cards(color_weakness, size_by):
     for i in range(2):
         card_image = pygame.image.load(f"./resources/Image/card_images/none_change.png")
         card = Card('none', 'change', card_image, card_image, card_back_image)
-        card.card_image = scale_by(card_image, size_by)
+        card.card_img = scale_by(card_image, size_by)
         card.card_img_back = scale_by(card_back_image, size_by)
         cards.append(card)
     return cards
@@ -92,9 +92,9 @@ def generate_for_change_cards(color_weakness, size_by):
         card_image = pygame.image.load(f"{change_card_folder}/{color}_{change_value}.png")
         for_change_card = Card(color, change_value, card_image, card_image_cw, card_back_image)
         if color_weakness:
-            for_change_card.card_image = scale_by(card_image_cw, size_by)
+            for_change_card.card_img = scale_by(card_image_cw, size_by)
         else:
-            for_change_card.card_image = scale_by(card_image, size_by)
+            for_change_card.card_img = scale_by(card_image, size_by)
         for_change_card.card_img_back = scale_by(card_back_image, size_by)
         for_change_cards.append(for_change_card)
 
@@ -117,9 +117,9 @@ def generate_a_stage_cards(color_weakness, size_by):
                 card_image = pygame.image.load(f"{card_folder}/{color}_{value}.png")
                 card = Card(color, value, card_image, card_image_cw, card_back_image)
                 if color_weakness:
-                    card.card_image = scale_by(card_image_cw, size_by)
+                    card.card_img = scale_by(card_image_cw, size_by)
                 else:
-                    card.card_image = scale_by(card_image, size_by)
+                    card.card_img = scale_by(card_image, size_by)
                 card.card_img_back = scale_by(card_back_image, size_by)
 
                 if card.is_special():
@@ -133,7 +133,7 @@ def generate_a_stage_cards(color_weakness, size_by):
     for i in range(2):
         card_image = pygame.image.load(f"./resources/Image/card_images/none_shield.png")
         card = Card('none', 'shield', card_image, card_image, card_back_image)
-        card.card_image = scale_by(card_image, size_by)
+        card.card_img = scale_by(card_image, size_by)
         card.card_img_back = scale_by(card_back_image, size_by)
 
         special_cards.append(card)
@@ -142,7 +142,7 @@ def generate_a_stage_cards(color_weakness, size_by):
     for i in range(2):
         card_image = pygame.image.load(f"./resources/Image/card_images/none_change.png")
         card = Card('none', 'change', card_image, card_image, card_back_image)
-        card.card_image = scale_by(card_image, size_by)
+        card.card_img = scale_by(card_image, size_by)
         card.card_img_back = scale_by(card_back_image, size_by)
         special_cards.append(card)
 
@@ -159,13 +159,13 @@ def generate_c_stage_cards(color_weakness, size_by):
 
     for color in colors:
         for value in values:
-            card_image = scale_by(pygame.image.load(f"{card_folder}/{color}_{value}.png"), size_by)
+            card_image = pygame.image.load(f"{card_folder}/{color}_{value}.png")
             card_image_cw = pygame.image.load(f"{card_folder_cw}/{color}_{value}.png")
             card = Dummy(color, value, card_image, card_image_cw, card_back_image)
             if color_weakness:
-                card.card_image = scale_by(card_image_cw, size_by)
+                card.card_img = scale_by(card_image_cw, size_by)
             else:
-                card.card_image = scale_by(card_image, size_by)
+                card.card_img = scale_by(card_image, size_by)
             card.card_img_back = scale_by(card_back_image, size_by)
             cards.append(card)
     return cards
@@ -183,9 +183,9 @@ def generate_c_for_change_cards(color_weakness, size_by):
         card_image = scale_by(pygame.image.load(f"{change_card_folder}/{color}_{change_value}.png"), size_by)
         for_change_card = Dummy(color, change_value, card_image, card_image_cw, card_back_image)
         if color_weakness:
-            for_change_card.card_image = scale_by(card_image_cw, size_by)
+            for_change_card.card_img = scale_by(card_image_cw, size_by)
         else:
-            for_change_card.card_image = scale_by(card_image, size_by)
+            for_change_card.card_img = scale_by(card_image, size_by)
         for_change_card.card_img_back = scale_by(card_back_image, size_by)
 
         for_change_cards.append(for_change_card)
