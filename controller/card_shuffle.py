@@ -20,12 +20,13 @@ def stage_a_distribute(player_count, regular_cards, special_cards, card_count):
     normal_prob = 0.5
     special_prob = 1 - normal_prob
 
+
     for i in range(player_count):
         for _ in range(card_count):
             if i == 0:
                 card_type = random.choices(['regular', 'special'], [normal_prob, special_prob])[0]
             else:
-                card_type = random.choices(['regular', 'special'], [normal_prob - 0.25, special_prob + 0.25])[0]
+                card_type = random.choices(['regular', 'special'], [normal_prob - 0.1, special_prob + 0.1])[0]
 
             if card_type == 'regular':
                 card = random.choice(regular_cards)
