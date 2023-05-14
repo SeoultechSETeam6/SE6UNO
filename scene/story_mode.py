@@ -26,6 +26,7 @@ from controller.game_utils import (
     is_valid_move,
     computer_playable_card,
     computer_color_preference,
+    skip_turn_with_probability,
     playable_attack_card,
     user_submit_card,
     com_submit_card,
@@ -156,7 +157,7 @@ class StageA(SinglePlay):
                 self.turn_and_reset()
 
 
-# 모든 카드를 플레이어들에게 나눠줌.
+# 모든 카드를 플레이어들에게 나눠줌. 50퍼센트 확률로 컴퓨터가 색 선호도에 따라 카드 선택함
 class StageB(SinglePlay):
     def __init__(self):
         super().__init__([True, False, True, False, True], 'You')
@@ -222,7 +223,7 @@ class StageB(SinglePlay):
                         self.turn_end_method()
 
 
-# 5턴 마다 낼 수 있는 카드의 색상이 무작위로 변경됨
+# 5턴 마다 낼 수 있는 카드의 색상이 무작위로 변경됨, 30퍼센트 확률로 카드를 낼 수 있어도 카드를 뽑고 턴을 넘김.
 class StageC(SinglePlay):
     def __init__(self):
         super().__init__([True, False, True, False, False], 'You')
@@ -258,13 +259,13 @@ class StageC(SinglePlay):
                 # 공격 카드 체크
                 if self.new_drawn_card is None and self.pop_card is None and self.playable_special_check is False:
                     self.playable, self.pop_card_index, self.playable_special_check = \
-                        playable_attack_card(self.player_hands[self.current_player], self.board_card)
-                    print('공격카드 체크')
+                        skip_turn_with_probability(self.player_hands[self.current_player], self.board_card)
+                    print('확률적 스킵 함수 발동됨')
                 # 유효성 검사
                 if self.new_drawn_card is None and self.pop_card is None and self.playable_special_check is False:
                     self.playable, self.pop_card_index = computer_playable_card(self.player_hands[self.current_player],
                                                                                 self.board_card)
-                    print('공격카드 외 체크')
+                    print('이 문구가 출력되면 무언가 잘못된것이다.')
                 # 카드를 낼 수 있을 때 낸다.
                 if self.playable and self.new_drawn_card is None and self.pop_card is None:
                     self.place_animation(self.current_player)

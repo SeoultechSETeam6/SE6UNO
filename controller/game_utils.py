@@ -176,6 +176,20 @@ def computer_color_preference(now_player_hands, board_card, color_preference):
         return playable, card_index, playable_special_check
 
 
+def skip_turn_with_probability(now_player_hands, board_card):
+    percentage = random.randint(1, 10)
+    if percentage > 3:
+        print("카드를 그냥 뽑지 않는다.")
+        playable, card_index = computer_playable_card(now_player_hands, board_card)
+        playable_special_check = True
+    else:
+        print("playable카드가 있어도, 카드를 뽑는다")
+        playable = False
+        card_index = None
+        playable_special_check = True
+    return playable, card_index, playable_special_check
+
+
 
 def playable_attack_card(now_player_hands, board_card):
     top_card = get_top_card(board_card)
