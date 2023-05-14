@@ -189,6 +189,7 @@ class StageC(SinglePlay):
         self.reset()
         self.check_reshuffle_method()
         self.check_change_top_card_method()
+        print("턴카운트: ", self.turn_count)
 
     def check_change_top_card_method(self):
         if self.turn_count % 5 == 0:

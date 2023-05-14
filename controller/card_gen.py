@@ -5,6 +5,7 @@ from controller.game_view import scale_by
 colors = ['red', 'green', 'blue', 'yellow']
 values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'skip', 'reverse', 'draw_2', 'one_more', 'bomb']
 change_colors = ['red', 'green', 'blue', 'yellow']
+shield_card_value = 'shield'
 change_value = None
 
 
@@ -63,17 +64,17 @@ def generate_cards(color_weakness, size_by):
                 cards.append(card)
 
     # 색 없는 실드카드를 한 번에 추가합니다.
-    for i in range(2):
+    for i in range(50):
         card_image = pygame.image.load(f"./resources/Image/card_images/none_shield.png")
-        card = Card('none', 'shield', card_image, card_image, card_back_image)
+        card = Card(None, 'shield', card_image, card_image, card_back_image)
         card.card_img = scale_by(card_image, size_by)
         card.card_img_back = scale_by(card_back_image, size_by)
         cards.append(card)
 
     # 색 없는 색변경 카드를 추가
-    for i in range(2):
+    for i in range(50):
         card_image = pygame.image.load(f"./resources/Image/card_images/none_change.png")
-        card = Card('none', 'change', card_image, card_image, card_back_image)
+        card = Card(None, 'change', card_image, card_image, card_back_image)
         card.card_img = scale_by(card_image, size_by)
         card.card_img_back = scale_by(card_back_image, size_by)
         cards.append(card)
@@ -132,7 +133,7 @@ def generate_a_stage_cards(color_weakness, size_by):
     # 색 없는 실드 카드를 추가
     for i in range(2):
         card_image = pygame.image.load(f"./resources/Image/card_images/none_shield.png")
-        card = Card('none', 'shield', card_image, card_image, card_back_image)
+        card = Card(None, 'shield', card_image, card_image, card_back_image)
         card.card_img = scale_by(card_image, size_by)
         card.card_img_back = scale_by(card_back_image, size_by)
 
@@ -141,7 +142,7 @@ def generate_a_stage_cards(color_weakness, size_by):
     # 색 없는 색변경 카드를 추가
     for i in range(2):
         card_image = pygame.image.load(f"./resources/Image/card_images/none_change.png")
-        card = Card('none', 'change', card_image, card_image, card_back_image)
+        card = Card(None, 'change', card_image, card_image, card_back_image)
         card.card_img = scale_by(card_image, size_by)
         card.card_img_back = scale_by(card_back_image, size_by)
         special_cards.append(card)
@@ -157,6 +158,7 @@ def generate_c_stage_cards(color_weakness, size_by):
     card_folder_cw = "./resources/Image/cw_card_images"
     card_folder = "./resources/Image/card_images"
 
+    # 색 더미 카드 추가
     for color in colors:
         for value in values:
             card_image = pygame.image.load(f"{card_folder}/{color}_{value}.png")
@@ -168,6 +170,14 @@ def generate_c_stage_cards(color_weakness, size_by):
                 card.card_img = scale_by(card_image, size_by)
             card.card_img_back = scale_by(card_back_image, size_by)
             cards.append(card)
+
+    # 색 없는 실드카드를 한 번에 추가합니다.
+    card_image = pygame.image.load(f"./resources/Image/card_images/none_shield.png")
+    card = Dummy(None, 'shield', card_image, card_image, card_back_image)
+    card.card_img = scale_by(card_image, size_by)
+    card.card_img_back = scale_by(card_back_image, size_by)
+    cards.append(card)
+
     return cards
 
 
@@ -180,7 +190,7 @@ def generate_c_for_change_cards(color_weakness, size_by):
 
     for color in change_colors:
         card_image_cw = pygame.image.load(f"{change_card_folder_cw}/{color}_{change_value}.png")
-        card_image = scale_by(pygame.image.load(f"{change_card_folder}/{color}_{change_value}.png"), size_by)
+        card_image = pygame.image.load(f"{change_card_folder}/{color}_{change_value}.png")
         for_change_card = Dummy(color, change_value, card_image, card_image_cw, card_back_image)
         if color_weakness:
             for_change_card.card_img = scale_by(card_image_cw, size_by)

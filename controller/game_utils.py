@@ -123,7 +123,7 @@ def draw_board_card(screen, card, x, y):
 
 # 내는 카드 유효성 검사
 def is_valid_move(card, top_card):
-    if card.color == "none" or top_card.color == "none" or card.color == top_card.color or card.value == top_card.value:
+    if card.color is None or top_card.color is None or card.color == top_card.color or card.value == top_card.value:
         return True
     return False
 
@@ -271,12 +271,18 @@ def apply_special_card_effects(card, current_player, direction, player_hands, re
 def random_top_card_color(top_card, dummy_cards, board_card, dummy_cards_for_change):  # stage c애서 발동
     color_list = ['red', 'blue', 'green', 'yellow']
     color = color_list[random.randint(0, 3)]
-    if top_card.value != "change":
-        dummy_card = [card for card in dummy_cards if card.value == top_card.value and card.color == color]
-        print("더미 카드: ", dummy_card)
-        print("더미 카드 이미지: ", dummy_card[0].card_img)
-        board_card.append(dummy_card[0])
-    elif top_card.value == "change":
+    print("더미카드 목록: ", dummy_cards)
+    print("원래 top card: ", top_card)
+    if top_card.value is not None:
+        if top_card.color is None:
+            print("top_card의 color가 none이므로, 계속 진행합니다.")
+            return board_card
+        elif top_card.color is not None:
+            dummy_card = [card for card in dummy_cards if card.value == top_card.value and card.color == color]
+            print("더미 카드: ", dummy_card)
+            print("더미 카드 이미지: ", dummy_card[0].card_img)
+            board_card.append(dummy_card[0])
+    elif top_card.value is None:
         dummy_card = dummy_cards_for_change[random.randint(0, 3)]
         board_card.append(dummy_card)
     return board_card
