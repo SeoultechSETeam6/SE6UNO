@@ -64,7 +64,7 @@ def generate_cards(color_weakness, size_by):
                 cards.append(card)
 
     # 색 없는 실드카드를 한 번에 추가합니다.
-    for i in range(50):
+    for i in range(2):
         card_image = pygame.image.load(f"./resources/Image/card_images/none_shield.png")
         card = Card(None, 'shield', card_image, card_image, card_back_image)
         card.card_img = scale_by(card_image, size_by)
@@ -72,7 +72,7 @@ def generate_cards(color_weakness, size_by):
         cards.append(card)
 
     # 색 없는 색변경 카드를 추가
-    for i in range(50):
+    for i in range(2):
         card_image = pygame.image.load(f"./resources/Image/card_images/none_change.png")
         card = Card(None, 'change', card_image, card_image, card_back_image)
         card.card_img = scale_by(card_image, size_by)
