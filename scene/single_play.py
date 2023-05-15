@@ -7,7 +7,7 @@ from ui.button import Button
 from scene.settings import Settings
 
 from controller.mouse import Mouse, MouseState
-from controller.card_gen import generate_cards, generate_for_change_cards, generate_c_stage_cards, generate_c_for_change_cards
+from controller.card_gen import generate_cards, generate_for_change_cards
 from controller.card_shuffle import shuffle_cards, distribute_cards
 from controller.game_utils import (
     draw_cards_user,
@@ -26,6 +26,7 @@ from controller.game_utils import (
     user_submit_card,
     com_submit_card,
     apply_special_card_effects,
+    decide_computer_play,
     card_reshuffle
 )
 
@@ -33,7 +34,7 @@ from controller import game_view, game_data
 
 
 class SinglePlay:
-    def __init__(self, computer_attends, username):
+    def __init__(self, computer_attends, username, computer_logic):
         # 게임 설정 불러오기
         self.settings_data = game_data.load_settings()
 
@@ -45,6 +46,7 @@ class SinglePlay:
                                                self.settings_data["resolution"]["height"]))
         self.clock = pygame.time.Clock()
         self.running = True
+        self.draw_override = False
 
         # 글꼴 설정
         self.font = pygame.font.Font(game_view.FONT_PATH, self.ui_size["font"][0])
@@ -65,6 +67,7 @@ class SinglePlay:
 
         # 컴퓨터 플레이어 참여 정보
         self.computer_attends = computer_attends
+        self.computer_logic = computer_logic
         for attend in self.computer_attends:
             if attend:
                 self.player_count += 1
@@ -128,11 +131,12 @@ class SinglePlay:
         self.center_x = (self.settings_data["resolution"]["width"] - self.image_width) // 2
         self.center_y = (self.settings_data["resolution"]["height"] - self.image_height) // 2
 
-        self.computer_color = ["red", "blue", "green", "yellow"]
+        self.select_color = ["red", "blue", "green", "yellow"]
 
         # 컴퓨터 초기 좌표와 카드 색 선호도.
         self.user_coordinate = []
         self.computer_coordinate = []
+        self.computer_color = [None]
         self.max_per_row = 15 * self.ui_size["change"]
         self.max_per_row_com = 20 * self.ui_size["change"]
         self.user_coordinate.append(30)
@@ -142,24 +146,25 @@ class SinglePlay:
         self.next_turn_co = [0, 150 * self.ui_size["change"]]
         if self.computer_attends[0]:
             self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, self.settings_data["resolution"]["height"] * 0.03])
-            self.computer1_color = self.computer_color[random.randint(0, 3)]
-            print("computer1_color", self.computer1_color)
+            self.computer1_color = self.select_color[random.randint(0, 3)]
+            self.computer_color.append(self.computer1_color)
         if self.computer_attends[1]:
             self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + self.settings_data["resolution"]["height"] * 0.2])
-            self.computer2_color = self.computer_color[random.randint(0, 3)]
-            print("computer2_color", self.computer2_color)
+            self.computer2_color = self.select_color[random.randint(0, 3)]
+            self.computer_color.append(self.computer2_color)
         if self.computer_attends[2]:
             self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.4)])
-            self.computer3_color = self.computer_color[random.randint(0, 3)]
-            print("computer3_color", self.computer3_color)
+            self.computer3_color = self.select_color[random.randint(0, 3)]
+            self.computer_color.append(self.computer3_color)
         if self.computer_attends[3]:
             self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.6)])
-            self.computer4_color = self.computer_color[random.randint(0, 3)]
-            print("computer4_color", self.computer4_color)
+            self.computer4_color = self.select_color[random.randint(0, 3)]
+            self.computer_color.append(self.computer4_color)
         if self.computer_attends[4]:
             self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.8)])
-            self.computer5_color = self.computer_color[random.randint(0, 3)]
-            print("computer5_color", self.computer5_color)
+            self.computer5_color = self.select_color[random.randint(0, 3)]
+            self.computer_color.append(self.computer5_color)
+        print("computer color list", self.computer_color)
 
         # change카드 좌표, spacing은 공백
         self.x5 = 100
@@ -195,6 +200,9 @@ class SinglePlay:
         self.hovered_card_index = 0
         self.hovered_change_index = 0
 
+        # 어떤 스테이지에서 게임을 진행하는지?
+        self.stage = "single"
+
         # uno 초기값
         self.uno_check = False
         self.uno_delay_time = None
@@ -212,6 +220,7 @@ class SinglePlay:
         self.clicked_change_index = None
         self.change_index = None
         self.playable = False
+        self.playable_special_check = False
         self.clicked_change = False
         self.color_change = None
 
@@ -264,9 +273,9 @@ class SinglePlay:
         self.uno_button_inactive_img = game_view.scale_by(pygame.image.load(
             "./resources/Image/button_images/uno_button_inactive.png").convert_alpha(), self.ui_size["change"])
         self.card_back_image = game_view.scale_by(pygame.image.load("./resources/Image/card_images/card_back.png"),
-                                              self.ui_size["change"])
+                                                  self.ui_size["change"])
         self.selected_image = game_view.scale_by(pygame.image.load("./resources/Image/selected_check.png"),
-                                             self.ui_size["change"] * 0.2)
+                                                 self.ui_size["change"] * 0.2)
 
         # 색변경 카드 사용시 None 나오는거 경로가 다름
         # 카드 크기 줄이기
@@ -281,8 +290,6 @@ class SinglePlay:
         self.center_x = (self.settings_data["resolution"]["width"] - self.image_width) // 2
         self.center_y = (self.settings_data["resolution"]["height"] - self.image_height) // 2
 
-        self.computer_color = ["red", "blue", "green", "yellow"]
-
         # 컴퓨터 초기 좌표와 카드 색 선호도.
         self.user_coordinate = []
         self.computer_coordinate = []
@@ -295,28 +302,14 @@ class SinglePlay:
         self.next_turn_co = [0, 150 * self.ui_size["change"]]
         if self.computer_attends[0]:
             self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, self.settings_data["resolution"]["height"] * 0.03])
-            self.computer1_color = self.computer_color[random.randint(0, 3)]
-            print("computer1_color", self.computer1_color)
         if self.computer_attends[1]:
-            self.computer_coordinate.append(
-                [self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + self.settings_data["resolution"]["height"] * 0.2])
-            self.computer2_color = self.computer_color[random.randint(0, 3)]
-            print("computer2_color", self.computer2_color)
+            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + self.settings_data["resolution"]["height"] * 0.2])
         if self.computer_attends[2]:
-            self.computer_coordinate.append(
-                [self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.4)])
-            self.computer3_color = self.computer_color[random.randint(0, 3)]
-            print("computer3_color", self.computer3_color)
+            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.4)])
         if self.computer_attends[3]:
-            self.computer_coordinate.append(
-                [self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.6)])
-            self.computer4_color = self.computer_color[random.randint(0, 3)]
-            print("computer4_color", self.computer4_color)
+            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.6)])
         if self.computer_attends[4]:
-            self.computer_coordinate.append(
-                [self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.8)])
-            self.computer5_color = self.computer_color[random.randint(0, 3)]
-            print("computer5_color", self.computer5_color)
+            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.8)])
 
         # change카드 좌표, spacing은 공백
         self.x5 = 100
@@ -353,6 +346,7 @@ class SinglePlay:
         self.clicked_change_index = None
         self.change_index = None
         self.playable = False
+        self.playable_special_check = False
         self.clicked_change = False
         self.color_change = None
 
@@ -364,19 +358,35 @@ class SinglePlay:
         self.clicked_remain_cards = False  # remain_cards 클릭 여부 초기값
         self.clicked_next_turn_button = False  # 다음턴 클릭여부 초기값
 
+    def check_reshuffle_method(self):
+        self.turn_count = self.turn_count + 1
+        if self.turn_count % 10 == 0:
+            self.sound_shuffle.set_volume(
+                self.settings_data["volume"]["sound"] * self.settings_data["volume"]["background"])
+            self.sound_shuffle.play(1)
+            self.board_card, self.remain_cards = card_reshuffle(self.board_card, self.remain_cards)
+
+    def turn_end_method(self):
+        self.reset()
+        self.check_reshuffle_method()
+
     def game(self):
         # 마우스의 위치를 가져옴
         mouse_x, mouse_y = Mouse.getMousePos()
         # 현재 플레이어 결정
         self.top_card = get_top_card(self.board_card)
-        # 현재 시각 불러옴
-        self.current_time = pygame.time.get_ticks()
 
         # 플레이어턴, 컴퓨터턴 결정
         if self.current_player == 0:
             self.user_turn = True
         else:
             self.user_turn = False
+
+        # 플레이어, 컴퓨터 메소드 호출
+        if self.user_turn:
+            self.user_turn_method()  # 여기서 user_turn_method 메소드를 호출
+        else:
+            self.computer_turn_method()
 
         if Mouse.getMouseState() == MouseState.CLICK:
             if self.uno_button_rect.collidepoint(mouse_x, mouse_y) and self.uno_check:
@@ -388,9 +398,32 @@ class SinglePlay:
             return
 
         self.hovered_card_index = find_hovered_card(self.player_hands[0], self.user_coordinate[0],
-                                                    self.user_coordinate[1], self.user_spacing, mouse_x, mouse_y, self.max_per_row, self.hovered_card_index)
-        self.hovered_change_index = find_hovered_change(self.change_color_list, self.x5, self.y5, self.spacing5, mouse_x, mouse_y, self.hovered_card_index)
+                                                    self.user_coordinate[1], self.user_spacing, mouse_x, mouse_y,
+                                                    self.max_per_row, self.hovered_card_index)
+        self.hovered_change_index = find_hovered_change(self.change_color_list, self.x5, self.y5, self.spacing5,
+                                                        mouse_x, mouse_y, self.hovered_card_index)
 
+    def user_turn_method(self):
+        # 마우스의 위치를 가져옴
+        mouse_x, mouse_y = Mouse.getMousePos()
+        # 현재 시각 불러옴
+        self.current_time = pygame.time.get_ticks()
+
+        if Mouse.getMouseState() == MouseState.CLICK:
+            if self.uno_button_rect.collidepoint(mouse_x, mouse_y) and self.uno_check:
+                self.sound_uno_button.set_volume(
+                    self.settings_data["volume"]["sound"] * self.settings_data["volume"]["effect"])
+                self.sound_uno_button.play(1)
+                self.uno_flags[self.current_player] = True
+
+        if self.uno_check:
+            return
+
+        # 플레이어턴, 컴퓨터턴 결정
+        if self.current_player == 0:
+            self.user_turn = True
+        else:
+            self.user_turn = False
         if self.user_turn:
             if self.turn_start_time is None:
                 self.turn_start_time = pygame.time.get_ticks()
@@ -398,8 +431,7 @@ class SinglePlay:
                 if self.is_draw:
                     self.is_draw = False
                     self.current_player = (self.current_player + self.game_direction) % self.player_count
-                    self.reset()
-                    self.turn_count = self.turn_count + 1
+                    self.turn_end_method()
                 elif self.change_card:
                     self.user_turn = False
                     self.card_playing()
@@ -407,8 +439,7 @@ class SinglePlay:
                     self.draw_animation(self.current_player)
                     self.player_hands[0].append(self.remain_cards.pop())
                     self.current_player = (self.current_player + self.game_direction) % self.player_count
-                    self.reset()
-                    self.turn_count = self.turn_count + 1
+                    self.turn_end_method()
 
             if Mouse.getMouseState() == MouseState.CLICK:
                 self.clicked_card_index, self.clicked_card = get_clicked_card(self.player_hands[0],
@@ -422,16 +453,19 @@ class SinglePlay:
 
             # 카드를 드로우함
             if self.clicked_remain_cards and self.new_drawn_card is None and self.pop_card is None:
-                self.is_draw = True
-                self.draw_animation(self.current_player)
-                self.turn_start_time = pygame.time.get_ticks()
-                self.player_hands[0].append(self.remain_cards.pop())
-                self.new_drawn_card = self.player_hands[0][-1]
+                if len(self.remain_cards) > 1:
+                    self.is_draw = True
+                    self.draw_animation(self.current_player)
+                    self.turn_start_time = pygame.time.get_ticks()
+                    self.player_hands[0].append(self.remain_cards.pop())
+                    self.new_drawn_card = self.player_hands[0][-1]
+                elif len(self.remain_cards) == 1:
+                    self.current_player = (self.current_player + self.game_direction) % self.player_count
+                    self.turn_end_method()
             # 카드를 드로우 하고 턴을 넘기는 함수.
             elif self.new_drawn_card is not None and self.clicked_next_turn_button:
                 self.current_player = (self.current_player + self.game_direction) % self.player_count
-                self.reset()
-                self.turn_count = self.turn_count + 1
+                self.turn_end_method()
             # 카드를 드로우 하고, 드로우한 카드를 내는 함수.
             elif self.new_drawn_card is not None and self.pop_card is None:
                 # 유효성 검사 및 클릭카드가 new_drawn_card인지 확인
@@ -445,25 +479,42 @@ class SinglePlay:
                 self.board_card, self.player_hands[self.current_player], self.pop_card = user_submit_card(self.clicked_card, self.clicked_card_index, self.board_card, self.player_hands[self.current_player])
                 self.turn_start_time = pygame.time.get_ticks()
 
+    def computer_turn_method(self):
+        # 현재 시각 불러옴
+        self.current_time = pygame.time.get_ticks()
+
+        if self.uno_check:
+            return
+
         # 컴퓨터 턴 처리
         if not self.user_turn:
             if self.turn_start_time is None:
                 self.turn_start_time = pygame.time.get_ticks()
             if self.current_time - self.turn_start_time >= self.delay_time:  # 설정한 시간이 되면 컴퓨터가 행동함
+                # 컴퓨터 로직을 입력받고, 행동을 결정함.
+                if self.new_drawn_card is None and self.pop_card is None and self.playable_special_check is False:
+                    self.playable, self.pop_card_index, self.playable_special_check = decide_computer_play(
+                        self.player_hands[self.current_player], self.board_card,
+                        self.computer_color[self.current_player], self.computer_logic[self.current_player - 1])
                 # 처음 유효성 검사
-                if self.new_drawn_card is None and self.pop_card is None:
+                if self.new_drawn_card is None and self.pop_card is None and self.playable_special_check is False:
                     self.playable, self.pop_card_index = computer_playable_card(self.player_hands[self.current_player], self.board_card)
                 # 카드를 낼 수 있을 때 낸다.
                 if self.playable and self.new_drawn_card is None and self.pop_card is None:
                     self.place_animation(self.current_player)
                     self.pop_card = self.player_hands[self.current_player][self.pop_card_index]
-                    self.board_card, self.player_hands[self.current_player] = com_submit_card(self.pop_card, self.pop_card_index, self.board_card, self.player_hands[self.current_player])
-                # 카드를 낼 수 없을 때 드로우 한다.
+                    self.board_card, self.player_hands[self.current_player] = com_submit_card(
+                        self.pop_card, self.pop_card_index, self.board_card, self.player_hands[self.current_player])
+                # 카드를 낼 수 없을 때 드로우 한다. (remain_cards가 2장 이상이면 카드를 가져오고, 한장만 존재하면 턴만 넘긴다.)
                 elif not self.playable and self.new_drawn_card is None and self.pop_card is None:
-                    self.draw_animation(self.current_player)
-                    self.new_drawn_card = self.remain_cards.pop()
-                    self.player_hands[self.current_player].append(self.new_drawn_card)
-                    self.turn_start_time = pygame.time.get_ticks()
+                    if len(self.remain_cards) > 2:
+                        self.draw_animation(self.current_player)
+                        self.new_drawn_card = self.remain_cards.pop()
+                        self.player_hands[self.current_player].append(self.new_drawn_card)
+                        self.turn_start_time = pygame.time.get_ticks()
+                    elif len(self.remain_cards) == 1:
+                        self.current_player = (self.current_player + self.game_direction) % self.player_count
+                        self.turn_end_method()
                 # 드로우한 카드가 낼 수 있는 경우
                 elif self.new_drawn_card is not None and is_valid_move(self.new_drawn_card, self.top_card) and self.pop_card is None:
                     if self.current_time - self.turn_start_time >= self.delay_time2:
@@ -474,9 +525,8 @@ class SinglePlay:
                 # 드로우한 카드를 낼 수 없는 경우
                 elif self.new_drawn_card is not None and not is_valid_move(self.new_drawn_card, self.top_card) and self.pop_card is None:
                     if self.current_time - self.turn_start_time >= self.delay_time2:
-                        self.turn_count = self.turn_count + 1
                         self.current_player = (self.current_player + self.game_direction) % self.player_count
-                        self.reset()
+                        self.turn_end_method()
 
     def is_uno(self):
         if len(self.player_hands[self.current_player]) == 1:
@@ -517,46 +567,48 @@ class SinglePlay:
         if self.pop_card is not None and not self.uno_check:
             if self.user_turn:
                 self.hovered_card_index -= 1
-            if self.pop_card.is_special() and self.pop_card.value != "change":
+            # remain_cards가 5장 미만이면 특수카드 발동 안함
+            if len(self.remain_cards) > 5 and self.pop_card.is_special() and self.pop_card.value != "change":
                 self.current_player, self.game_direction = apply_special_card_effects(self.pop_card,
                                                                                       self.current_player,
                                                                                       self.game_direction,
                                                                                       self.player_hands,
                                                                                       self.remain_cards,
-                                                                                      self.player_count)
+                                                                                      self.player_count,
+                                                                                      self.stage)
                 self.animation_method[self.pop_card.value](self.current_player)
-                self.reset()
-                self.turn_count = self.turn_count + 1
-            # 내는 카드가 special이고, change일 경우
-            elif self.pop_card.is_special() and self.pop_card.value == "change":
+                self.turn_end_method()
+            # 내는 카드가 special이고, change일 경우, remain_cards가 5장 미만이면 발동 안함
+            elif len(self.remain_cards) > 5 and self.pop_card.is_special() and self.pop_card.value == "change":
                 if self.user_turn:
                     self.change_card = True
                     if self.clicked_change_index is not None:
                         self.color_change = self.change_color_list[self.clicked_change_index]
                         self.current_player, self.game_direction = apply_special_card_effects(
                             self.pop_card, self.current_player, self.game_direction,
-                            self.player_hands, self.remain_cards, self.player_count)
+                            self.player_hands, self.remain_cards, self.player_count, self.stage)
                         self.animation_method[self.pop_card.value](self.current_player)
                         self.board_card.append(self.color_change)
-                        self.reset()
-                        self.turn_count = self.turn_count + 1
+                        self.turn_end_method()
                 else:
                     self.change_index = random.randint(0, 3)
                     self.color_change = self.change_color_list[self.change_index]
                     if self.current_time - self.turn_start_time >= self.delay_time3:
                         self.current_player, self.game_direction = apply_special_card_effects(
                             self.pop_card, self.current_player, self.game_direction, self.player_hands,
-                            self.remain_cards,
-                            self.player_count)
+                            self.remain_cards, self.player_count, self.stage)
                         self.animation_method[self.pop_card.value](self.current_player)
                         self.board_card.append(self.color_change)
-                        self.reset()
-                        self.turn_count = self.turn_count + 1
+                        self.turn_end_method()
             # 내는 카드가 special이 아닌 경우
-            elif not self.pop_card.is_special():
+            elif len(self.remain_cards) > 5 and not self.pop_card.is_special():
                 self.current_player = (self.current_player + self.game_direction) % self.player_count
-                self.reset()
-                self.turn_count = self.turn_count + 1
+                self.turn_end_method()
+            # 5장 이하인 경우에는 특수카드 발동x, 그냥 넘어감.
+            elif len(self.remain_cards) <= 5:
+                print('5장 미만 발동')
+                self.current_player = (self.current_player + self.game_direction) % self.player_count
+                self.turn_end_method()
 
     def win(self):
         popup = None
@@ -774,7 +826,6 @@ class SinglePlay:
             if self.game_direction > 0:
                 for i in range(self.player_count - 1):
                     self.screen.blit(self.card_back_image, remain_pos[(index + i) % self.player_count])
-                print()
             else:
                 for i in range(self.player_count - 1):
                     self.screen.blit(self.card_back_image, remain_pos[(index - i) % self.player_count])
@@ -888,7 +939,7 @@ class SinglePlay:
                           self.computer_coordinate[i][1],
                           self.max_per_row_com, 20,
                           None,
-                          show_back=True)  # 추후 True로 바꾼다.
+                          show_back=False)  # 추후 True로 바꾼다.
 
         # 유저턴이고, 체인지 카드면 체인지카드를 그린다.
         if self.user_turn and self.change_card:
@@ -946,7 +997,8 @@ class SinglePlay:
             self.pause_popup()
 
         # 매 프레임마다 화면 업데이트
-        pygame.display.flip()
+        if self.draw_override is False:
+            pygame.display.flip()
 
     def event(self):
         for event in pygame.event.get():
@@ -1026,12 +1078,6 @@ class SinglePlay:
             self.win()
             Mouse.updateMouseState()
             self.clock.tick(game_view.FPS)
-            # 카드 섞기 발생
-            if self.turn_count % 10 == 0:
-                self.sound_shuffle.set_volume(self.settings_data["volume"]["sound"] * self.settings_data["volume"]["background"])
-                self.sound_shuffle.play(1)
-                self.board_card, self.remain_cards = card_reshuffle(self.board_card, self.remain_cards)
-                self.turn_count = self.turn_count + 1
             if not self.paused:
                 self.game()
                 self.is_uno()
