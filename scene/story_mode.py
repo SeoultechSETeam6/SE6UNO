@@ -1,5 +1,6 @@
 from scene.single_play import SinglePlay
-import random
+import random, pygame
+from controller.mouse import Mouse
 from controller.card_gen import (
     generate_cards,
     generate_a_stage_cards,
@@ -9,8 +10,12 @@ from controller.card_gen import (
 )
 from controller.card_shuffle import shuffle_cards, distribute_cards, stage_a_distribute
 from controller.game_utils import (
+    draw_text,
     apply_special_card_effects,
-    random_top_card_color)
+    random_top_card_color
+)
+
+from controller import game_view
 
 
 # 콤보 사용, 기술 카드를 낼 수 있으면 기술카드를 먼저 냄
@@ -22,6 +27,8 @@ class StageA(SinglePlay):
         self.player_hands, self.remain_cards = stage_a_distribute(self.player_count, self.regular_cards,
                                                                   self.special_cards, self.card_count)
         self.stage = "A"
+        self.draw_override = True
+        self.combo = 0
 
     def turn_and_reset(self):
         if self.new_drawn_card is not None:
@@ -30,10 +37,18 @@ class StageA(SinglePlay):
             elif self.pop_card.is_special() is False:
                 self.current_player = (self.current_player + self.game_direction) % self.player_count
             self.turn_end_method()
+            self.combo = 0
         elif self.new_drawn_card is None:
             self.reset()
+            self.combo = self.combo + 1
+            print(self.combo)
+
+    def draw_and_reset_combo(self):
+        if self.new_drawn_card is not None:
+            self.combo = 0
 
     def card_playing(self):
+        self.draw_and_reset_combo()
         if self.pop_card is not None and not self.uno_check:
             if self.user_turn:
                 self.hovered_card_index -= 1
@@ -77,6 +92,15 @@ class StageA(SinglePlay):
             elif len(self.remain_cards) <= 5:
                 print('5장 미만 발동')
                 self.turn_and_reset()
+
+    def draw_combo(self):
+        draw_text(self.screen, str(self.combo), self.font, (255, 255, 255), self.center_x, self.center_y + 100)
+
+    def draw(self):
+        super().draw()
+        if self.combo > 0:
+            self.draw_combo()
+        pygame.display.flip()
 
 
 # 모든 카드를 플레이어들에게 나눠줌. 50퍼센트 확률로 컴퓨터가 색 선호도에 따라 카드 선택함

@@ -46,6 +46,7 @@ class SinglePlay:
                                                self.settings_data["resolution"]["height"]))
         self.clock = pygame.time.Clock()
         self.running = True
+        self.draw_override = False
 
         # 글꼴 설정
         self.font = pygame.font.Font(game_view.FONT_PATH, self.ui_size["font"][0])
@@ -996,7 +997,8 @@ class SinglePlay:
             self.pause_popup()
 
         # 매 프레임마다 화면 업데이트
-        pygame.display.flip()
+        if self.draw_override is False:
+            pygame.display.flip()
 
     def event(self):
         for event in pygame.event.get():
