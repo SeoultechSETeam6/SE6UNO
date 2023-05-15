@@ -106,6 +106,7 @@ class SinglePlayLobby:
 
         # 컴퓨터 참여 정보 리스트
         self.computers_attend_flag = [False, False, False, False, False]
+        self.computers_logic = [None, None, None, None, None]
         self.computers_attend_count = 0
 
         # 이름 변경 팝업창
@@ -127,41 +128,51 @@ class SinglePlayLobby:
     def event_join_computer_1(self):
         if self.computers_attend_flag[0]:
             self.computers_attend_flag[0] = False
+            self.computers_logic[0] = None  # 테스트 코드, 추후 삭제
             self.computers_attend_count -= 1
         else:
             self.computers_attend_flag[0] = True
+            self.computers_logic[0] = "basic"  # 테스트 코드, 추후 삭제
             self.computers_attend_count += 1
 
     def event_join_computer_2(self):
         if self.computers_attend_flag[1]:
             self.computers_attend_flag[1] = False
+            self.computers_logic[1] = None  # 테스트 코드, 추후 삭제
             self.computers_attend_count -= 1
         else:
             self.computers_attend_flag[1] = True
+            self.computers_logic[1] = "A"  # 테스트 코드, 추후 삭제
             self.computers_attend_count += 1
 
     def event_join_computer_3(self):
         if self.computers_attend_flag[2]:
             self.computers_attend_flag[2] = False
+            self.computers_logic[2] = None  # 테스트 코드, 추후 삭제
             self.computers_attend_count -= 1
         else:
             self.computers_attend_flag[2] = True
+            self.computers_logic[2] = "B"  # 테스트 코드, 추후 삭제
             self.computers_attend_count += 1
 
     def event_join_computer_4(self):
         if self.computers_attend_flag[3]:
             self.computers_attend_flag[3] = False
+            self.computers_logic[3] = None  # 테스트 코드, 추후 삭제
             self.computers_attend_count -= 1
         else:
             self.computers_attend_flag[3] = True
+            self.computers_logic[3] = "C"  # 테스트 코드, 추후 삭제
             self.computers_attend_count += 1
 
     def event_join_computer_5(self):
         if self.computers_attend_flag[4]:
             self.computers_attend_flag[4] = False
+            self.computers_logic[4] = None  # 테스트 코드, 추후 삭제
             self.computers_attend_count -= 1
         else:
             self.computers_attend_flag[4] = True
+            self.computers_logic[4] = "D"  # 테스트 코드, 추후 삭제
             self.computers_attend_count += 1
 
     # 플레이어 이름 변경 팝업창에서 확인 클릭 시 이벤트
@@ -174,7 +185,10 @@ class SinglePlayLobby:
     # 게임 시작 버튼 이벤트
     def event_start(self):
         print("게임 시작")
-        SinglePlay(self.computers_attend_flag, self.player_name).run()
+        # 로직이 current_player와 잘 연동되기 위해, 로직에서 None을 제거.
+        self.computers_logic = [logic for logic in self.computers_logic if logic is not None]
+        print("컴퓨터 로직: ", self.computers_logic)
+        SinglePlay(self.computers_attend_flag, self.player_name, self.computers_logic).run()
         self.running = False
 
     # 게임 나가기 버튼 이벤트

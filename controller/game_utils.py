@@ -150,6 +150,7 @@ def computer_playable_card(now_player_hands, board_card):
 
 
 def computer_color_preference(now_player_hands, board_card, color_preference):
+    print("B로직 발동")
     top_card = get_top_card(board_card)
     percentage = random.randint(1, 10)
     # 1~5가 나오면, 랜덤하게 카드를 뽑고, 6~10이 나오면 자신의 색 선호도에 맞춰서 카드를 뽑는다.
@@ -177,30 +178,33 @@ def computer_color_preference(now_player_hands, board_card, color_preference):
 
 
 def skip_turn_with_probability(now_player_hands, board_card):
+    print("C로직 발동")
     percentage = random.randint(1, 10)
     if percentage > 3:
-        print("카드를 그냥 뽑지 않는다.")
+        print("70퍼센트 확률로 카드를 가져오지 않는다.")
         playable, card_index = computer_playable_card(now_player_hands, board_card)
         playable_special_check = True
     else:
-        print("playable카드가 있어도, 카드를 뽑는다")
+        print("30퍼센트 확률로 playable카드가 있어도 카드를 가져온다.")
         playable = False
         card_index = None
         playable_special_check = True
     return playable, card_index, playable_special_check
 
 
-
 def playable_attack_card(now_player_hands, board_card):
+    print("D로직 발동")
     top_card = get_top_card(board_card)
     playable_attack_cards = [card for card in now_player_hands if is_valid_move(card, top_card) and
                              (card.value == 'draw_2' or card.value == 'bomb')]
     if playable_attack_cards:
+        print("유효한 공격 카드가 존재하여, 공격카드중 하나를 뽑는다.")
         selected_card = random.choice(playable_attack_cards)
         playable = True
         card_index = now_player_hands.index(selected_card)
         playable_special_check = True
     else:
+        print("유효한 공격 카드가 없어 랜덤한 카드를 뽑는다.")
         playable = False
         card_index = None
         playable_special_check = False
@@ -208,15 +212,18 @@ def playable_attack_card(now_player_hands, board_card):
 
 
 def playable_special_card(now_player_hands, board_card):
+    print("A로직 발동")
     top_card = get_top_card(board_card)
     playable_special_cards = [card for card in now_player_hands if is_valid_move(card, top_card) and
                              card.is_special() is True]
     if playable_special_cards:
+        print("유효한 기술 카드가 존재하여, 기술카드중 하나를 뽑는다.")
         selected_card = random.choice(playable_special_cards)
         playable = True
         card_index = now_player_hands.index(selected_card)
         playable_special_check = True
     else:
+        print("유효한 기술 카드가 없어 랜덤한 카드를 뽑는다.")
         playable = False
         card_index = None
         playable_special_check = False
@@ -298,6 +305,26 @@ def apply_special_card_effects(card, current_player, direction, player_hands, re
         if stage != "A":
             current_player = (current_player + direction) % player_count
         return current_player, direction
+
+
+# 컴퓨터 스테이지 로직에 따라 컴퓨터의 행동을 결정하는 함수.
+def decide_computer_play(now_player_hands, board_card, color_preference, computer_logic):
+    print("현재 컴퓨터의 로직: ", computer_logic)
+    if computer_logic == "basic":
+        playable, card_index, playable_special_check = False, None, False
+    elif computer_logic == "A":
+        playable, card_index, playable_special_check = playable_special_card(now_player_hands, board_card)
+    elif computer_logic == "B":
+        playable, card_index, playable_special_check = computer_color_preference(now_player_hands, board_card,
+                                                                                 color_preference)
+    elif computer_logic == "C":
+        playable, card_index, playable_special_check = skip_turn_with_probability(now_player_hands, board_card)
+    elif computer_logic == "D":
+        playable, card_index, playable_special_check = playable_attack_card(now_player_hands, board_card)
+    else:
+        print("로직에서 벗어난 오류발생.")
+        playable, card_index, playable_special_check = False, None, False
+    return playable, card_index, playable_special_check
 
 
 def random_top_card_color(top_card, dummy_cards, board_card, dummy_cards_for_change):  # stage c애서 발동

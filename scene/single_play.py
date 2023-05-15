@@ -26,6 +26,7 @@ from controller.game_utils import (
     user_submit_card,
     com_submit_card,
     apply_special_card_effects,
+    decide_computer_play,
     card_reshuffle
 )
 
@@ -33,7 +34,7 @@ from controller import game_view, game_data
 
 
 class SinglePlay:
-    def __init__(self, computer_attends, username):
+    def __init__(self, computer_attends, username, computer_logic):
         # 게임 설정 불러오기
         self.settings_data = game_data.load_settings()
 
@@ -65,6 +66,7 @@ class SinglePlay:
 
         # 컴퓨터 플레이어 참여 정보
         self.computer_attends = computer_attends
+        self.computer_logic = computer_logic
         for attend in self.computer_attends:
             if attend:
                 self.player_count += 1
@@ -145,27 +147,22 @@ class SinglePlay:
             self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, self.settings_data["resolution"]["height"] * 0.03])
             self.computer1_color = self.select_color[random.randint(0, 3)]
             self.computer_color.append(self.computer1_color)
-            print("computer1_color", self.computer1_color)
         if self.computer_attends[1]:
             self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + self.settings_data["resolution"]["height"] * 0.2])
             self.computer2_color = self.select_color[random.randint(0, 3)]
             self.computer_color.append(self.computer2_color)
-            print("computer2_color", self.computer2_color)
         if self.computer_attends[2]:
             self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.4)])
             self.computer3_color = self.select_color[random.randint(0, 3)]
             self.computer_color.append(self.computer3_color)
-            print("computer3_color", self.computer3_color)
         if self.computer_attends[3]:
             self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.6)])
             self.computer4_color = self.select_color[random.randint(0, 3)]
             self.computer_color.append(self.computer4_color)
-            print("computer4_color", self.computer4_color)
         if self.computer_attends[4]:
             self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.8)])
             self.computer5_color = self.select_color[random.randint(0, 3)]
             self.computer_color.append(self.computer5_color)
-            print("computer5_color", self.computer5_color)
         print("computer color list", self.computer_color)
 
         # change카드 좌표, spacing은 공백
@@ -493,14 +490,20 @@ class SinglePlay:
             if self.turn_start_time is None:
                 self.turn_start_time = pygame.time.get_ticks()
             if self.current_time - self.turn_start_time >= self.delay_time:  # 설정한 시간이 되면 컴퓨터가 행동함
+                # 컴퓨터 로직을 입력받고, 행동을 결정함.
+                if self.new_drawn_card is None and self.pop_card is None and self.playable_special_check is False:
+                    self.playable, self.pop_card_index, self.playable_special_check = decide_computer_play(
+                        self.player_hands[self.current_player], self.board_card,
+                        self.computer_color[self.current_player], self.computer_logic[self.current_player - 1])
                 # 처음 유효성 검사
-                if self.new_drawn_card is None and self.pop_card is None:
+                if self.new_drawn_card is None and self.pop_card is None and self.playable_special_check is False:
                     self.playable, self.pop_card_index = computer_playable_card(self.player_hands[self.current_player], self.board_card)
                 # 카드를 낼 수 있을 때 낸다.
                 if self.playable and self.new_drawn_card is None and self.pop_card is None:
                     self.place_animation(self.current_player)
                     self.pop_card = self.player_hands[self.current_player][self.pop_card_index]
-                    self.board_card, self.player_hands[self.current_player] = com_submit_card(self.pop_card, self.pop_card_index, self.board_card, self.player_hands[self.current_player])
+                    self.board_card, self.player_hands[self.current_player] = com_submit_card(
+                        self.pop_card, self.pop_card_index, self.board_card, self.player_hands[self.current_player])
                 # 카드를 낼 수 없을 때 드로우 한다. (remain_cards가 2장 이상이면 카드를 가져오고, 한장만 존재하면 턴만 넘긴다.)
                 elif not self.playable and self.new_drawn_card is None and self.pop_card is None:
                     if len(self.remain_cards) > 2:
@@ -822,7 +825,6 @@ class SinglePlay:
             if self.game_direction > 0:
                 for i in range(self.player_count - 1):
                     self.screen.blit(self.card_back_image, remain_pos[(index + i) % self.player_count])
-                print()
             else:
                 for i in range(self.player_count - 1):
                     self.screen.blit(self.card_back_image, remain_pos[(index - i) % self.player_count])
