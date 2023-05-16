@@ -156,8 +156,9 @@ def computer_color_preference(now_player_hands, board_card, color_preference):
     # 1~5가 나오면, 랜덤하게 카드를 뽑고, 6~10이 나오면 자신의 색 선호도에 맞춰서 카드를 뽑는다.
     if percentage < 6:
         print("랜덤 카드를 뽑는다")
-        playable, card_index = computer_playable_card(now_player_hands, board_card)
-        playable_special_check = True
+        playable = False
+        card_index = None
+        playable_special_check = False
         return playable, card_index, playable_special_check
     elif percentage > 5:
         print("색 카드를 뽑는다", color_preference)
