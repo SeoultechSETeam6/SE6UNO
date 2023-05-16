@@ -1,6 +1,6 @@
-from scene.single_play import SinglePlay
-import random, pygame
-from controller.mouse import Mouse
+import pygame
+import random
+
 from controller.card_gen import (
     generate_cards,
     generate_a_stage_cards,
@@ -14,8 +14,7 @@ from controller.game_utils import (
     apply_special_card_effects,
     random_top_card_color
 )
-
-from controller import game_view
+from scene.single_play import SinglePlay
 
 
 # 콤보 사용, 기술 카드를 낼 수 있으면 기술카드를 먼저 냄
