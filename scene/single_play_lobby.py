@@ -98,15 +98,28 @@ class SinglePlayLobby:
         self.image_joined = pygame.transform.scale(
             pygame.image.load("./resources/Image/lobby_images/computer_enter.png"),
             (self.ui_size["logo"][0] * 0.5, self.ui_size["logo"][1] * 0.4))
+        self.image_A_joined = pygame.transform.scale(
+            pygame.image.load("./resources/Image/lobby_images/computer_enter_A.png"),
+            (self.ui_size["logo"][0] * 0.5, self.ui_size["logo"][1] * 0.4))
+        self.image_B_joined = pygame.transform.scale(
+            pygame.image.load("./resources/Image/lobby_images/computer_enter_B.png"),
+            (self.ui_size["logo"][0] * 0.5, self.ui_size["logo"][1] * 0.4))
+        self.image_C_joined = pygame.transform.scale(
+            pygame.image.load("./resources/Image/lobby_images/computer_enter_C.png"),
+            (self.ui_size["logo"][0] * 0.5, self.ui_size["logo"][1] * 0.4))
+        self.image_D_joined = pygame.transform.scale(
+            pygame.image.load("./resources/Image/lobby_images/computer_enter_D.png"),
+            (self.ui_size["logo"][0] * 0.5, self.ui_size["logo"][1] * 0.4))
+
 
         # 이름 설정 기본 값
         self.player_name = "You"
         self.player_name_temp = ""
         self.name_display = self.font.render("Player name : " + self.player_name, True, (0, 0, 0))
 
-        # 컴퓨터 참여 정보 리스트
+        # 컴퓨터 참여 정보 리스트 및 로직 리스트
         self.computers_attend_flag = [False, False, False, False, False]
-        self.computers_logic = [None, None, None, None, None]
+        self.computers_logic = ["None", "None", "None", "None", "None"]
         self.computers_attend_count = 0
 
         # 이름 변경 팝업창
@@ -124,56 +137,48 @@ class SinglePlayLobby:
         self.player_name_temp = ""
         self.popup.pop = True
 
+    def computer_status(self, index):
+        if self.computers_logic[index] == "D":
+            self.computers_attend_flag[index] = False
+            self.computers_logic[index] = "None"
+        elif self.computers_logic[index] == "None":
+            self.computers_attend_flag[index] = True
+            self.computers_logic[index] = "basic"
+        elif self.computers_logic[index] == "basic":
+            self.computers_attend_flag[index] = True
+            self.computers_logic[index] = "A"
+        elif self.computers_logic[index] == "A":
+            self.computers_attend_flag[index] = True
+            self.computers_logic[index] = "B"
+        elif self.computers_logic[index] == "B":
+            self.computers_attend_flag[index] = True
+            self.computers_logic[index] = "C"
+        elif self.computers_logic[index] == "C":
+            self.computers_attend_flag[index] = True
+            self.computers_logic[index] = "D"
+        self.check_computer_attend()
+
     # 컴퓨터 플레이어 클릭 시 참여 플래그 토글 이벤트
     def event_join_computer_1(self):
-        if self.computers_attend_flag[0]:
-            self.computers_attend_flag[0] = False
-            self.computers_logic[0] = None  # 테스트 코드, 추후 삭제
-            self.computers_attend_count -= 1
-        else:
-            self.computers_attend_flag[0] = True
-            self.computers_logic[0] = "basic"  # 테스트 코드, 추후 삭제
-            self.computers_attend_count += 1
+        self.computer_status(0)
 
     def event_join_computer_2(self):
-        if self.computers_attend_flag[1]:
-            self.computers_attend_flag[1] = False
-            self.computers_logic[1] = None  # 테스트 코드, 추후 삭제
-            self.computers_attend_count -= 1
-        else:
-            self.computers_attend_flag[1] = True
-            self.computers_logic[1] = "A"  # 테스트 코드, 추후 삭제
-            self.computers_attend_count += 1
+        self.computer_status(1)
 
     def event_join_computer_3(self):
-        if self.computers_attend_flag[2]:
-            self.computers_attend_flag[2] = False
-            self.computers_logic[2] = None  # 테스트 코드, 추후 삭제
-            self.computers_attend_count -= 1
-        else:
-            self.computers_attend_flag[2] = True
-            self.computers_logic[2] = "B"  # 테스트 코드, 추후 삭제
-            self.computers_attend_count += 1
+        self.computer_status(2)
 
     def event_join_computer_4(self):
-        if self.computers_attend_flag[3]:
-            self.computers_attend_flag[3] = False
-            self.computers_logic[3] = None  # 테스트 코드, 추후 삭제
-            self.computers_attend_count -= 1
-        else:
-            self.computers_attend_flag[3] = True
-            self.computers_logic[3] = "C"  # 테스트 코드, 추후 삭제
-            self.computers_attend_count += 1
+        self.computer_status(3)
 
     def event_join_computer_5(self):
-        if self.computers_attend_flag[4]:
-            self.computers_attend_flag[4] = False
-            self.computers_logic[4] = None  # 테스트 코드, 추후 삭제
-            self.computers_attend_count -= 1
-        else:
-            self.computers_attend_flag[4] = True
-            self.computers_logic[4] = "D"  # 테스트 코드, 추후 삭제
-            self.computers_attend_count += 1
+        self.computer_status(4)
+
+    def check_computer_attend(self):
+        self.computers_attend_count = 0
+        for i in self.computers_attend_flag:
+            if self.computers_attend_flag[i] is True:
+                self.computers_attend_count = self.computers_attend_count + 1
 
     # 플레이어 이름 변경 팝업창에서 확인 클릭 시 이벤트
     def event_save_player_name(self):
@@ -186,7 +191,7 @@ class SinglePlayLobby:
     def event_start(self):
         print("게임 시작")
         # 로직이 current_player와 잘 연동되기 위해, 로직에서 None을 제거.
-        self.computers_logic = [logic for logic in self.computers_logic if logic is not None]
+        self.computers_logic = [logic for logic in self.computers_logic if logic != "None"]
         print("컴퓨터 로직: ", self.computers_logic)
         SinglePlay(self.computers_attend_flag, self.player_name, self.computers_logic).run()
         self.running = False
@@ -205,7 +210,16 @@ class SinglePlayLobby:
             if not self.popup.pop:
                 button.detect_event()
             if self.computers_attend_flag[i]:
-                self.screen.blit(self.image_joined, (button.x, button.y))
+                if self.computers_logic[i] == "basic":
+                    self.screen.blit(self.image_joined, (button.x, button.y))
+                elif self.computers_logic[i] == "A":
+                    self.screen.blit(self.image_A_joined, (button.x, button.y))
+                elif self.computers_logic[i] == "B":
+                    self.screen.blit(self.image_B_joined, (button.x, button.y))
+                elif self.computers_logic[i] == "C":
+                    self.screen.blit(self.image_C_joined, (button.x, button.y))
+                elif self.computers_logic[i] == "D":
+                    self.screen.blit(self.image_D_joined, (button.x, button.y))
 
         # 플레이어 이름 변경 버튼 그리기
         self.button_change_player_name.draw()
