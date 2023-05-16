@@ -177,7 +177,7 @@ class SinglePlayLobby:
     def check_computer_attend(self):
         self.computers_attend_count = 0
         for i in self.computers_attend_flag:
-            if self.computers_attend_flag[i] is True:
+            if i is True:
                 self.computers_attend_count = self.computers_attend_count + 1
 
     # 플레이어 이름 변경 팝업창에서 확인 클릭 시 이벤트
@@ -193,6 +193,7 @@ class SinglePlayLobby:
         # 로직이 current_player와 잘 연동되기 위해, 로직에서 None을 제거.
         self.computers_logic = [logic for logic in self.computers_logic if logic != "None"]
         print("컴퓨터 로직: ", self.computers_logic)
+        print(self.computers_attend_flag, self.computers_attend_count)
         SinglePlay(self.computers_attend_flag, self.player_name, self.computers_logic).run()
         self.running = False
 
