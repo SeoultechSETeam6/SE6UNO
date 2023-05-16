@@ -4,7 +4,7 @@ from controller.mouse import Mouse
 from controller import game_data, game_view
 from ui.button import Button, ImageButton
 from ui.popup import Popup
-# from scene.story_mode_stage import StageA, StageB, StageC, StageD
+from scene.story_mode import StageA, StageB, StageC, StageD
 
 
 class StoryModeMap:
@@ -121,18 +121,19 @@ class StoryModeMap:
 
     def event_stage_entry(self):
         self.popup.pop = False
-        # if self.selected_stage_number == 1:
-        #     stage_1 = StageA()
-        #     stage_1.run()
-        # elif self.selected_stage_number == 2:
-        #     stage_2 = StageB()
-        #     stage_2.run()
-        # elif self.selected_stage_number == 3:
-        #     stage_3 = StageC()
-        #     stage_3.run()
-        # else:
-        #     stage_4 = StageD()
-        #     stage_4.run()
+        if self.selected_stage_number == 1:
+            stage_1 = StageA()
+            stage_1.run()
+        elif self.selected_stage_number == 2:
+            stage_2 = StageB()
+            stage_2.run()
+        elif self.selected_stage_number == 3:
+            stage_3 = StageC()
+            stage_3.run()
+        else:
+            pass
+            stage_4 = StageD()
+            stage_4.run()
 
     def event_stage_1_popup(self):
         print('1스테이지 입장버튼 클릭됨')

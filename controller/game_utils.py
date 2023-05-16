@@ -123,7 +123,7 @@ def draw_board_card(screen, card, x, y):
 
 # 내는 카드 유효성 검사
 def is_valid_move(card, top_card):
-    if card.color == "none" or top_card.color == "none" or card.color == top_card.color or card.value == top_card.value:
+    if card.color is None or top_card.color is None or card.color == top_card.color or card.value == top_card.value:
         return True
     return False
 
@@ -149,6 +149,87 @@ def computer_playable_card(now_player_hands, board_card):
     return playable, card_index
 
 
+def computer_color_preference(now_player_hands, board_card, color_preference):
+    print("B로직 발동")
+    top_card = get_top_card(board_card)
+    percentage = random.randint(1, 10)
+    # 1~5가 나오면, 랜덤하게 카드를 뽑고, 6~10이 나오면 자신의 색 선호도에 맞춰서 카드를 뽑는다.
+    if percentage < 6:
+        print("랜덤 카드를 뽑는다")
+        playable, card_index = computer_playable_card(now_player_hands, board_card)
+        playable_special_check = True
+        return playable, card_index, playable_special_check
+    elif percentage > 5:
+        print("색 카드를 뽑는다", color_preference)
+        playable_cards = [card for card in now_player_hands if is_valid_move(card, top_card) and card.color == color_preference]
+        if playable_cards:
+            print("뽑을수 있는 색 카드 후보군", playable_cards)
+            selected_card = random.choice(playable_cards)
+            print("색 카드를 뽑을 수 있다.", selected_card)
+            playable = True
+            card_index = now_player_hands.index(selected_card)
+            playable_special_check = True
+        else:
+            print("색 카드를 뽑을 수 없다.")
+            playable = False
+            card_index = None
+            playable_special_check = False
+        return playable, card_index, playable_special_check
+
+
+def skip_turn_with_probability(now_player_hands, board_card):
+    print("C로직 발동")
+    percentage = random.randint(1, 10)
+    if percentage > 3:
+        print("70퍼센트 확률로 카드를 가져오지 않는다.")
+        playable, card_index = computer_playable_card(now_player_hands, board_card)
+        playable_special_check = True
+    else:
+        print("30퍼센트 확률로 playable카드가 있어도 카드를 가져온다.")
+        playable = False
+        card_index = None
+        playable_special_check = True
+    return playable, card_index, playable_special_check
+
+
+def playable_attack_card(now_player_hands, board_card):
+    print("D로직 발동")
+    top_card = get_top_card(board_card)
+    playable_attack_cards = [card for card in now_player_hands if is_valid_move(card, top_card) and
+                             (card.value == 'draw_2' or card.value == 'bomb')]
+    if playable_attack_cards:
+        print("유효한 공격 카드가 존재하여, 공격카드중 하나를 뽑는다.")
+        selected_card = random.choice(playable_attack_cards)
+        playable = True
+        card_index = now_player_hands.index(selected_card)
+        playable_special_check = True
+    else:
+        print("유효한 공격 카드가 없어 랜덤한 카드를 뽑는다.")
+        playable = False
+        card_index = None
+        playable_special_check = False
+    return playable, card_index, playable_special_check
+
+
+def playable_special_card(now_player_hands, board_card):
+    print("A로직 발동")
+    top_card = get_top_card(board_card)
+    playable_special_cards = [card for card in now_player_hands if is_valid_move(card, top_card) and
+                             card.is_special() is True]
+    if playable_special_cards:
+        print("유효한 기술 카드가 존재하여, 기술카드중 하나를 뽑는다.")
+        selected_card = random.choice(playable_special_cards)
+        playable = True
+        card_index = now_player_hands.index(selected_card)
+        playable_special_check = True
+    else:
+        print("유효한 기술 카드가 없어 랜덤한 카드를 뽑는다.")
+        playable = False
+        card_index = None
+        playable_special_check = False
+    return playable, card_index, playable_special_check
+
+
 def user_submit_card(card, card_index, board_card, now_player_hand):
     board_card.append(card)
     now_player_hand.pop(card_index)
@@ -163,13 +244,13 @@ def com_submit_card(card, card_index, board_card, now_player_hand):
 
 
 # 스페셜 카드 적용
-def apply_special_card_effects(card, current_player, direction, player_hands, remain_cards,
-                               player_count):
+def apply_special_card_effects(card, current_player, direction, player_hands, remain_cards, player_count, stage):
 
     # 역방향 카드
     if card.value == "reverse":
         direction *= -1
-        current_player = (current_player + direction) % player_count
+        if stage != "A":
+            current_player = (current_player + direction) % player_count
         return current_player, direction
 
     # 스킵 카드
@@ -180,7 +261,6 @@ def apply_special_card_effects(card, current_player, direction, player_hands, re
 
     # 2장 드로우 공격
     elif card.value == "draw_2":
-        change_card = False
         next_player = (current_player + direction) % player_count
         has_shield = next((check_card for check_card in player_hands[next_player] if check_card.value == "shield")
                           , None)
@@ -210,56 +290,61 @@ def apply_special_card_effects(card, current_player, direction, player_hands, re
             if i != current_player:
                 add_card = remain_cards.pop()
                 hand.append(add_card)
-        current_player = (current_player + direction) % player_count
+        if stage != "A":
+            current_player = (current_player + direction) % player_count
         return current_player, direction
 
     # 실드 카드(딘순히 내는 동작)
     elif card.value == "shield":
-        current_player = (current_player + direction) % player_count
+        if stage != "A":
+            current_player = (current_player + direction) % player_count
         return current_player, direction
 
     # 체인지 카드(카드색 바꿈)
     elif card.value == "change":
-        current_player = (current_player + direction) % player_count
+        if stage != "A":
+            current_player = (current_player + direction) % player_count
         return current_player, direction
 
 
-def random_top_card_color(top_card, dummy_cards, board_card, dummy_cards_c):  # stage c애서 발동
+# 컴퓨터 스테이지 로직에 따라 컴퓨터의 행동을 결정하는 함수.
+def decide_computer_play(now_player_hands, board_card, color_preference, computer_logic):
+    print("현재 컴퓨터의 로직: ", computer_logic)
+    if computer_logic == "basic":
+        playable, card_index, playable_special_check = False, None, False
+    elif computer_logic == "A":
+        playable, card_index, playable_special_check = playable_special_card(now_player_hands, board_card)
+    elif computer_logic == "B":
+        playable, card_index, playable_special_check = computer_color_preference(now_player_hands, board_card,
+                                                                                 color_preference)
+    elif computer_logic == "C":
+        playable, card_index, playable_special_check = skip_turn_with_probability(now_player_hands, board_card)
+    elif computer_logic == "D":
+        playable, card_index, playable_special_check = playable_attack_card(now_player_hands, board_card)
+    else:
+        print("로직에서 벗어난 오류발생.")
+        playable, card_index, playable_special_check = False, None, False
+    return playable, card_index, playable_special_check
+
+
+def random_top_card_color(top_card, dummy_cards, board_card, dummy_cards_for_change):  # stage c애서 발동
     color_list = ['red', 'blue', 'green', 'yellow']
     color = color_list[random.randint(0, 3)]
-    if top_card.value != "change":
-        dummy_card = [card for card in dummy_cards if card.value == top_card.value and card.color == color]
-        board_card.append(dummy_card[0])
-    elif top_card.value == "change":
-        dummy_card = dummy_cards_c[random.randint(0, 3)]
+    print("더미카드 목록: ", dummy_cards)
+    print("원래 top card: ", top_card)
+    if top_card.value is not None:
+        if top_card.color is None:
+            print("top_card의 color가 none이므로, 계속 진행합니다.")
+            return board_card
+        elif top_card.color is not None:
+            dummy_card = [card for card in dummy_cards if card.value == top_card.value and card.color == color]
+            print("더미 카드: ", dummy_card)
+            print("더미 카드 이미지: ", dummy_card[0].card_img)
+            board_card.append(dummy_card[0])
+    elif top_card.value is None:
+        dummy_card = dummy_cards_for_change[random.randint(0, 3)]
         board_card.append(dummy_card)
-    print(dummy_card)
-    print(top_card)
     return board_card
-
-
-def find_combos(hand):
-    combos = []
-
-    # card.value 가 skip인 카드가 두 장 이상
-    skip_cards = [card for card in hand if card.value == 'skip']
-    draw_2_cards = [card for card in hand if card.value == 'draw_2']
-    for color in set(card.color for card in hand):
-        same_color_skip = next((card for card in skip_cards if card.color == color), None)
-        same_color_draw_2 = next((card for card in draw_2_cards if card.color == color), None)
-
-    if len(skip_cards) >= 2:
-        combos = (skip_cards[:2])
-
-    # card.value 가 draw_2인 카드 두 장 이상
-    elif len(draw_2_cards) >= 2:
-        combos = (draw_2_cards[:2])
-
-    # 서로 같은 card.color를 가지는 skip과 draw_2를 가지고 있을때
-    elif same_color_skip and same_color_draw_2:
-        combos = ([same_color_skip, same_color_draw_2])
-
-    return combos
 
 
 def card_reshuffle(board_card, remain_cards):
