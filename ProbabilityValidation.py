@@ -52,6 +52,8 @@ def testing_color_preference(repeat_count, color_number):
     print("색 선호도에 맞는 카드를 선택한 비율: ", color_logic_count / (color_logic_count + basic_logic_count))
     print("기본 로직을 선택한 비율: ", basic_logic_count / (color_logic_count + basic_logic_count))
 
+# def  testing_skip_turn(repeat_count):
+
 
 # testing_stage_a_distribute(1000)
 # testing_color_preference(1000, 0)

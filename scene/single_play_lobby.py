@@ -11,6 +11,7 @@ from scene.single_play import SinglePlay
 class SinglePlayLobby:
     def __init__(self):
         # 게임 설정 불러오기
+        self.selected_button_index = 0
         self.settings_data = game_data.load_settings()
 
         # pygame 초기화
@@ -94,6 +95,11 @@ class SinglePlayLobby:
                                   self.ui_size["font"][1],
                                   on_click_function=self.event_exit)
 
+        # 버튼 리스트
+        self.buttons = [self.button_exit, self.buttons_computer[0], self.buttons_computer[1],
+                        self.buttons_computer[2], self.buttons_computer[3], self.buttons_computer[4],
+                        self.button_change_player_name]
+
         # 컴퓨터 플레이어 추가완료 이미지
         self.image_joined = pygame.transform.scale(
             pygame.image.load("./resources/Image/lobby_images/computer_enter.png"),
@@ -110,7 +116,6 @@ class SinglePlayLobby:
         self.image_D_joined = pygame.transform.scale(
             pygame.image.load("./resources/Image/lobby_images/computer_enter_D.png"),
             (self.ui_size["logo"][0] * 0.5, self.ui_size["logo"][1] * 0.4))
-
 
         # 이름 설정 기본 값
         self.player_name = "You"
@@ -180,6 +185,23 @@ class SinglePlayLobby:
             if i is True:
                 self.computers_attend_count = self.computers_attend_count + 1
 
+    # 컴퓨터가 하나 이상 참가해야지, 버튼 리스트에 게임 스타트 버튼이 추가된다.
+    def keyboard_detect_start_button(self):
+        # 버튼 리스트
+        if self.computers_attend_count == 0:
+            self.buttons = [self.button_exit, self.buttons_computer[0], self.buttons_computer[1],
+                            self.buttons_computer[2], self.buttons_computer[3], self.buttons_computer[4],
+                            self.button_change_player_name]
+        elif self.computers_attend_count > 0:
+            self.buttons = [self.button_exit, self.buttons_computer[0], self.buttons_computer[1],
+                            self.buttons_computer[2], self.buttons_computer[3], self.buttons_computer[4],
+                            self.button_change_player_name, self.button_start]
+
+    # 키보드 select가 start에 있는데, 컴퓨터의 참여가 0일경우 에러를 방지하는 코드
+    def keyboard_select_error(self):
+        if self.selected_button_index == len(self.buttons):
+            self.selected_button_index = 1
+
     # 플레이어 이름 변경 팝업창에서 확인 클릭 시 이벤트
     def event_save_player_name(self):
         print('플레이어 이름 변경 확인 버튼 클릭됨')
@@ -246,24 +268,44 @@ class SinglePlayLobby:
         self.name_display = self.font.render("User name: " + self.player_name, True, (0, 0, 0))
         self.screen.blit(self.name_display, (self.screen.get_width() * 0.02, self.screen.get_height() * 0.92))
 
+        self.screen.blit(self.buttons[self.selected_button_index].selected_image,
+                         (self.buttons[self.selected_button_index].rect.x,
+                          self.buttons[self.selected_button_index].rect.y - self.ui_size["font"][1]))
+
         pygame.display.flip()
+
+    def detect_key_event(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            if self.popup.pop:
+                if event.type == pygame.KEYDOWN:
+                    # 백스페이스 누르면 한 글자 씩 지움
+                    if event.key == pygame.K_BACKSPACE:
+                        self.player_name_temp = self.player_name_temp[0:len(self.player_name_temp) - 1]
+                    # 엔터 누르면 닉네임 변경 저장
+                    elif event.key == pygame.K_RETURN:
+                        self.event_save_player_name()
+                    else:
+                        self.player_name_temp = self.player_name_temp + pygame.key.name(event.key)
+            elif self.popup.pop is False:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == self.settings_data["key"]['up']:
+                        self.buttons[self.selected_button_index].keyboard_selected = False
+                        self.selected_button_index = (self.selected_button_index - 1) % len(self.buttons)
+                        self.buttons[self.selected_button_index].keyboard_selected = True
+                    elif event.key == self.settings_data["key"]['down']:
+                        self.buttons[self.selected_button_index].keyboard_selected = False
+                        self.selected_button_index = (self.selected_button_index + 1) % len(self.buttons)
+                        self.buttons[self.selected_button_index].keyboard_selected = True
+                    elif event.key == self.settings_data["key"]['enter']:
+                        self.buttons[self.selected_button_index].on_click_function()
 
     def run(self):
         while self.running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                if self.popup.pop:
-                    if event.type == pygame.KEYDOWN:
-                        # 백스페이스 누르면 한 글자 씩 지움
-                        if event.key == pygame.K_BACKSPACE:
-                            self.player_name_temp = self.player_name_temp[0:len(self.player_name_temp) - 1]
-                        # 엔터 누르면 닉네임 변경 저장
-                        elif event.key == pygame.K_RETURN:
-                            self.event_save_player_name()
-                        else:
-                            self.player_name_temp = self.player_name_temp + pygame.key.name(event.key)
-
+            self.detect_key_event()
             Mouse.updateMouseState()
             self.clock.tick(game_view.FPS)
+            self.keyboard_detect_start_button()
+            self.keyboard_select_error()
             self.draw()
