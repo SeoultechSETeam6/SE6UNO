@@ -2,34 +2,49 @@ import pygame
 import socket
 import threading
 
-server_ip = '127.0.0.1'  # 서버 IP 주소 설정 (이 경우 로컬 IP)
-server_port = 10614  # 포트 번호 설정
 
-# 소켓 객체 생성 (TCP)
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+class Client:
+    def __init__(self):
+        self.server_ip = '127.0.0.1'  # 서버 IP 주소 설정 (이 경우 로컬 IP)
+        self.server_port = 10613  # 포트 번호 설정
 
-# 서버에 연결
-client_socket.connect((server_ip, server_port))
+        # 소켓 객체 생성 (TCP)
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        self.temp1 = "1"
+        self.temp2 = "2"
+        self.temp3 = "3"
+
+    def recv_data(self):
+        while True:
+            data = self.client_socket.recv(1024)
+            print("recive : ", repr(data.decode()))
+
+    def send_data(self):
+        message = input('')
+        self.client_socket.sendall(message.encode())
+        self.client_socket.sendall(self.temp3.encode())
+        self.client_socket.sendall(self.temp2.encode())
+        self.client_socket.sendall(self.temp1.encode())
+
+    def connect(self):
+        try:
+            # 서버에 연결
+            self.client_socket.connect((self.server_ip, self.server_port))
+            print('>> Connect Server')
+            thread = threading.Thread(target=self.recv_data)
+            thread.start()
+        except:
+            print(">> Can't Connect Server")
+
+        # while True:
+        #     pass
+        #     self.client_socket.close()
 
 
-def recv_data(client_socket) :
-    while True :
-        data = client_socket.recv(1024)
-
-        print("recive : ", repr(data.decode()))
-
-
-thread = threading.Thread(target=recv_data, args=(client_socket, ))
-thread.start()
-print('>> Connect Server')
-
-
+game_client = Client()
+game_client.connect()
 while True:
-    message = input('')
-    if message == 'quit':
-        close_data = message
-        break
-    client_socket.send(message.encode())
+    game_client.send_data()
 
 
-client_socket.close()
