@@ -522,7 +522,6 @@ class SinglePlay:
                         self.pop_card = self.new_drawn_card
                         self.pop_card_index = self.player_hands[self.current_player].index(self.pop_card)
                         self.board_card, self.player_hands[self.current_player] = com_submit_card(self.pop_card, self.pop_card_index, self.board_card, self.player_hands[self.current_player])
-                        self.turn_end_method()
                 # 드로우한 카드를 낼 수 없는 경우
                 elif self.new_drawn_card is not None and not is_valid_move(self.new_drawn_card, self.top_card) and self.pop_card is None:
                     if self.current_time - self.turn_start_time >= self.delay_time2:
