@@ -350,7 +350,7 @@ class SinglePlayLobby:
                     if event.key == self.settings_data["key"]['up']:
                         self.buttons[self.selected_button_vertical_index][
                             self.selected_button_horizon_index].keyboard_selected = False
-                        # 컴퓨터 로직 선택에서 위 아래 이동시, 아웃레인지 방지 코드
+                        # 위 키보드로 이동 시, 자연스러운 이동을 위한 코드, 버튼의 열을 보정한다.
                         if self.selected_button_vertical_index == 0 and self.selected_button_horizon_index in [0, 1]:
                             self.selected_button_horizon_index = 0
                         elif self.selected_button_vertical_index == 0 and self.selected_button_horizon_index == 2:
@@ -361,6 +361,7 @@ class SinglePlayLobby:
                             self.selected_button_horizon_index = self.selected_button_horizon_index + 1
                         self.selected_button_vertical_index = (self.selected_button_vertical_index - 1) % len(
                             self.buttons)
+                        # 행간 이동
                         if len(self.buttons[self.selected_button_vertical_index]) == self.selected_button_horizon_index:
                             self.selected_button_horizon_index = self.selected_button_horizon_index - 1
                         self.buttons[self.selected_button_vertical_index][
@@ -368,13 +369,22 @@ class SinglePlayLobby:
                     elif event.key == self.settings_data["key"]['down']:
                         self.buttons[self.selected_button_vertical_index][
                             self.selected_button_horizon_index].keyboard_selected = False
-                        # 컴퓨터 로직 선택에서 위 아래 이동시, 아웃레인지 방지 코드
+                        # 위 키보드로 이동 시, 자연스러운 이동을 위한 코드, 버튼의 열을 보정한다.
                         if self.selected_button_vertical_index == 0 and self.selected_button_horizon_index in [0, 1]:
                             self.selected_button_horizon_index = 0
                         elif self.selected_button_vertical_index == 0 and self.selected_button_horizon_index == 2:
                             self.selected_button_horizon_index = 1
                         elif self.selected_button_vertical_index == 0 and self.selected_button_horizon_index in [3, 4]:
                             self.selected_button_horizon_index = 2
+                        # 유저 이름 변경, 스타트, 나가기에서 computer_attend 버튼으로 이동시 보정
+                        elif self.selected_button_vertical_index == 2:
+                            if len(self.buttons[self.selected_button_vertical_index]) == 2:
+                                if self.selected_button_horizon_index == 0:
+                                    self.selected_button_horizon_index = self.selected_button_horizon_index + 1
+                                elif self.selected_button_horizon_index == 1:
+                                    self.selected_button_horizon_index = self.selected_button_horizon_index + 2
+                            elif len(self.buttons[self.selected_button_vertical_index]) == 3:
+                                self.selected_button_horizon_index = self.selected_button_horizon_index + 1
                         self.selected_button_vertical_index = (self.selected_button_vertical_index + 1) % len(
                             self.buttons)
                         if len(self.buttons[self.selected_button_vertical_index]) == self.selected_button_horizon_index:
