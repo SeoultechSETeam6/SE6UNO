@@ -34,7 +34,7 @@ from controller import game_view, game_data
 
 
 class SinglePlay:
-    def __init__(self, computer_attends, username, computer_logic):
+    def __init__(self, computer_attends, username, computer_logic, game_rule):
         # 게임 설정 불러오기
         self.settings_data = game_data.load_settings()
 
@@ -68,6 +68,7 @@ class SinglePlay:
         # 컴퓨터 플레이어 참여 정보
         self.computer_attends = computer_attends
         self.computer_logic = computer_logic
+        self.game_rule = game_rule
         for attend in self.computer_attends:
             if attend:
                 self.player_count += 1

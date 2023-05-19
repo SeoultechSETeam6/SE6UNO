@@ -258,7 +258,7 @@ class SinglePlayLobby:
         print("컴퓨터 로직: ", self.computers_logic)
         print(self.computers_attend_flag, self.computers_attend_count)
         self.running = False
-        SinglePlay(self.computers_attend_flag, self.player_name, self.computers_logic).run()
+        SinglePlay(self.computers_attend_flag, self.player_name, self.computers_logic, self.game_rule).run()
 
     # 게임 나가기 버튼 이벤트
     def event_exit(self):

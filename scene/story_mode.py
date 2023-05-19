@@ -20,7 +20,7 @@ from scene.single_play import SinglePlay
 # 콤보 사용, 기술 카드를 낼 수 있으면 기술카드를 먼저 냄
 class StageA(SinglePlay):
     def __init__(self):
-        super().__init__([False, False, True, False, False], 'You', ['A'])
+        super().__init__([False, False, True, False, False], 'You', ['A'], [None, None, None])
         self.regular_cards, self.special_cards = generate_a_stage_cards(self.settings_data["color_weakness"],
                                                                         self.ui_size["change"])
         self.player_hands, self.remain_cards = stage_a_distribute(self.player_count, self.regular_cards,
@@ -106,7 +106,7 @@ class StageA(SinglePlay):
 # 모든 카드를 플레이어들에게 나눠줌. 50퍼센트 확률로 컴퓨터가 색 선호도에 따라 카드 선택함
 class StageB(SinglePlay):
     def __init__(self):
-        super().__init__([True, False, True, False, True], 'You', ['B', 'B', 'B'])
+        super().__init__([True, False, True, False, True], 'You', ['B', 'B', 'B'], ['B', None, None])
         self.turn_count = 1
         self.cards = generate_cards(self.settings_data["color_weakness"], self.ui_size["change"])
         self.shuffled_cards = shuffle_cards(self.cards)
@@ -129,7 +129,7 @@ class StageB(SinglePlay):
 # 5턴 마다 낼 수 있는 카드의 색상이 무작위로 변경됨, 30퍼센트 확률로 카드를 낼 수 있어도 카드를 뽑고 턴을 넘김.
 class StageC(SinglePlay):
     def __init__(self):
-        super().__init__([True, False, True, False, False], 'You', ['C', 'C'])
+        super().__init__([True, False, True, False, False], 'You', ['C', 'C'], [None, 'C', None])
         self.turn_count = 1
         self.dummy_cards = generate_c_stage_cards(self.settings_data["color_weakness"], self.ui_size["change"])
         self.dummy_cards_c = generate_c_for_change_cards(self.settings_data["color_weakness"], self.ui_size["change"])
@@ -151,7 +151,7 @@ class StageC(SinglePlay):
 # 공격 카드, 폭탄 카드가 다수 추가됨. 공격, 폭탄카드 사용 가능시 먼저 사용
 class StageD(SinglePlay):
     def __init__(self):
-        super().__init__([True, False, True, False, True], 'You', ['D', 'D', 'D'])
+        super().__init__([True, False, True, False, True], 'You', ['D', 'D', 'D'], [None, None, 'D'])
         self.turn_count = 1
         self.cards = generate_d_stage_cards(self.settings_data["color_weakness"], self.ui_size["change"])
 
