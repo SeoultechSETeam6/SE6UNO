@@ -522,6 +522,7 @@ class SinglePlay:
                         self.pop_card = self.new_drawn_card
                         self.pop_card_index = self.player_hands[self.current_player].index(self.pop_card)
                         self.board_card, self.player_hands[self.current_player] = com_submit_card(self.pop_card, self.pop_card_index, self.board_card, self.player_hands[self.current_player])
+                        self.turn_end_method()
                 # 드로우한 카드를 낼 수 없는 경우
                 elif self.new_drawn_card is not None and not is_valid_move(self.new_drawn_card, self.top_card) and self.pop_card is None:
                     if self.current_time - self.turn_start_time >= self.delay_time2:
@@ -1029,25 +1030,15 @@ class SinglePlay:
                         elif self.key_select_option == 1:
                             self.key_select_option = 0
                         elif self.key_select_option == 2:
-                            if any(self.uno_flags):
-                                self.key_select_option = 1
-                            else:
-                                self.key_select_option = 0
+                            self.key_select_option = 1
                         else:
                             if self.user_turn and self.new_drawn_card is not None:
                                 self.key_select_option = 2
-                            elif any(self.uno_flags):
-                                self.key_select_option = 1
                             else:
-                                self.key_select_option = 0
+                                self.key_select_option = 1
                     elif event.key == self.settings_data["key"]['down']:
                         if self.key_select_option == 0:
-                            if any(self.uno_flags):
-                                self.key_select_option = 1
-                            elif self.user_turn and self.new_drawn_card is not None:
-                                self.key_select_option = 2
-                            else:
-                                self.key_select_option = 3
+                            self.key_select_option = 1
                         elif self.key_select_option == 1:
                             if self.user_turn and self.new_drawn_card is not None:
                                 self.key_select_option = 2
@@ -1058,15 +1049,28 @@ class SinglePlay:
                         else:
                             self.key_select_option = 0
                     elif event.key == self.settings_data["key"]['enter']:
+                        # 0: 드로우, 1: 우노버튼, 2: 턴 넘기기, 3. 덱
                         if self.key_select_option == 0:
-                            pass
+                            if self.user_turn:
+                                self.clicked_remain_cards = True
                         elif self.key_select_option == 1:
-                            pass
-                        elif self.key_select_option == 2:
-                            pass
+                            # 우노일때
+                            if self.uno_check:
+                                self.sound_uno_button.set_volume(
+                                    self.settings_data["volume"]["sound"] * self.settings_data["volume"]["effect"])
+                                self.sound_uno_button.play(1)
+                                self.uno_flags[self.current_player] = True
+                            # 우노가 아닐때,
+                            else:
+                                self.key_select_option = 0
+                        elif self.key_select_option == 2 and self.user_turn:
+                            self.clicked_next_turn_button = True
                         else:
-                            self.clicked_card_index, self.clicked_card \
-                                = self.hovered_card_index, self.player_hands[0][self.hovered_card_index]
+                            if self.hovered_card_index < len(self.player_hands[0]):
+                                self.clicked_card_index, self.clicked_card = self.hovered_card_index, \
+                                    self.player_hands[0][self.hovered_card_index]
+                            else:
+                                pass
 
     def run(self):
         self.setting()
