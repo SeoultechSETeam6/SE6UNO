@@ -27,7 +27,7 @@ class StageA(SinglePlay):
                                                                   self.special_cards, self.card_count)
         self.stage = "A"
         self.draw_override = True
-        self.combo = 0
+        self.combo_text = f"combo: {self.combo}"
 
     def turn_and_reset(self):
         if self.new_drawn_card is not None:
@@ -93,7 +93,8 @@ class StageA(SinglePlay):
                 self.turn_and_reset()
 
     def draw_combo(self):
-        draw_text(self.screen, str(self.combo), self.font, (255, 255, 255), self.center_x, self.center_y + 100)
+        self.combo_text = f"combo: {self.combo}"
+        draw_text(self.screen, self.combo_text, self.font, (255, 255, 255), self.center_x, self.center_y + 100)
 
     def draw(self):
         super().draw()

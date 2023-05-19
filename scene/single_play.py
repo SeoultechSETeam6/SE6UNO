@@ -201,7 +201,7 @@ class SinglePlay:
         self.hovered_change_index = 0
 
         # 어떤 스테이지에서 게임을 진행하는지?
-        self.stage = "single"
+        self.stage = "basic"
 
         # uno 초기값
         self.uno_check = False
@@ -233,6 +233,7 @@ class SinglePlay:
         self.clicked_next_turn_button = False  # 다음턴 클릭여부 초기값
 
         self.turn_count = 1
+        self.combo = 0
 
         # 0: 드로우, 1: 우노버튼, 2: 턴 넘기기, 3. 덱
         self.key_select_option = 3
