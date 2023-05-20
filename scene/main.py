@@ -3,6 +3,7 @@ import sys
 
 from controller import game_data, game_view
 from controller.mouse import Mouse
+from scene.multiple_play_select_mode import SelectMode
 from ui.button import Button
 
 from scene.single_play_lobby import SinglePlayLobby
@@ -48,7 +49,7 @@ class Main:
         # 버튼
         self.buttons = [
             Button(self.screen.get_width() // 2,
-                   self.screen.get_height() // 2 * 1.1,
+                   self.screen.get_height() // 2 * 0.92,
                    self.ui_size["button"][0],
                    self.ui_size["button"][1],
                    self.screen,
@@ -57,7 +58,7 @@ class Main:
                    self.ui_size["font"][1],
                    on_click_function=self.event_story_mode),
             Button(self.screen.get_width() // 2,
-                   self.screen.get_height() // 2 * 1.28,
+                   self.screen.get_height() // 2 * 1.1,
                    self.ui_size["button"][0],
                    self.ui_size["button"][1],
                    self.screen,
@@ -65,6 +66,15 @@ class Main:
                    '싱글 플레이',
                    self.ui_size["font"][1],
                    on_click_function=self.event_single_play_mode),
+            Button(self.screen.get_width() // 2,
+                   self.screen.get_height() // 2 * 1.28,
+                   self.ui_size["button"][0],
+                   self.ui_size["button"][1],
+                   self.screen,
+                   0xffffff,
+                   '멀티 플레이',
+                   self.ui_size["font"][1],
+                   on_click_function=self.event_multiple_play_mode),
             Button(self.screen.get_width() // 2,
                    self.screen.get_height() // 2 * 1.46,
                    self.ui_size["button"][0],
@@ -100,13 +110,19 @@ class Main:
     def event_story_mode(self):
         self.music.stop()
         print('스토리 모드 버튼 클릭됨')
-        StoryModeMap().run()
-        # self.running = False
+        flag = True
+        while flag:
+            flag = StoryModeMap().run()
 
     def event_single_play_mode(self):
         self.music.stop()
         print('싱글 플레이 버튼 클릭됨')
         SinglePlayLobby().run()
+
+    def event_multiple_play_mode(self):
+        self.music.stop()
+        print('멀티 플레이 버튼 클릭됨')
+        SelectMode().run()
 
     def event_achievement(self):
         self.music.stop()
