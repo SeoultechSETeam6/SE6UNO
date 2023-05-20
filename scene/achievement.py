@@ -56,7 +56,7 @@ class Achievement:
         self.achieved_data = game_data.load_achieved_status()
         self.texts_achieved_date = []
         for i, achievement in enumerate(self.achievements):
-            achievement.update({"date": self.small_font.render("달성 일시: " + str(self.achieved_data[f"{i}"]["achieved_date"]), True, (255, 255, 255))})
+            achievement.update({"date": self.small_font.render("달성 일시: " + str(self.achieved_data[i]["achieved_date"]), True, (255, 255, 255))})
 
         # 상단 글자 이미지
         self.image_achievement_title = game_view.scale_by(
@@ -86,7 +86,7 @@ class Achievement:
             self.screen.blit(achievement["image"], (x, y))
             self.screen.blit(achievement["name"], (x, y + self.screen.get_height() * 0.25))
             self.screen.blit(achievement["description"], (x, y + self.screen.get_height() * 0.32))
-            if self.achieved_data[f"{i}"]["achieved"]:
+            if self.achieved_data[i]["achieved"]:
                 self.screen.blit(self.image_clear_mark, (x, y + self.screen.get_height() * 0.05))
                 self.screen.blit(achievement["date"], (x, y + self.screen.get_height() * 0.35))
             x += self.screen.get_width() // 4
