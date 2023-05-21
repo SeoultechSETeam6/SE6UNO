@@ -246,7 +246,6 @@ def com_submit_card(card, card_index, board_card, now_player_hand):
 
 # 스페셜 카드 적용
 def apply_special_card_effects(card, current_player, direction, player_hands, remain_cards, player_count, stage):
-
     # 역방향 카드
     if card.value == "reverse":
         direction *= -1
