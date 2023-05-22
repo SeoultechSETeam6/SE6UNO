@@ -1,5 +1,4 @@
 import pygame
-import math
 
 from controller import game_data, game_view
 from controller.mouse import Mouse
@@ -66,28 +65,6 @@ class SinglePlayLobby:
                                              "./resources/Image/lobby_images/computer5.png",
                                              on_click_function=self.event_join_computer_5)]
 
-        self.buttons_rule = [ImageButton(self.screen.get_width() * 0.3,
-                                         self.screen.get_height() * 0.5,
-                                         self.screen.get_width() // 6,
-                                         self.screen.get_height() // 6,
-                                         self.screen,
-                                         "./resources/Image/lobby_images/computer1.png",
-                                         on_click_function=self.event_rule_b),
-                             ImageButton(self.screen.get_width() * 0.5,
-                                         self.screen.get_height() * 0.5,
-                                         self.screen.get_width() // 6,
-                                         self.screen.get_height() // 6,
-                                         self.screen,
-                                         "./resources/Image/lobby_images/computer2.png",
-                                         on_click_function=self.event_rule_c),
-                             ImageButton(self.screen.get_width() * 0.7,
-                                         self.screen.get_height() * 0.5,
-                                         self.screen.get_width() // 6,
-                                         self.screen.get_height() // 6,
-                                         self.screen,
-                                         "./resources/Image/lobby_images/computer3.png",
-                                         on_click_function=self.event_rule_d)]
-
         # 시작 버튼
         self.button_start = ImageButton(self.screen.get_width() // 2,
                                         self.screen.get_height() * 0.85,
@@ -120,7 +97,7 @@ class SinglePlayLobby:
                                   on_click_function=self.event_exit)
 
         # 버튼 리스트 초기값
-        self.buttons = [self.buttons_computer, self.buttons_rule, [self.button_change_player_name, self.button_exit]]
+        self.buttons = [self.buttons_computer, [self.button_change_player_name, self.button_exit]]
         self.buttons[self.selected_button_vertical_index][self.selected_button_horizon_index] \
             .keyboard_selected = True
 
@@ -149,7 +126,6 @@ class SinglePlayLobby:
         # 컴퓨터 참여 정보 리스트 및 로직 리스트
         self.computers_attend_flag = [False, False, False, False, False]
         self.computers_logic = ["None", "None", "None", "None", "None"]
-        self.game_rule = [None, None, None]
         self.computers_attend_count = 0
 
         # 이름 변경 팝업창
@@ -204,30 +180,6 @@ class SinglePlayLobby:
     def event_join_computer_5(self):
         self.computer_status(4)
 
-    def event_rule_b(self):
-        if self.game_rule[0] is None:
-            self.game_rule[0] = "B"
-            print(self.game_rule)
-        elif self.game_rule[0] == "B":
-            self.game_rule[0] = None
-            print(self.game_rule)
-
-    def event_rule_c(self):
-        if self.game_rule[1] is None:
-            self.game_rule[1] = "C"
-            print(self.game_rule)
-        elif self.game_rule[1] == "C":
-            self.game_rule[1] = None
-            print(self.game_rule)
-
-    def event_rule_d(self):
-        if self.game_rule[2] is None:
-            self.game_rule[2] = "D"
-            print(self.game_rule)
-        elif self.game_rule[2] == "D":
-            self.game_rule[2] = None
-            print(self.game_rule)
-
     def check_computer_attend(self):
         self.computers_attend_count = 0
         for i in self.computers_attend_flag:
@@ -238,9 +190,9 @@ class SinglePlayLobby:
     def keyboard_detect_start_button(self):
         # 버튼 리스트
         if self.computers_attend_count == 0:
-            self.buttons = [self.buttons_computer, self.buttons_rule, [self.button_change_player_name, self.button_exit]]
+            self.buttons = [self.buttons_computer, [self.button_change_player_name, self.button_exit]]
         elif self.computers_attend_count > 0:
-            self.buttons = [self.buttons_computer, self.buttons_rule,
+            self.buttons = [self.buttons_computer,
                             [self.button_change_player_name, self.button_start, self.button_exit]]
 
     # 플레이어 이름 변경 팝업창에서 확인 클릭 시 이벤트
@@ -284,19 +236,6 @@ class SinglePlayLobby:
                     self.screen.blit(self.image_C_joined, (button.x, button.y))
                 elif self.computers_logic[i] == "D":
                     self.screen.blit(self.image_D_joined, (button.x, button.y))
-
-        # 게임 룰 버튼 그림
-        for i, button in enumerate(self.buttons_rule):
-            button.draw()
-            # 팔업이 떠있을 경우 감지하지 않음
-            if not self.popup.pop:
-                button.detect_event()
-            if self.game_rule[i] == "B":
-                self.screen.blit(self.image_joined, (button.x, button.y))
-            elif self.game_rule[i] == "C":
-                self.screen.blit(self.image_joined, (button.x, button.y))
-            elif self.game_rule[i] == "D":
-                self.screen.blit(self.image_joined, (button.x, button.y))
 
         # 플레이어 이름 변경 버튼 그리기
         self.button_change_player_name.draw()
@@ -358,7 +297,13 @@ class SinglePlayLobby:
                         elif self.selected_button_vertical_index == 0 and self.selected_button_horizon_index in [3, 4]:
                             self.selected_button_horizon_index = 2
                         elif self.selected_button_vertical_index == 1:
-                            self.selected_button_horizon_index = self.selected_button_horizon_index + 1
+                            if len(self.buttons[self.selected_button_vertical_index]) == 2:
+                                if self.selected_button_horizon_index == 0:
+                                    self.selected_button_horizon_index = self.selected_button_horizon_index + 1
+                                elif self.selected_button_horizon_index == 1:
+                                    self.selected_button_horizon_index = self.selected_button_horizon_index + 2
+                            elif len(self.buttons[self.selected_button_vertical_index]) == 3:
+                                self.selected_button_horizon_index = self.selected_button_horizon_index + 1
                         self.selected_button_vertical_index = (self.selected_button_vertical_index - 1) % len(
                             self.buttons)
                         # 행간 이동
@@ -369,7 +314,7 @@ class SinglePlayLobby:
                     elif event.key == self.settings_data["key"]['down']:
                         self.buttons[self.selected_button_vertical_index][
                             self.selected_button_horizon_index].keyboard_selected = False
-                        # 위 키보드로 이동 시, 자연스러운 이동을 위한 코드, 버튼의 열을 보정한다.
+                        # 아래 키보드로 이동 시, 자연스러운 이동을 위한 코드, 버튼의 열을 보정한다.
                         if self.selected_button_vertical_index == 0 and self.selected_button_horizon_index in [0, 1]:
                             self.selected_button_horizon_index = 0
                         elif self.selected_button_vertical_index == 0 and self.selected_button_horizon_index == 2:
@@ -377,7 +322,7 @@ class SinglePlayLobby:
                         elif self.selected_button_vertical_index == 0 and self.selected_button_horizon_index in [3, 4]:
                             self.selected_button_horizon_index = 2
                         # 유저 이름 변경, 스타트, 나가기에서 computer_attend 버튼으로 이동시 보정
-                        elif self.selected_button_vertical_index == 2:
+                        elif self.selected_button_vertical_index == 1:
                             if len(self.buttons[self.selected_button_vertical_index]) == 2:
                                 if self.selected_button_horizon_index == 0:
                                     self.selected_button_horizon_index = self.selected_button_horizon_index + 1
