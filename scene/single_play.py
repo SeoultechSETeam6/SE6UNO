@@ -12,7 +12,7 @@ from scene.settings import Settings
 
 from controller.mouse import Mouse, MouseState
 from controller.card_gen import generate_cards, generate_for_change_cards, generate_c_stage_cards, generate_c_for_change_cards
-from controller.card_shuffle import shuffle_cards, distribute_cards, stage_a_distribute
+from controller.card_shuffle import shuffle_cards, distribute_cards, stage_a_distribute, stage_b_distribute
 from controller.game_utils import (
     draw_cards_user,
     draw_cards_ai,
@@ -312,17 +312,8 @@ class SinglePlay:
             self.player_hands, self.remain_cards = distribute_cards(self.player_count, self.shuffled_cards, self.card_count)
         # 카드를 전부 나눠주는 B스테이지 로직
         if 'B' in self.computer_logic:
-            # 두 장의 카드 빼놓기 (remain에 하나, board에 하나)
-            saved_card = self.remain_cards.pop(0)
-            saved_two_card = self.remain_cards.pop(1)
-            # 나머지 카드를 플레이어들에게 순차적으로 나눠주기
-            player_index = 0
-            while self.remain_cards:
-                self.player_hands[player_index].append(self.remain_cards.pop())
-                player_index = (player_index + 1) % self.player_count
-            # 따로 뺀 카드 2장을 다시 remain_cards에 추가하기
-            self.remain_cards.append(saved_card)
-            self.remain_cards.append(saved_two_card)
+            self.player_hands, self.remain_cards = stage_b_distribute(self.player_count, self.remain_cards, self.player_hands)
+            print(self.remain_cards, self.player_hands)
 
     def setting(self):
         self.settings_data = game_data.load_settings()
@@ -490,10 +481,17 @@ class SinglePlay:
                 self.combo = self.combo + 1
                 print(self.combo)
         else:
-            self.turn_end_method()
+            if self.pop_card.is_special() is False:
+                self.current_player = (self.current_player + self.game_direction) % self.player_count
+                self.turn_end_method()
+            # special 카드이고, remain card에 5장 이하일 경우, 턴을 넘기는 함수.
+            elif self.pop_card.is_special() is True and len(self.remain_cards) <= 5:
+                self.current_player = (self.current_player + self.game_direction) % self.player_count
+                self.turn_end_method()
+            else:
+                self.turn_end_method()
 
     def game(self):
-        print(self.player_hands)
         # 마우스의 위치를 가져옴
         mouse_x, mouse_y = Mouse.getMousePos()
         # 현재 플레이어 결정

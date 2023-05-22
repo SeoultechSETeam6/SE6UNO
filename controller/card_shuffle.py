@@ -12,7 +12,6 @@ def distribute_cards(player_count, cards, card_count):
     for _ in range(player_count):
         hand = [cards.pop() for _ in range(card_count)]
         hands.append(hand)
-    print(hands, cards)
     return hands, cards
 
 
@@ -47,5 +46,17 @@ def stage_a_distribute(player_count, regular_cards, special_cards, card_count):
     remaining_cards = regular_cards + special_cards
     random.shuffle(remaining_cards)
     return hands, remaining_cards
+
+
+def stage_b_distribute(player_count, remain_cards, player_hands):
+    saved_card = remain_cards.pop(0)
+    saved_two_card = remain_cards.pop(1)
+    card_count = len(remain_cards) // player_count
+    for player_index in range(player_count):
+        for n in range(card_count):
+            player_hands[player_index].append(remain_cards.pop())
+    remain_cards.append(saved_card)
+    remain_cards.append(saved_two_card)
+    return player_hands, remain_cards
 
 
