@@ -4,6 +4,7 @@ from controller import game_data, game_view
 from controller.mouse import Mouse
 from ui.button import Button
 from ui.popup import Popup
+from multi_play_lobby_host import MultiPlayLobbyServer
 
 
 class SelectMode:
@@ -70,7 +71,7 @@ class SelectMode:
 
     def event_create_server(self):
         print("서버 만들기")
-        pass
+        MultiPlayLobbyServer().run()
 
     def event_join(self):
         if len(self.ip) > 0:

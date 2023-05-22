@@ -17,18 +17,29 @@ class Server:
         self.clients = []
         self.clients_lock = threading.Lock()
 
+        self.game_start = False
+
     def client_handler(self, client_socket, addr):
         with self.clients_lock:
             self.clients.append(client_socket)
         try:
             while True:
-                msg = client_socket.recv(1024).decode('utf-8')
-                if msg == 'start_game':
-                    with self.clients_lock:
+                data = client_socket.recv(1024)
+                print(data)
+                if data is not None:
+                    if self.game_start:
                         for client in self.clients:
-                            client.sendall('game_started'.encode('utf-8'))
-                else:
-                    print(f"Message from {addr}: {msg}")
+                            if client is not client_socket:
+                                client.sendall(data)
+                    if client_socket is self.clients[0]:
+                        msg = data.decode('utf-8')
+                        if msg == 'start_game':
+                            self.game_start = True
+                            for client in self.clients:
+                                client.sendall('start_game'.encode('utf-8'))
+                    else:
+                        client_socket.sendall('not_host'.encode('utf-8'))
+
         except:
             print(f"Client {addr} disconnected")
         finally:
@@ -41,18 +52,10 @@ class Server:
         client_socket, addr = self.server_socket.accept()
         print(f"Client {addr} connected")
 
-        client_socket.sendall(len(self.clients).to_bytes(4, byteorder='little'))
-
         thread = threading.Thread(target=self.client_handler, args=(client_socket, addr))
         thread.start()
-
-
-class MultiPlay(SinglePlay):
-    def __init__(self, computer_attends, username, computer_logic):
-        super().__init__(computer_attends, username, computer_logic)
 
 
 game_server = Server()
 while True:
     game_server.connect()
-
