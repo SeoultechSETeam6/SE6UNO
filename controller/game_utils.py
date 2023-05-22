@@ -245,18 +245,21 @@ def com_submit_card(card, card_index, board_card, now_player_hand):
 
 
 # 스페셜 카드 적용
-def apply_special_card_effects(card, current_player, direction, player_hands, remain_cards, player_count, stage):
+def apply_special_card_effects(card, current_player, direction, player_hands, remain_cards, player_count, computer_logic, new_drawn_card):
     # 역방향 카드
     if card.value == "reverse":
         direction *= -1
-        if stage != "A":
+        if 'A' not in computer_logic:
             current_player = (current_player + direction) % player_count
         return current_player, direction
 
     # 스킵 카드
     elif card.value == "skip":
         pygame.time.delay(100)
-        current_player = (current_player + direction + direction) % player_count
+        if 'A' not in computer_logic:
+            current_player = (current_player + direction + direction) % player_count
+        elif new_drawn_card is not None and 'A' in computer_logic:
+            current_player = (current_player + direction + direction) % player_count
         return current_player, direction
 
     # 2장 드로우 공격
@@ -269,14 +272,20 @@ def apply_special_card_effects(card, current_player, direction, player_hands, re
             for _ in range(2):
                 add_card = remain_cards.pop()
                 player_hands[next_player].append(add_card)
-            current_player = (current_player + (direction * 2)) % player_count
+            if 'A' not in computer_logic:
+                current_player = (current_player + direction + direction) % player_count
+            elif new_drawn_card is not None and 'A' in computer_logic:
+                current_player = (current_player + direction + direction) % player_count
             pygame.time.delay(100)
             return current_player, direction
         # shield 카드가 있으면 사용후, 턴 넘기기
         else:
             shield_card = next(check_card for check_card in player_hands[next_player] if check_card.value == "shield")
             player_hands[next_player].remove(shield_card)
-            current_player = (current_player + (direction * 2)) % player_count
+            if 'A' not in computer_logic:
+                current_player = (current_player + direction + direction) % player_count
+            elif new_drawn_card is not None and 'A' in computer_logic:
+                current_player = (current_player + direction + direction) % player_count
             pygame.time.delay(100)
             return current_player, direction
 
@@ -290,19 +299,19 @@ def apply_special_card_effects(card, current_player, direction, player_hands, re
             if i != current_player:
                 add_card = remain_cards.pop()
                 hand.append(add_card)
-        if stage != "A":
+        if 'A' not in computer_logic:
             current_player = (current_player + direction) % player_count
         return current_player, direction
 
     # 실드 카드(딘순히 내는 동작)
     elif card.value == "shield":
-        if stage != "A":
+        if 'A' not in computer_logic:
             current_player = (current_player + direction) % player_count
         return current_player, direction
 
     # 체인지 카드(카드색 바꿈)
     elif card.value == "change":
-        if stage != "A":
+        if 'A' not in computer_logic:
             current_player = (current_player + direction) % player_count
         return current_player, direction
 

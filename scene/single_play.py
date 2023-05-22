@@ -11,7 +11,7 @@ from ui.popup import Popup
 from scene.settings import Settings
 
 from controller.mouse import Mouse, MouseState
-from controller.card_gen import generate_cards, generate_for_change_cards
+from controller.card_gen import generate_cards, generate_for_change_cards, generate_c_stage_cards, generate_c_for_change_cards
 from controller.card_shuffle import shuffle_cards, distribute_cards, stage_a_distribute
 from controller.game_utils import (
     draw_cards_user,
@@ -31,7 +31,8 @@ from controller.game_utils import (
     com_submit_card,
     apply_special_card_effects,
     decide_computer_play,
-    card_reshuffle
+    card_reshuffle,
+    random_top_card_color
 )
 
 from controller import game_view, game_data
@@ -116,11 +117,17 @@ class SinglePlay:
         # 카드 생성 및 셔플
         self.regular_cards, self.special_cards = generate_cards(self.settings_data["color_weakness"],
                                                                 self.ui_size["change"], self.computer_logic)
-        self.shuffled_cards = shuffle_cards(self.regular_cards, self.special_cards)
 
         # 카드 분배, 유저는 player_hands[0]이고, 나머지는 인공지능으로 설정한다. change는 카드 체인지를 위한 카드들.
-        self.player_hands, self.remain_cards = distribute_cards(self.player_count, self.shuffled_cards, self.card_count)
+        self.player_hands = []
+        self.remain_cards = []
+        self.shuffled_cards = []
+        self.shuffle_distribute_card()
         self.change_color_list = generate_for_change_cards(self.settings_data["color_weakness"], self.ui_size["change"])
+        if 'C' in self.computer_logic:
+            self.dummy_cards = generate_c_stage_cards(self.settings_data["color_weakness"], self.ui_size["change"])
+            self.dummy_cards_c = generate_c_for_change_cards(self.settings_data["color_weakness"],
+                                                             self.ui_size["change"])
 
         # 초기 플레이어 순서를 위한 설정 값.
         self.current_player = (random.randint(0, self.player_count - 1))
@@ -230,9 +237,6 @@ class SinglePlay:
         self.hovered_card_index = 0
         self.hovered_change_index = 0
 
-        # 어떤 스테이지에서 게임을 진행하는지?
-        self.stage = "basic"
-
         # uno 초기값
         self.uno_check = False
         self.uno_delay_time = None
@@ -264,6 +268,7 @@ class SinglePlay:
 
         self.turn_count = 1
         self.combo = 0
+        self.combo_text = f"combo: {self.combo}"
 
         # 0: 드로우, 1: 우노버튼, 2: 턴 넘기기, 3. 덱
         self.key_select_option = 3
@@ -300,11 +305,24 @@ class SinglePlay:
         if 'A' in self.computer_logic:
             self.player_hands, self.remain_cards = stage_a_distribute(self.player_count, self.regular_cards,
                                                                       self.special_cards, self.card_count)
+            print('컴퓨터가 기술 카드를 받을 확률 증가')
         else:
             # 카드 생성 및 셔플
-            self.regular_cards, self.special_cards = generate_cards(self.settings_data["color_weakness"],
-                                                                    self.ui_size["change"], self.computer_logic)
             self.shuffled_cards = shuffle_cards(self.regular_cards, self.special_cards)
+            self.player_hands, self.remain_cards = distribute_cards(self.player_count, self.shuffled_cards, self.card_count)
+        # 카드를 전부 나눠주는 B스테이지 로직
+        if 'B' in self.computer_logic:
+            # 두 장의 카드 빼놓기 (remain에 하나, board에 하나)
+            saved_card = self.remain_cards.pop(0)
+            saved_two_card = self.remain_cards.pop(1)
+            # 나머지 카드를 플레이어들에게 순차적으로 나눠주기
+            player_index = 0
+            while self.remain_cards:
+                self.player_hands[player_index].append(self.remain_cards.pop())
+                player_index = (player_index + 1) % self.player_count
+            # 따로 뺀 카드 2장을 다시 remain_cards에 추가하기
+            self.remain_cards.append(saved_card)
+            self.remain_cards.append(saved_two_card)
 
     def setting(self):
         self.settings_data = game_data.load_settings()
@@ -439,11 +457,43 @@ class SinglePlay:
             self.sound_shuffle.play(1)
             self.board_card, self.remain_cards = card_reshuffle(self.board_card, self.remain_cards)
 
+    def check_change_top_card_method(self):
+        if self.turn_count % 5 == 0:
+            self.board_card = random_top_card_color(self.board_card[-1], self.dummy_cards, self.board_card,
+                                                    self.dummy_cards_c)
+
     def turn_end_method(self):
         self.reset()
         self.check_reshuffle_method()
+        if 'C' in self.computer_logic:
+            self.check_change_top_card_method()
+        print("턴카운트: ", self.turn_count)
+
+    # 카드를 뽑을 시, 콤보를 0으로 리셋함.
+    def draw_and_reset_combo(self):
+        if self.new_drawn_card is not None:
+            self.combo = 0
+
+    def combo_and_reset_function(self):
+        if 'A' in self.computer_logic:
+            print('스테이지 A: 콤보가 발동한다.')
+            if self.new_drawn_card is not None:
+                if self.pop_card is None:
+                    pass
+                elif self.pop_card.is_special() is False:
+                    self.current_player = (self.current_player + self.game_direction) % self.player_count
+                self.turn_end_method()
+                self.combo = 0
+            elif self.new_drawn_card is None:
+                print('콤보 더하고 자신의 턴이 와야함')
+                self.reset()
+                self.combo = self.combo + 1
+                print(self.combo)
+        else:
+            self.turn_end_method()
 
     def game(self):
+        print(self.player_hands)
         # 마우스의 위치를 가져옴
         mouse_x, mouse_y = Mouse.getMousePos()
         # 현재 플레이어 결정
@@ -505,7 +555,7 @@ class SinglePlay:
                 if self.is_draw:
                     self.is_draw = False
                     self.current_player = (self.current_player + self.game_direction) % self.player_count
-                    self.turn_end_method()
+                    self.combo_and_reset_function()
                 elif self.change_card:
                     self.user_turn = False
                     self.card_playing()
@@ -513,7 +563,7 @@ class SinglePlay:
                     self.draw_animation(self.current_player)
                     self.player_hands[0].append(self.remain_cards.pop())
                     self.current_player = (self.current_player + self.game_direction) % self.player_count
-                    self.turn_end_method()
+                    self.combo_and_reset_function()
 
             if Mouse.getMouseState() == MouseState.CLICK:
                 self.clicked_card_index, self.clicked_card = get_clicked_card(self.player_hands[0],
@@ -539,6 +589,7 @@ class SinglePlay:
                     self.player_hands[0].append(self.remain_cards.pop())
                     self.new_drawn_card = self.player_hands[0][-1]
                 elif len(self.remain_cards) == 1:
+                    self.combo = 0
                     self.current_player = (self.current_player + self.game_direction) % self.player_count
                     self.turn_end_method()
             # 카드를 드로우 하고 턴을 넘기는 함수.
@@ -592,12 +643,13 @@ class SinglePlay:
                         self.pop_card, self.pop_card_index, self.board_card, self.player_hands[self.current_player])
                 # 카드를 낼 수 없을 때 드로우 한다. (remain_cards가 2장 이상이면 카드를 가져오고, 한장만 존재하면 턴만 넘긴다.)
                 elif not self.playable and self.new_drawn_card is None and self.pop_card is None:
-                    if len(self.remain_cards) > 2:
+                    if len(self.remain_cards) > 1:
                         self.draw_animation(self.current_player)
                         self.new_drawn_card = self.remain_cards.pop()
                         self.player_hands[self.current_player].append(self.new_drawn_card)
                         self.turn_start_time = pygame.time.get_ticks()
                     elif len(self.remain_cards) == 1:
+                        self.combo = 0
                         self.current_player = (self.current_player + self.game_direction) % self.player_count
                         self.turn_end_method()
                 # 드로우한 카드가 낼 수 있는 경우
@@ -638,8 +690,11 @@ class SinglePlay:
                     self.sound_uno_button.set_volume(
                         self.settings_data["volume"]["sound"] * self.settings_data["volume"]["effect"])
                     self.sound_uno_button.play(1)
-                    self.draw_animation(self.current_player)
-                    self.player_hands[self.current_player].append(self.remain_cards.pop())
+                    if len(self.remain_cards) > 1:
+                        self.draw_animation(self.current_player)
+                        self.player_hands[self.current_player].append(self.remain_cards.pop())
+                    elif len(self.remain_cards) == 1:
+                        pass
                 else:
                     if self.uno_flags[self.current_player]:
                         self.uno_check = False
@@ -653,10 +708,14 @@ class SinglePlay:
                     self.uno_flags[self.current_player] = True
                 else:
                     if self.uno_flags[self.current_player]:
-                        self.draw_animation(self.current_player)
-                        self.player_hands[self.current_player].append(self.remain_cards.pop())
+                        if len(self.remain_cards) > 1:
+                            self.draw_animation(self.current_player)
+                            self.player_hands[self.current_player].append(self.remain_cards.pop())
+                        elif len(self.remain_cards) == 1:
+                            pass
 
     def card_playing(self):
+        self.draw_and_reset_combo()
         if self.pop_card is not None and not self.uno_check:
             if self.user_turn:
                 self.hovered_card_index -= 1
@@ -668,7 +727,8 @@ class SinglePlay:
                                                                                       self.player_hands,
                                                                                       self.remain_cards,
                                                                                       self.player_count,
-                                                                                      self.stage)
+                                                                                      self.computer_logic,
+                                                                                      self.new_drawn_card)
                 self.animation_method[self.pop_card.value](self.current_player)
                 if self.user_turn:
                     if not self.story_mode:
@@ -725,7 +785,7 @@ class SinglePlay:
                             game_data.save_achieved_status(5)
                     self.flag_used_special_card = True
                 print("유저가 특수 카드를 사용: " + str(self.flag_used_special_card))
-                self.turn_end_method()
+                self.combo_and_reset_function()
             # 내는 카드가 special이고, change일 경우, remain_cards가 5장 미만이면 발동 안함
             elif len(self.remain_cards) > 5 and self.pop_card.is_special() and self.pop_card.value == "change":
                 if self.user_turn:
@@ -735,30 +795,29 @@ class SinglePlay:
                         self.color_change = self.change_color_list[self.clicked_change_index]
                         self.current_player, self.game_direction = apply_special_card_effects(
                             self.pop_card, self.current_player, self.game_direction,
-                            self.player_hands, self.remain_cards, self.player_count, self.stage)
+                            self.player_hands, self.remain_cards, self.player_count, self.computer_logic,
+                            self.new_drawn_card)
                         self.animation_method[self.pop_card.value](self.current_player)
                         self.board_card.append(self.color_change)
-                        self.turn_end_method()
+                        self.combo_and_reset_function()
                 else:
                     self.change_index = random.randint(0, 3)
                     self.color_change = self.change_color_list[self.change_index]
                     if self.current_time - self.turn_start_time >= self.delay_time3:
                         self.current_player, self.game_direction = apply_special_card_effects(
                             self.pop_card, self.current_player, self.game_direction, self.player_hands,
-                            self.remain_cards, self.player_count, self.stage)
+                            self.remain_cards, self.player_count, self.computer_logic, self.new_drawn_card)
                         self.animation_method[self.pop_card.value](self.current_player)
                         self.board_card.append(self.color_change)
-                        self.turn_end_method()
+                        self.combo_and_reset_function()
                 print("유저가 특수 카드를 사용: " + str(self.flag_used_special_card))
             # 내는 카드가 special이 아닌 경우
             elif len(self.remain_cards) > 5 and not self.pop_card.is_special():
-                self.current_player = (self.current_player + self.game_direction) % self.player_count
-                self.turn_end_method()
+                self.combo_and_reset_function()
             # 5장 이하인 경우에는 특수카드 발동x, 그냥 넘어감.
             elif len(self.remain_cards) <= 5:
                 print('5장 미만 발동')
-                self.current_player = (self.current_player + self.game_direction) % self.player_count
-                self.turn_end_method()
+                self.combo_and_reset_function()
 
     def win(self):
         popup = None
@@ -1108,6 +1167,10 @@ class SinglePlay:
 
     # 애니메이션 관련 매서드 끝
 
+    def draw_combo(self):
+        self.combo_text = f"combo: {self.combo}"
+        draw_text(self.screen, self.combo_text, self.font, (255, 255, 255), self.center_x, self.center_y + 100)
+
     def draw(self):
         self.screen.fill((111, 111, 111))
 
@@ -1239,9 +1302,12 @@ class SinglePlay:
             if pygame.time.get_ticks() - self.popup_start_time > 3500:
                 self.popup_achieved.pop = False
 
+        # 콤보가 1 이상일시 콤보 표기
+        if self.combo > 0:
+            self.draw_combo()
+
         # 매 프레임마다 화면 업데이트
-        if self.draw_override is False:
-            pygame.display.flip()
+        pygame.display.flip()
 
     def event(self):
         for event in pygame.event.get():

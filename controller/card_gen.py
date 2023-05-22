@@ -48,24 +48,23 @@ def generate_cards(color_weakness, size_by, computer_logic):
     card_folder = "./resources/Image/card_images"
 
     # 색약 모드와 경로 차별화
-    for i in range(2):
-        for color in colors:
-            for value in values:
-                card_image_cw = pygame.image.load(f"{card_folder_cw}/{color}_{value}.png")
-                card_image = pygame.image.load(f"{card_folder}/{color}_{value}.png")
-                card = Card(color, value, card_image, card_image_cw, card_back_image)
-                if color_weakness:
-                    card.card_img = scale_by(card_image_cw, size_by)
-                else:
-                    card.card_img = scale_by(card_image, size_by)
-                card.card_img_back = scale_by(card_back_image, size_by)
+    for color in colors:
+        for value in values:
+            card_image_cw = pygame.image.load(f"{card_folder_cw}/{color}_{value}.png")
+            card_image = pygame.image.load(f"{card_folder}/{color}_{value}.png")
+            card = Card(color, value, card_image, card_image_cw, card_back_image)
+            if color_weakness:
+                card.card_img = scale_by(card_image_cw, size_by)
+            else:
+                card.card_img = scale_by(card_image, size_by)
+            card.card_img_back = scale_by(card_back_image, size_by)
 
-                if card.is_special():
-                    special_cards.append(card)
-                else:
-                    regular_cards.append(card)
-                if value == "bomb":
-                    break
+            if card.is_special():
+                special_cards.append(card)
+            else:
+                regular_cards.append(card)
+            if value == "bomb":
+                break
 
     # 색 없는 실드 카드를 추가
     for i in range(2):
@@ -86,14 +85,14 @@ def generate_cards(color_weakness, size_by, computer_logic):
     if 'D' in computer_logic:
         for i in range(2):
             for color in colors:
-                card_image_cw = pygame.image.load(f"{card_folder_cw}/{color}_{value}.png")
-                card_image = pygame.image.load(f"{card_folder}/{color}_{value}.png")
+                card_image_cw = pygame.image.load(f"{card_folder_cw}/{color}_bomb.png")
+                card_image = pygame.image.load(f"{card_folder}/{color}_bomb.png")
                 card = Card(color, "bomb", card_image, card_image_cw, card_back_image)
                 special_cards.append(card)
                 print("D로직 붐카드 2장 추가")
             for color in colors:
-                card_image_cw = pygame.image.load(f"{card_folder_cw}/{color}_{value}.png")
-                card_image = pygame.image.load(f"{card_folder}/{color}_{value}.png")
+                card_image_cw = pygame.image.load(f"{card_folder_cw}/{color}_draw_2.png")
+                card_image = pygame.image.load(f"{card_folder}/{color}_draw_2.png")
                 card = Card(color, "draw_2", card_image, card_image_cw, card_back_image)
                 special_cards.append(card)
                 print("D로직 드로우2카드 2장 추가")
