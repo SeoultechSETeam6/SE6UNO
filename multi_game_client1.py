@@ -1,6 +1,4 @@
-from multi_game_client import MultiPlay
+from multi_play_lobby_client import LobbyClient
 
-game_client = MultiPlay([False, False, True, False, False], 'you', None)
-game_client.connect()
-while True:
-    game_client.send_msg()
+lobby_client = LobbyClient()
+lobby_client.connect()

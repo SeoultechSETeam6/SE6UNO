@@ -268,8 +268,6 @@ class SinglePlayLobby:
                           self.buttons[self.selected_button_vertical_index][
                               self.selected_button_horizon_index].rect.y - self.ui_size["font"][1]))
 
-        pygame.display.flip()
-
     def detect_key_event(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -360,4 +358,5 @@ class SinglePlayLobby:
             Mouse.updateMouseState()
             self.clock.tick(game_view.FPS)
             self.keyboard_detect_start_button()
+            pygame.display.flip()
             self.draw()

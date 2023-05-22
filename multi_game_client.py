@@ -63,13 +63,15 @@ class MultiPlay(SinglePlay):
         self.sound_uno_button = pygame.mixer.Sound("./resources/SoundEffect/Unobutton_sound.ogg")
 
         # 카드 생성 및 셔플
-        self.cards = generate_cards(self.settings_data["color_weakness"], self.ui_size["change"])
-        self.shuffled_cards = shuffle_cards(self.cards)
+        # 카드 생성 및 셔플
+        self.regular_cards, self.special_cards = generate_cards(self.settings_data["color_weakness"],
+                                                                self.ui_size["change"], self.computer_logic)
 
         # 카드 분배, 유저는 player_hands[0]이고, 나머지는 인공지능으로 설정한다. change는 카드 체인지를 위한 카드들.
-        self.player_hands, self.remain_cards = distribute_cards(self.shuffled_cards, self.player_count, self.card_count)
-        self.change_color_list = generate_for_change_cards(self.settings_data["color_weakness"], self.ui_size["change"])
-
+        self.player_hands = []
+        self.remain_cards = []
+        self.shuffled_cards = []
+        self.shuffle_distribute_card()
         # 초기 플레이어 순서를 위한 설정 값.
         self.current_player = (random.randint(0, self.player_count - 1))
         # 게임 순서 방향 (1: 정방향, -1: 역방향)
@@ -232,7 +234,7 @@ class MultiPlay(SinglePlay):
         raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
 
 
-game_client = MultiPlay([False, False, False, False, False], 'you', None)
+game_client = MultiPlay([False, False, False, False, False], 'you', [None, None, None, None, None])
 game_client.connect()
 while True:
     game_client.send_msg()
