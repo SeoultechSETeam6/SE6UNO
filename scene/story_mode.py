@@ -4,10 +4,8 @@ import random
 from controller import game_view, game_data
 from controller.card_gen import (
     generate_cards,
-    generate_a_stage_cards,
     generate_c_stage_cards,
-    generate_c_for_change_cards,
-    generate_d_stage_cards
+    generate_c_for_change_cards
 )
 from controller.card_shuffle import shuffle_cards, distribute_cards, stage_a_distribute
 from controller.game_utils import (
@@ -23,8 +21,8 @@ from ui.popup import Popup
 class StageA(SinglePlay):
     def __init__(self):
         super().__init__([False, False, True, False, False], 'You', ['A'], True)
-        self.regular_cards, self.special_cards = generate_a_stage_cards(self.settings_data["color_weakness"],
-                                                                        self.ui_size["change"])
+        self.regular_cards, self.special_cards = generate_cards(self.settings_data["color_weakness"],
+                                                                self.ui_size["change"], ['A'])
         self.player_hands, self.remain_cards = stage_a_distribute(self.player_count, self.regular_cards,
                                                                   self.special_cards, self.card_count)
         self.stage = "A"
@@ -110,7 +108,7 @@ class StageB(SinglePlay):
     def __init__(self):
         super().__init__([True, False, True, False, True], 'You', ['B', 'B', 'B'], True)
         self.turn_count = 1
-        self.cards = generate_cards(self.settings_data["color_weakness"], self.ui_size["change"])
+        self.cards = generate_cards(self.settings_data["color_weakness"], self.ui_size["change"], self.computer_logic)
         self.shuffled_cards = shuffle_cards(self.cards)
         self.player_hands, self.remain_cards = distribute_cards(self.shuffled_cards, self.player_count, self.card_count)
         # 가장 첫번째 카드를 빼놓기
@@ -154,10 +152,9 @@ class StageC(SinglePlay):
 class StageD(SinglePlay):
     def __init__(self):
         super().__init__([True, False, True, False, True], 'You', ['D', 'D', 'D'], True)
-        self.turn_count = 1
-        self.cards = generate_d_stage_cards(self.settings_data["color_weakness"], self.ui_size["change"])
 
         self.stage = "D"
+
     def win(self):
         popup = None
         if len(self.player_hands[0]) == 0:

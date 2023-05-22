@@ -12,7 +12,7 @@ from scene.settings import Settings
 
 from controller.mouse import Mouse, MouseState
 from controller.card_gen import generate_cards, generate_for_change_cards
-from controller.card_shuffle import shuffle_cards, distribute_cards
+from controller.card_shuffle import shuffle_cards, distribute_cards, stage_a_distribute
 from controller.game_utils import (
     draw_cards_user,
     draw_cards_ai,
@@ -114,11 +114,12 @@ class SinglePlay:
         self.sound_uno_button = pygame.mixer.Sound("./resources/SoundEffect/Unobutton_sound.ogg")
 
         # 카드 생성 및 셔플
-        self.cards = generate_cards(self.settings_data["color_weakness"], self.ui_size["change"])
-        self.shuffled_cards = shuffle_cards(self.cards)
+        self.regular_cards, self.special_cards = generate_cards(self.settings_data["color_weakness"],
+                                                                self.ui_size["change"], self.computer_logic)
+        self.shuffled_cards = shuffle_cards(self.regular_cards, self.special_cards)
 
         # 카드 분배, 유저는 player_hands[0]이고, 나머지는 인공지능으로 설정한다. change는 카드 체인지를 위한 카드들.
-        self.player_hands, self.remain_cards = distribute_cards(self.shuffled_cards, self.player_count, self.card_count)
+        self.player_hands, self.remain_cards = distribute_cards(self.player_count, self.shuffled_cards, self.card_count)
         self.change_color_list = generate_for_change_cards(self.settings_data["color_weakness"], self.ui_size["change"])
 
         # 초기 플레이어 순서를 위한 설정 값.
@@ -294,6 +295,16 @@ class SinglePlay:
             else:
                 card.card_img = game_view.scale_by(card.image, self.ui_size["change"])
             card.card_img_back = game_view.scale_by(card.image_back, self.ui_size["change"])
+
+    def shuffle_distribute_card(self):
+        if 'A' in self.computer_logic:
+            self.player_hands, self.remain_cards = stage_a_distribute(self.player_count, self.regular_cards,
+                                                                      self.special_cards, self.card_count)
+        else:
+            # 카드 생성 및 셔플
+            self.regular_cards, self.special_cards = generate_cards(self.settings_data["color_weakness"],
+                                                                    self.ui_size["change"], self.computer_logic)
+            self.shuffled_cards = shuffle_cards(self.regular_cards, self.special_cards)
 
     def setting(self):
         self.settings_data = game_data.load_settings()

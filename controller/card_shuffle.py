@@ -1,17 +1,18 @@
 import random
-from controller.card_gen import generate_a_stage_cards, Card
 
 
-def shuffle_cards(cards):
+def shuffle_cards(regular_cards, special_cards):
+    cards = regular_cards + special_cards
     random.shuffle(cards)
     return cards
 
 
-def distribute_cards(cards, player_count, card_count):
+def distribute_cards(player_count, cards, card_count):
     hands = []
     for _ in range(player_count):
         hand = [cards.pop() for _ in range(card_count)]
         hands.append(hand)
+    print(hands, cards)
     return hands, cards
 
 
