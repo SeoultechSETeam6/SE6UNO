@@ -11,6 +11,8 @@ from scene.single_play import SinglePlay
 class SinglePlayLobby:
     def __init__(self):
         # 게임 설정 불러오기
+        self.selected_button_vertical_index = 0
+        self.selected_button_horizon_index = 0
         self.settings_data = game_data.load_settings()
 
         # pygame 초기화
@@ -27,36 +29,36 @@ class SinglePlayLobby:
         self.small_font = pygame.font.Font(game_view.FONT_PATH, self.ui_size["font"][1])
 
         # 컴퓨터 추가 버튼
-        self.buttons_computer = [ImageButton(self.screen.get_width() * 0.9,
+        self.buttons_computer = [ImageButton(self.screen.get_width() * 0.1,
                                              self.screen.get_height() * 0.1,
                                              self.screen.get_width() // 6,
                                              self.screen.get_height() // 6,
                                              self.screen,
                                              "./resources/Image/lobby_images/computer1.png",
                                              on_click_function=self.event_join_computer_1),
-                                 ImageButton(self.screen.get_width() * 0.9,
-                                             self.screen.get_height() * 0.3,
+                                 ImageButton(self.screen.get_width() * 0.3,
+                                             self.screen.get_height() * 0.1,
                                              self.screen.get_width() // 6,
                                              self.screen.get_height() // 6,
                                              self.screen,
                                              "./resources/Image/lobby_images/computer2.png",
                                              on_click_function=self.event_join_computer_2),
-                                 ImageButton(self.screen.get_width() * 0.9,
-                                             self.screen.get_height() * 0.5,
+                                 ImageButton(self.screen.get_width() * 0.5,
+                                             self.screen.get_height() * 0.1,
                                              self.screen.get_width() // 6,
                                              self.screen.get_height() // 6,
                                              self.screen,
                                              "./resources/Image/lobby_images/computer3.png",
                                              on_click_function=self.event_join_computer_3),
-                                 ImageButton(self.screen.get_width() * 0.9,
-                                             self.screen.get_height() * 0.7,
+                                 ImageButton(self.screen.get_width() * 0.7,
+                                             self.screen.get_height() * 0.1,
                                              self.screen.get_width() // 6,
                                              self.screen.get_height() // 6,
                                              self.screen,
                                              "./resources/Image/lobby_images/computer4.png",
                                              on_click_function=self.event_join_computer_4),
                                  ImageButton(self.screen.get_width() * 0.9,
-                                             self.screen.get_height() * 0.9,
+                                             self.screen.get_height() * 0.1,
                                              self.screen.get_width() // 6,
                                              self.screen.get_height() // 6,
                                              self.screen,
@@ -65,7 +67,7 @@ class SinglePlayLobby:
 
         # 시작 버튼
         self.button_start = ImageButton(self.screen.get_width() // 2,
-                                        self.screen.get_height() // 2,
+                                        self.screen.get_height() * 0.85,
                                         self.screen.get_width() // 4,
                                         self.screen.get_height() // 4,
                                         self.screen,
@@ -73,8 +75,8 @@ class SinglePlayLobby:
                                         on_click_function=self.event_start)
 
         # 이름 변경 버튼
-        self.button_change_player_name = Button(self.screen.get_width() * 0.07,
-                                                self.screen.get_height() * 0.87,
+        self.button_change_player_name = Button(self.screen.get_width() * 0.25,
+                                                self.screen.get_height() * 0.85,
                                                 self.ui_size["button"][0],
                                                 self.ui_size["button"][1],
                                                 self.screen,
@@ -84,8 +86,8 @@ class SinglePlayLobby:
                                                 on_click_function=self.event_change_player_name)
 
         # 나가기 버튼
-        self.button_exit = Button(self.screen.get_width() * 0.07,
-                                  self.screen.get_height() * 0.06,
+        self.button_exit = Button(self.screen.get_width() * 0.75,
+                                  self.screen.get_height() * 0.85,
                                   self.ui_size["button"][0],
                                   self.ui_size["button"][1],
                                   self.screen,
@@ -93,6 +95,11 @@ class SinglePlayLobby:
                                   '나가기',
                                   self.ui_size["font"][1],
                                   on_click_function=self.event_exit)
+
+        # 버튼 리스트 초기값
+        self.buttons = [self.buttons_computer, [self.button_change_player_name, self.button_exit]]
+        self.buttons[self.selected_button_vertical_index][self.selected_button_horizon_index] \
+            .keyboard_selected = True
 
         # 컴퓨터 플레이어 추가완료 이미지
         self.image_joined = pygame.transform.scale(
@@ -110,7 +117,6 @@ class SinglePlayLobby:
         self.image_D_joined = pygame.transform.scale(
             pygame.image.load("./resources/Image/lobby_images/computer_enter_D.png"),
             (self.ui_size["logo"][0] * 0.5, self.ui_size["logo"][1] * 0.4))
-
 
         # 이름 설정 기본 값
         self.player_name = "You"
@@ -180,6 +186,15 @@ class SinglePlayLobby:
             if i is True:
                 self.computers_attend_count = self.computers_attend_count + 1
 
+    # 컴퓨터가 하나 이상 참가해야지, 버튼 리스트에 게임 스타트 버튼이 추가된다.
+    def keyboard_detect_start_button(self):
+        # 버튼 리스트
+        if self.computers_attend_count == 0:
+            self.buttons = [self.buttons_computer, [self.button_change_player_name, self.button_exit]]
+        elif self.computers_attend_count > 0:
+            self.buttons = [self.buttons_computer,
+                            [self.button_change_player_name, self.button_start, self.button_exit]]
+
     # 플레이어 이름 변경 팝업창에서 확인 클릭 시 이벤트
     def event_save_player_name(self):
         print('플레이어 이름 변경 확인 버튼 클릭됨')
@@ -194,8 +209,8 @@ class SinglePlayLobby:
         self.computers_logic = [logic for logic in self.computers_logic if logic != "None"]
         print("컴퓨터 로직: ", self.computers_logic)
         print(self.computers_attend_flag, self.computers_attend_count)
-        SinglePlay(self.computers_attend_flag, self.player_name, self.computers_logic).run()
         self.running = False
+        SinglePlay(self.computers_attend_flag, self.player_name, self.computers_logic, False).run()
 
     # 게임 나가기 버튼 이벤트
     def event_exit(self):
@@ -246,24 +261,103 @@ class SinglePlayLobby:
         self.name_display = self.font.render("User name: " + self.player_name, True, (0, 0, 0))
         self.screen.blit(self.name_display, (self.screen.get_width() * 0.02, self.screen.get_height() * 0.92))
 
+        self.screen.blit(self.buttons[self.selected_button_vertical_index]
+                         [self.selected_button_horizon_index].selected_image,
+                         (self.buttons[self.selected_button_vertical_index][
+                              self.selected_button_horizon_index].rect.x,
+                          self.buttons[self.selected_button_vertical_index][
+                              self.selected_button_horizon_index].rect.y - self.ui_size["font"][1]))
+
         pygame.display.flip()
+
+    def detect_key_event(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            if self.popup.pop:
+                if event.type == pygame.KEYDOWN:
+                    # 백스페이스 누르면 한 글자 씩 지움
+                    if event.key == pygame.K_BACKSPACE:
+                        self.player_name_temp = self.player_name_temp[0:len(self.player_name_temp) - 1]
+                    # 엔터 누르면 닉네임 변경 저장
+                    elif event.key == pygame.K_RETURN:
+                        self.event_save_player_name()
+                    else:
+                        self.player_name_temp = self.player_name_temp + pygame.key.name(event.key)
+            elif self.popup.pop is False:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == self.settings_data["key"]['up']:
+                        self.buttons[self.selected_button_vertical_index][
+                            self.selected_button_horizon_index].keyboard_selected = False
+                        # 위 키보드로 이동 시, 자연스러운 이동을 위한 코드, 버튼의 열을 보정한다.
+                        if self.selected_button_vertical_index == 0 and self.selected_button_horizon_index in [0, 1]:
+                            self.selected_button_horizon_index = 0
+                        elif self.selected_button_vertical_index == 0 and self.selected_button_horizon_index == 2:
+                            self.selected_button_horizon_index = 1
+                        elif self.selected_button_vertical_index == 0 and self.selected_button_horizon_index in [3, 4]:
+                            self.selected_button_horizon_index = 2
+                        elif self.selected_button_vertical_index == 1:
+                            if len(self.buttons[self.selected_button_vertical_index]) == 2:
+                                if self.selected_button_horizon_index == 0:
+                                    self.selected_button_horizon_index = self.selected_button_horizon_index + 1
+                                elif self.selected_button_horizon_index == 1:
+                                    self.selected_button_horizon_index = self.selected_button_horizon_index + 2
+                            elif len(self.buttons[self.selected_button_vertical_index]) == 3:
+                                self.selected_button_horizon_index = self.selected_button_horizon_index + 1
+                        self.selected_button_vertical_index = (self.selected_button_vertical_index - 1) % len(
+                            self.buttons)
+                        # 행간 이동
+                        if len(self.buttons[self.selected_button_vertical_index]) == self.selected_button_horizon_index:
+                            self.selected_button_horizon_index = self.selected_button_horizon_index - 1
+                        self.buttons[self.selected_button_vertical_index][
+                            self.selected_button_horizon_index].keyboard_selected = True
+                    elif event.key == self.settings_data["key"]['down']:
+                        self.buttons[self.selected_button_vertical_index][
+                            self.selected_button_horizon_index].keyboard_selected = False
+                        # 아래 키보드로 이동 시, 자연스러운 이동을 위한 코드, 버튼의 열을 보정한다.
+                        if self.selected_button_vertical_index == 0 and self.selected_button_horizon_index in [0, 1]:
+                            self.selected_button_horizon_index = 0
+                        elif self.selected_button_vertical_index == 0 and self.selected_button_horizon_index == 2:
+                            self.selected_button_horizon_index = 1
+                        elif self.selected_button_vertical_index == 0 and self.selected_button_horizon_index in [3, 4]:
+                            self.selected_button_horizon_index = 2
+                        # 유저 이름 변경, 스타트, 나가기에서 computer_attend 버튼으로 이동시 보정
+                        elif self.selected_button_vertical_index == 1:
+                            if len(self.buttons[self.selected_button_vertical_index]) == 2:
+                                if self.selected_button_horizon_index == 0:
+                                    self.selected_button_horizon_index = self.selected_button_horizon_index + 1
+                                elif self.selected_button_horizon_index == 1:
+                                    self.selected_button_horizon_index = self.selected_button_horizon_index + 2
+                            elif len(self.buttons[self.selected_button_vertical_index]) == 3:
+                                self.selected_button_horizon_index = self.selected_button_horizon_index + 1
+                        self.selected_button_vertical_index = (self.selected_button_vertical_index + 1) % len(
+                            self.buttons)
+                        if len(self.buttons[self.selected_button_vertical_index]) == self.selected_button_horizon_index:
+                            self.selected_button_horizon_index = self.selected_button_horizon_index - 1
+                        self.buttons[self.selected_button_vertical_index][
+                            self.selected_button_horizon_index].keyboard_selected = True
+                    elif event.key == self.settings_data["key"]['left']:
+                        self.buttons[self.selected_button_vertical_index][
+                            self.selected_button_horizon_index].keyboard_selected = False
+                        self.selected_button_horizon_index = (self.selected_button_horizon_index - 1) % len(
+                            self.buttons[self.selected_button_vertical_index])
+                        self.buttons[self.selected_button_vertical_index][
+                            self.selected_button_horizon_index].keyboard_selected = True
+                    elif event.key == self.settings_data["key"]['right']:
+                        self.buttons[self.selected_button_vertical_index][
+                            self.selected_button_horizon_index].keyboard_selected = False
+                        self.selected_button_horizon_index = (self.selected_button_horizon_index + 1) % len(
+                            self.buttons[self.selected_button_vertical_index])
+                        self.buttons[self.selected_button_vertical_index][
+                            self.selected_button_horizon_index].keyboard_selected = True
+                    elif event.key == self.settings_data["key"]['enter']:
+                        self.buttons[self.selected_button_vertical_index][
+                            self.selected_button_horizon_index].on_click_function()
 
     def run(self):
         while self.running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                if self.popup.pop:
-                    if event.type == pygame.KEYDOWN:
-                        # 백스페이스 누르면 한 글자 씩 지움
-                        if event.key == pygame.K_BACKSPACE:
-                            self.player_name_temp = self.player_name_temp[0:len(self.player_name_temp) - 1]
-                        # 엔터 누르면 닉네임 변경 저장
-                        elif event.key == pygame.K_RETURN:
-                            self.event_save_player_name()
-                        else:
-                            self.player_name_temp = self.player_name_temp + pygame.key.name(event.key)
-
+            self.detect_key_event()
             Mouse.updateMouseState()
             self.clock.tick(game_view.FPS)
+            self.keyboard_detect_start_button()
             self.draw()

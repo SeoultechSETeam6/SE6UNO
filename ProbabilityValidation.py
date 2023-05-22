@@ -1,4 +1,4 @@
-from controller.card_gen import generate_a_stage_cards, generate_cards
+from controller.card_gen import generate_cards
 from controller.card_shuffle import stage_a_distribute
 from controller.game_utils import computer_color_preference
 
@@ -10,7 +10,7 @@ def testing_stage_a_distribute(repeat_count):
     com_regular_card = 0
     com_special_card = 0
     for i in range(repeat_count):
-        regular_cards, special_cards = generate_a_stage_cards(False, 1)
+        regular_cards, special_cards = generate_cards(False, 1, ['A'])
         hands, remaining_cards = stage_a_distribute(2, regular_cards, special_cards, 6)
         print("현재 진행 상황: ", i, "/", repeat_count)
         for n in hands[0]:
@@ -36,7 +36,8 @@ def testing_color_preference(repeat_count, color_number):
     color_list = ["red", "blue", "yellow", "green"]
     color_logic_count = 0
     basic_logic_count = 0
-    cards = generate_cards(False, 1)
+    regular_cards, special_cards = generate_cards(False, 1, [None])
+    cards = regular_cards + special_cards
     board_card = [card for card in cards if card.value == "shield"]
     now_player_hands = [card for card in cards if card.value == "1" and card.color == color_list[color_number]]
     color_preference = color_list[color_number]
@@ -52,6 +53,8 @@ def testing_color_preference(repeat_count, color_number):
     print("색 선호도에 맞는 카드를 선택한 비율: ", color_logic_count / (color_logic_count + basic_logic_count))
     print("기본 로직을 선택한 비율: ", basic_logic_count / (color_logic_count + basic_logic_count))
 
+# def  testing_skip_turn(repeat_count):
 
-# testing_stage_a_distribute(1000)
+
+testing_stage_a_distribute(1000)
 # testing_color_preference(1000, 0)
