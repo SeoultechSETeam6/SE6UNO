@@ -157,6 +157,8 @@ class Main:
         # 매 프레임마다 화면 업데이트
         pygame.display.flip()
 
+
+
     # 키 입력 감지
     def detect_key_event(self):
         for event in pygame.event.get():

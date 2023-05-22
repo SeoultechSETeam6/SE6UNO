@@ -136,7 +136,7 @@ class StoryModeMap:
             stage_4 = StageD()
             win = stage_4.run()
         if win:
-            game_data.increment_stage_clear_count(self.selected_stage_number)
+            game_data.increment_stage_clear_count(self.selected_stage_number - 1)
         self.flag_enter_stage = True
         self.running = False
 
