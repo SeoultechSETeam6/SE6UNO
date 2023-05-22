@@ -68,7 +68,7 @@ class StoryModeMap:
             (self.ui_size["stage_button"][0] * 0.95, self.ui_size["stage_button"][1] * 0.5))
 
         # 클리어 체크 후 버튼 표시 및 클리어 여부 표시
-        if self.clear_data["1st"] > 0:
+        if self.clear_data[0] > 0:
             self.buttons.append(ImageButton(self.screen.get_width() * 0.2,
                                             self.screen.get_height() * 0.67,
                                             self.ui_size["stage_button"][0],
@@ -77,7 +77,7 @@ class StoryModeMap:
                                             "./resources/image/story_image/storygym_2.png",
                                             on_click_function=self.event_stage_2_popup))
             self.clear_flags.append(clear_flag)
-        if self.clear_data["2nd"] > 0:
+        if self.clear_data[1] > 0:
             self.buttons.append(ImageButton(self.screen.get_width() * 0.45,
                                             self.screen.get_height() * 0.35,
                                             self.ui_size["stage_button"][0],
@@ -86,7 +86,7 @@ class StoryModeMap:
                                             "./resources/image/story_image/storygym_3.png",
                                             on_click_function=self.event_stage_3_popup))
             self.clear_flags.append(clear_flag)
-        if self.clear_data["3rd"] > 0:
+        if self.clear_data[2] > 0:
             self.buttons.append(ImageButton(self.screen.get_width() * 0.5,
                                             self.screen.get_height() * 0.72,
                                             self.ui_size["stage_button"][0],
@@ -95,7 +95,7 @@ class StoryModeMap:
                                             "./resources/image/story_image/storygym_4.png",
                                             on_click_function=self.event_stage_4_popup))
             self.clear_flags.append(clear_flag)
-        if self.clear_data["4th"] > 0:
+        if self.clear_data[3] > 0:
             self.clear_flags.append(clear_flag)
 
         # 클릭한 버튼ㅅ index를 저장하는 변수
@@ -115,6 +115,8 @@ class StoryModeMap:
         self.selected_button_index = 0
         self.buttons[self.selected_button_index].keyboard_selected = True
 
+        self.flag_enter_stage = False
+
     def event_quit(self):
         print('캠페인 맵 메뉴에서 나가기 버튼 클릭 됨')
         self.running = False
@@ -123,17 +125,20 @@ class StoryModeMap:
         self.popup.pop = False
         if self.selected_stage_number == 1:
             stage_1 = StageA()
-            stage_1.run()
+            win = stage_1.run()
         elif self.selected_stage_number == 2:
             stage_2 = StageB()
-            stage_2.run()
+            win = stage_2.run()
         elif self.selected_stage_number == 3:
             stage_3 = StageC()
-            stage_3.run()
+            win = stage_3.run()
         else:
-            pass
             stage_4 = StageD()
-            stage_4.run()
+            win = stage_4.run()
+        if win:
+            game_data.increment_stage_clear_count(self.selected_stage_number)
+        self.flag_enter_stage = True
+        self.running = False
 
     def event_stage_1_popup(self):
         print('1스테이지 입장버튼 클릭됨')
@@ -235,3 +240,4 @@ class StoryModeMap:
             self.clock.tick(game_view.FPS)
             self.event()
             self.draw()
+        return self.flag_enter_stage

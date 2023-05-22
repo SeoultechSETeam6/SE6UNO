@@ -40,10 +40,10 @@ class Popup:
                                     '확인',
                                     self.text_size,
                                     on_click_function=self.on_click_function)
-        self.button_close = Button(x * 1.3,
-                                   y * 0.72,
-                                   self.width // 10,
-                                   self.height // 9,
+        self.button_close = Button(x + self.width // 2.5,
+                                   y - self.height // 3,
+                                   self.width // 8,
+                                   self.height // 7,
                                    self.screen,
                                    0xffffff,
                                    'X',
@@ -52,19 +52,19 @@ class Popup:
 
         self.pop = False
 
-        self.font = pygame.font.Font(game_view.FONT_PATH, text_size)
-        self.font = self.font.render(text, True, 0x000000)
+        self.font = pygame.font.Font(game_view.FONT_PATH, text_size).render(text, True, 0x000000)
         self.surface.fill(gray)
 
     def open(self):
         self.screen.blit(self.surface, self.rect)
         self.screen.blit(self.font, [
-            self.screen.get_width() * 0.5 - self.font.get_rect().width / 2,
-            self.screen.get_height() * 0.48 - self.font.get_rect().height / 2])
-        self.screen.blit(self.button_accept.surface, self.button_accept.rect)
+            (self.x + self.width // 2) - self.font.get_rect().width / 2,
+            (self.y + self.height // 2.2) - self.font.get_rect().height / 2])
         self.screen.blit(self.button_close.surface, self.button_close.rect)
-        self.button_accept.draw()
-        self.button_accept.detect_event()
+        if self.on_click_function is not None:
+            self.screen.blit(self.button_accept.surface, self.button_accept.rect)
+            self.button_accept.draw()
+            self.button_accept.detect_event()
         self.button_close.draw()
         self.button_close.detect_event()
 

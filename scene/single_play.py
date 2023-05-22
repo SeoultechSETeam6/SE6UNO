@@ -1,8 +1,12 @@
+import select
+
 import pygame
 import random
 import time
 
+from scene.achievement import Achievement
 from ui.button import Button
+from ui.popup import Popup
 
 from scene.settings import Settings
 
@@ -34,9 +38,10 @@ from controller import game_view, game_data
 
 
 class SinglePlay:
-    def __init__(self, computer_attends, username, computer_logic, game_rule):
+    def __init__(self, computer_attends, username, computer_logic, is_story_mode=False):
         # 게임 설정 불러오기
         self.settings_data = game_data.load_settings()
+        self.achievement_data = game_data.load_achieved_status()
 
         # pygame 초기화
         pygame.init()
@@ -65,27 +70,39 @@ class SinglePlay:
                                    self.small_font.render("Computer4", True, (0, 0, 0)),
                                    self.small_font.render("Computer5", True, (0, 0, 0))]
 
+        # 싱글 플레이인지 확인
+        self.story_mode = is_story_mode
+
         # 컴퓨터 플레이어 참여 정보
         self.computer_attends = computer_attends
         self.computer_logic = computer_logic
-        self.game_rule = game_rule
         for attend in self.computer_attends:
             if attend:
                 self.player_count += 1
 
         # 게임 이미지
-        self.pause_button_img = game_view.scale_by(pygame.image.load("./resources/Image/button_images/pause.png").convert_alpha(), self.ui_size["change"])
-        self.resume_button_img = game_view.scale_by(pygame.image.load("./resources/Image/button_images/resume.png").convert_alpha(), self.ui_size["change"])
-        self.direction_img = game_view.scale_by(pygame.image.load("./resources/Image/direction_images/direction.png").convert_alpha(), self.ui_size["change"])
+        self.pause_button_img = game_view.scale_by(
+            pygame.image.load("./resources/Image/button_images/pause.png").convert_alpha(), self.ui_size["change"])
+        self.resume_button_img = game_view.scale_by(
+            pygame.image.load("./resources/Image/button_images/resume.png").convert_alpha(), self.ui_size["change"])
+        self.direction_img = game_view.scale_by(
+            pygame.image.load("./resources/Image/direction_images/direction.png").convert_alpha(),
+            self.ui_size["change"])
         self.direction_reverse_img = game_view.scale_by(pygame.image.load(
             "./resources/Image/direction_images/direction_reverse.png").convert_alpha(), self.ui_size["change"])
-        self.turn_arrow_img = game_view.scale_by(pygame.image.load("./resources/Image/direction_images/turn_arrow.png").convert_alpha(), self.ui_size["change"])
-        self.next_turn_button_img = game_view.scale_by(pygame.image.load("./resources/Image/button_images/next_turn.png").convert_alpha(), self.ui_size["change"])
-        self.uno_button_img = game_view.scale_by(pygame.image.load("./resources/Image/button_images/uno_button.png").convert_alpha(), self.ui_size["change"])
+        self.turn_arrow_img = game_view.scale_by(
+            pygame.image.load("./resources/Image/direction_images/turn_arrow.png").convert_alpha(),
+            self.ui_size["change"])
+        self.next_turn_button_img = game_view.scale_by(
+            pygame.image.load("./resources/Image/button_images/next_turn.png").convert_alpha(), self.ui_size["change"])
+        self.uno_button_img = game_view.scale_by(
+            pygame.image.load("./resources/Image/button_images/uno_button.png").convert_alpha(), self.ui_size["change"])
         self.uno_button_inactive_img = game_view.scale_by(pygame.image.load(
             "./resources/Image/button_images/uno_button_inactive.png").convert_alpha(), self.ui_size["change"])
-        self.card_back_image = game_view.scale_by(pygame.image.load("resources/Image/card_images/card_back.png"), self.ui_size["change"])
-        self.selected_image = game_view.scale_by(pygame.image.load("./resources/Image/selected_check.png"), self.ui_size["change"] * 0.2)
+        self.card_back_image = game_view.scale_by(pygame.image.load("resources/Image/card_images/card_back.png"),
+                                                  self.ui_size["change"])
+        self.selected_image = game_view.scale_by(pygame.image.load("./resources/Image/selected_check.png"),
+                                                 self.ui_size["change"] * 0.2)
 
         # 배경 음악
         self.background_music = pygame.mixer.Sound("./resources/Music/single_mode_play.ogg")
@@ -122,7 +139,7 @@ class SinglePlay:
         self.time_limit = 10000  # 유저의 턴 시간 제한
         self.current_time = pygame.time.get_ticks()  # 현재 시간
         self.turn_start_time = None  # 턴 시작 시간
-        self.is_draw = False # 드로우한 시간인지 아닌지 구분
+        self.is_draw = False  # 드로우한 시간인지 아닌지 구분
         self.delay_time = random.randint(1000, 2000)  # 컴퓨터 딜레이 타임1
         self.delay_time2 = random.randint(900, 2000)  # 컴퓨터 딜레이 타임2
         self.delay_time3 = random.randint(900, 2000)  # 컴퓨터 딜레이 타임3
@@ -146,23 +163,32 @@ class SinglePlay:
         self.turn_coordinate = [70, 150 * self.ui_size["change"], 150 * self.ui_size["change"], 80]
         self.next_turn_co = [0, 150 * self.ui_size["change"]]
         if self.computer_attends[0]:
-            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, self.settings_data["resolution"]["height"] * 0.03])
+            self.computer_coordinate.append(
+                [self.settings_data["resolution"]["width"] * 0.65, self.settings_data["resolution"]["height"] * 0.03])
             self.computer1_color = self.select_color[random.randint(0, 3)]
             self.computer_color.append(self.computer1_color)
         if self.computer_attends[1]:
-            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + self.settings_data["resolution"]["height"] * 0.2])
+            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65,
+                                             (self.settings_data["resolution"]["height"] * 0.03) +
+                                             self.settings_data["resolution"]["height"] * 0.2])
             self.computer2_color = self.select_color[random.randint(0, 3)]
             self.computer_color.append(self.computer2_color)
         if self.computer_attends[2]:
-            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.4)])
+            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65,
+                                             (self.settings_data["resolution"]["height"] * 0.03) + (
+                                                     self.settings_data["resolution"]["height"] * 0.4)])
             self.computer3_color = self.select_color[random.randint(0, 3)]
             self.computer_color.append(self.computer3_color)
         if self.computer_attends[3]:
-            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.6)])
+            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65,
+                                             (self.settings_data["resolution"]["height"] * 0.03) + (
+                                                     self.settings_data["resolution"]["height"] * 0.6)])
             self.computer4_color = self.select_color[random.randint(0, 3)]
             self.computer_color.append(self.computer4_color)
         if self.computer_attends[4]:
-            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.8)])
+            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65,
+                                             (self.settings_data["resolution"]["height"] * 0.03) + (
+                                                     self.settings_data["resolution"]["height"] * 0.8)])
             self.computer5_color = self.select_color[random.randint(0, 3)]
             self.computer_color.append(self.computer5_color)
         print("computer color list", self.computer_color)
@@ -174,7 +200,8 @@ class SinglePlay:
         # 플레이어들이 카드를 뽑고 남은 카드들의 위치를 잡는데 사용
         self.remain_cards_x_position = (self.screen.get_rect().centerx - 151 * self.ui_size["change"])
         self.remain_cards_y_position = (self.screen.get_rect().centery - 75 * self.ui_size["change"])
-        self.remain_pos = pygame.Vector2(self.screen.get_rect().centerx, self.screen.get_rect().centery - 151 * self.ui_size["change"])
+        self.remain_pos = pygame.Vector2(self.screen.get_rect().centerx,
+                                         self.screen.get_rect().centery - 151 * self.ui_size["change"])
         # remain카드
         self.remain_cards_rect = self.remain_cards[0].card_img_back.get_rect()
         self.remain_cards_rect.topleft = (self.remain_cards_x_position, self.remain_cards_y_position)
@@ -183,7 +210,8 @@ class SinglePlay:
         self.pause_button_rect.topleft = (25, 25)
         # next_turn버튼
         self.next_turn_button_rect = self.next_turn_button_img.get_rect()
-        self.next_turn_button_rect.topleft = (self.user_coordinate[0] - self.next_turn_co[0], self.user_coordinate[1] - self.next_turn_co[1])
+        self.next_turn_button_rect.topleft = (
+            self.user_coordinate[0] - self.next_turn_co[0], self.user_coordinate[1] - self.next_turn_co[1])
         # uno_button
         self.uno_button_rect = self.uno_button_img.get_rect()
         self.uno_button_rect.topleft = (150, self.settings_data["resolution"]["height"] * 0.5)
@@ -239,6 +267,26 @@ class SinglePlay:
         # 0: 드로우, 1: 우노버튼, 2: 턴 넘기기, 3. 덱
         self.key_select_option = 3
 
+        # 기술 카드를 사용했는지 확인
+        self.flag_used_special_card = False
+
+        # 업적 팝업
+        self.popup_achieved = Popup(self.screen.get_width() // 6,
+                                    self.screen.get_height() * 0.4,
+                                    self.screen.get_width() // 3,
+                                    self.screen.get_height() // 6,
+                                    self.screen,
+                                    "업적 달성!",
+                                    self.ui_size["font"][0])
+        self.popup_achievement_image_path = "./resources/Image/achievements/"
+        self.popup_achievement_image = \
+            game_view.scale_by(pygame.image.load(self.popup_achievement_image_path +
+                                                 game_data.ACHIEVEMENTS[1]["image"]).convert_alpha(),
+                                                 self.ui_size["change"])
+        self.popup_start_time = 0
+
+        self.win_flag = False
+
     def reload_card(self, deck):
         for card in deck:
             if self.settings_data["color_weakness"]:
@@ -263,11 +311,13 @@ class SinglePlay:
         self.resume_button_img = game_view.scale_by(
             pygame.image.load("./resources/Image/button_images/resume.png").convert_alpha(), self.ui_size["change"])
         self.direction_img = game_view.scale_by(
-            pygame.image.load("./resources/Image/direction_images/direction.png").convert_alpha(), self.ui_size["change"])
+            pygame.image.load("./resources/Image/direction_images/direction.png").convert_alpha(),
+            self.ui_size["change"])
         self.direction_reverse_img = game_view.scale_by(pygame.image.load(
             "./resources/Image/direction_images/direction_reverse.png").convert_alpha(), self.ui_size["change"])
         self.turn_arrow_img = game_view.scale_by(
-            pygame.image.load("./resources/Image/direction_images/turn_arrow.png").convert_alpha(), self.ui_size["change"])
+            pygame.image.load("./resources/Image/direction_images/turn_arrow.png").convert_alpha(),
+            self.ui_size["change"])
         self.next_turn_button_img = game_view.scale_by(
             pygame.image.load("./resources/Image/button_images/next_turn.png").convert_alpha(), self.ui_size["change"])
         self.uno_button_img = game_view.scale_by(
@@ -303,15 +353,24 @@ class SinglePlay:
         self.turn_coordinate = [70, 150 * self.ui_size["change"], 150 * self.ui_size["change"], 80]
         self.next_turn_co = [0, 150 * self.ui_size["change"]]
         if self.computer_attends[0]:
-            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, self.settings_data["resolution"]["height"] * 0.03])
+            self.computer_coordinate.append(
+                [self.settings_data["resolution"]["width"] * 0.65, self.settings_data["resolution"]["height"] * 0.03])
         if self.computer_attends[1]:
-            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + self.settings_data["resolution"]["height"] * 0.2])
+            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65,
+                                             (self.settings_data["resolution"]["height"] * 0.03) +
+                                             self.settings_data["resolution"]["height"] * 0.2])
         if self.computer_attends[2]:
-            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.4)])
+            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65,
+                                             (self.settings_data["resolution"]["height"] * 0.03) + (
+                                                     self.settings_data["resolution"]["height"] * 0.4)])
         if self.computer_attends[3]:
-            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.6)])
+            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65,
+                                             (self.settings_data["resolution"]["height"] * 0.03) + (
+                                                     self.settings_data["resolution"]["height"] * 0.6)])
         if self.computer_attends[4]:
-            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65, (self.settings_data["resolution"]["height"] * 0.03) + (self.settings_data["resolution"]["height"] * 0.8)])
+            self.computer_coordinate.append([self.settings_data["resolution"]["width"] * 0.65,
+                                             (self.settings_data["resolution"]["height"] * 0.03) + (
+                                                     self.settings_data["resolution"]["height"] * 0.8)])
 
         # change카드 좌표, spacing은 공백
         self.x5 = 100
@@ -320,7 +379,8 @@ class SinglePlay:
         # 플레이어들이 카드를 뽑고 남은 카드들의 위치를 잡는데 사용
         self.remain_cards_x_position = (self.screen.get_rect().centerx - 151 * self.ui_size["change"])
         self.remain_cards_y_position = (self.screen.get_rect().centery - 75 * self.ui_size["change"])
-        self.remain_pos = pygame.Vector2(self.screen.get_rect().centerx, self.screen.get_rect().centery - 151 * self.ui_size["change"])
+        self.remain_pos = pygame.Vector2(self.screen.get_rect().centerx,
+                                         self.screen.get_rect().centery - 151 * self.ui_size["change"])
         # remain카드
         self.remain_cards_rect = self.remain_cards[0].card_img_back.get_rect()
         self.remain_cards_rect.topleft = (self.remain_cards_x_position, self.remain_cards_y_position)
@@ -330,7 +390,7 @@ class SinglePlay:
         # next_turn버튼
         self.next_turn_button_rect = self.next_turn_button_img.get_rect()
         self.next_turn_button_rect.topleft = (
-        self.user_coordinate[0] - self.next_turn_co[0], self.user_coordinate[1] - self.next_turn_co[1])
+            self.user_coordinate[0] - self.next_turn_co[0], self.user_coordinate[1] - self.next_turn_co[1])
         # uno_button
         self.uno_button_rect = self.uno_button_img.get_rect()
         self.uno_button_rect.topleft = (150, self.settings_data["resolution"]["height"] * 0.5)
@@ -392,7 +452,8 @@ class SinglePlay:
 
         if Mouse.getMouseState() == MouseState.CLICK:
             if self.uno_button_rect.collidepoint(mouse_x, mouse_y) and self.uno_check:
-                self.sound_uno_button.set_volume(self.settings_data["volume"]["sound"] * self.settings_data["volume"]["effect"])
+                self.sound_uno_button.set_volume(
+                    self.settings_data["volume"]["sound"] * self.settings_data["volume"]["effect"])
                 self.sound_uno_button.play(1)
                 self.uno_flags[self.current_player] = True
 
@@ -445,13 +506,18 @@ class SinglePlay:
 
             if Mouse.getMouseState() == MouseState.CLICK:
                 self.clicked_card_index, self.clicked_card = get_clicked_card(self.player_hands[0],
-                                                                              self.user_coordinate[0], self.user_coordinate[1], self.user_spacing, mouse_x, mouse_y, self.max_per_row)
+                                                                              self.user_coordinate[0],
+                                                                              self.user_coordinate[1],
+                                                                              self.user_spacing, mouse_x, mouse_y,
+                                                                              self.max_per_row)
                 # remain_cards 클릭 확인
                 self.clicked_remain_cards = self.remain_cards_rect.collidepoint(mouse_x, mouse_y)
                 # next_turn_button 클릭 확인
                 self.clicked_next_turn_button = self.next_turn_button_rect.collidepoint(mouse_x, mouse_y)
                 # change 클릭 확인
-                self.clicked_change_index, self.clicked_change = get_clicked_change(self.change_color_list, self.x5, self.y5, self.spacing5, mouse_x, mouse_y)
+                self.clicked_change_index, self.clicked_change = get_clicked_change(self.change_color_list, self.x5,
+                                                                                    self.y5, self.spacing5, mouse_x,
+                                                                                    mouse_y)
 
             # 카드를 드로우함
             if self.clicked_remain_cards and self.new_drawn_card is None and self.pop_card is None:
@@ -471,14 +537,19 @@ class SinglePlay:
             # 카드를 드로우 하고, 드로우한 카드를 내는 함수.
             elif self.new_drawn_card is not None and self.pop_card is None:
                 # 유효성 검사 및 클릭카드가 new_drawn_card인지 확인
-                if self.new_drawn_card is not None and is_valid_move(self.new_drawn_card, self.top_card) and self.clicked_card == self.new_drawn_card and self.pop_card is None:
+                if self.new_drawn_card is not None and is_valid_move(self.new_drawn_card,
+                                                                     self.top_card) and self.clicked_card == self.new_drawn_card and self.pop_card is None:
                     self.place_animation(self.current_player)
-                    self.board_card, self.player_hands[self.current_player], self.pop_card = user_submit_card(self.clicked_card, self.clicked_card_index, self.board_card, self.player_hands[self.current_player])
+                    self.board_card, self.player_hands[self.current_player], self.pop_card = user_submit_card(
+                        self.clicked_card, self.clicked_card_index, self.board_card,
+                        self.player_hands[self.current_player])
                     self.turn_start_time = pygame.time.get_ticks()
             # 카드를 드로우하지 않고, 카드를 냄
-            elif self.pop_card is None and self.clicked_card is not None and is_valid_move(self.clicked_card, self.top_card):
+            elif self.pop_card is None and self.clicked_card is not None and is_valid_move(self.clicked_card,
+                                                                                           self.top_card):
                 self.place_animation(self.current_player)
-                self.board_card, self.player_hands[self.current_player], self.pop_card = user_submit_card(self.clicked_card, self.clicked_card_index, self.board_card, self.player_hands[self.current_player])
+                self.board_card, self.player_hands[self.current_player], self.pop_card = user_submit_card(
+                    self.clicked_card, self.clicked_card_index, self.board_card, self.player_hands[self.current_player])
                 self.turn_start_time = pygame.time.get_ticks()
 
     def computer_turn_method(self):
@@ -500,7 +571,8 @@ class SinglePlay:
                         self.computer_color[self.current_player], self.computer_logic[self.current_player - 1])
                 # 처음 유효성 검사
                 if self.new_drawn_card is None and self.pop_card is None and self.playable_special_check is False:
-                    self.playable, self.pop_card_index = computer_playable_card(self.player_hands[self.current_player], self.board_card)
+                    self.playable, self.pop_card_index = computer_playable_card(self.player_hands[self.current_player],
+                                                                                self.board_card)
                 # 카드를 낼 수 있을 때 낸다.
                 if self.playable and self.new_drawn_card is None and self.pop_card is None:
                     self.place_animation(self.current_player)
@@ -518,14 +590,20 @@ class SinglePlay:
                         self.current_player = (self.current_player + self.game_direction) % self.player_count
                         self.turn_end_method()
                 # 드로우한 카드가 낼 수 있는 경우
-                elif self.new_drawn_card is not None and is_valid_move(self.new_drawn_card, self.top_card) and self.pop_card is None:
+                elif self.new_drawn_card is not None and is_valid_move(self.new_drawn_card,
+                                                                       self.top_card) and self.pop_card is None:
                     if self.current_time - self.turn_start_time >= self.delay_time2:
                         self.place_animation(self.current_player)
                         self.pop_card = self.new_drawn_card
                         self.pop_card_index = self.player_hands[self.current_player].index(self.pop_card)
-                        self.board_card, self.player_hands[self.current_player] = com_submit_card(self.pop_card, self.pop_card_index, self.board_card, self.player_hands[self.current_player])
+                        self.board_card, self.player_hands[self.current_player] = com_submit_card(self.pop_card,
+                                                                                                  self.pop_card_index,
+                                                                                                  self.board_card,
+                                                                                                  self.player_hands[
+                                                                                                      self.current_player])
                 # 드로우한 카드를 낼 수 없는 경우
-                elif self.new_drawn_card is not None and not is_valid_move(self.new_drawn_card, self.top_card) and self.pop_card is None:
+                elif self.new_drawn_card is not None and not is_valid_move(self.new_drawn_card,
+                                                                           self.top_card) and self.pop_card is None:
                     if self.current_time - self.turn_start_time >= self.delay_time2:
                         self.current_player = (self.current_player + self.game_direction) % self.player_count
                         self.turn_end_method()
@@ -546,7 +624,8 @@ class SinglePlay:
         if self.uno_check:
             if self.user_turn:
                 if self.current_time - self.uno_current_time >= self.uno_delay_time:
-                    self.sound_uno_button.set_volume(self.settings_data["volume"]["sound"] * self.settings_data["volume"]["effect"])
+                    self.sound_uno_button.set_volume(
+                        self.settings_data["volume"]["sound"] * self.settings_data["volume"]["effect"])
                     self.sound_uno_button.play(1)
                     self.draw_animation(self.current_player)
                     self.player_hands[self.current_player].append(self.remain_cards.pop())
@@ -556,7 +635,8 @@ class SinglePlay:
 
             else:
                 if self.current_time - self.uno_current_time >= self.uno_delay_time:
-                    self.sound_uno_button.set_volume(self.settings_data["volume"]["sound"] * self.settings_data["volume"]["effect"])
+                    self.sound_uno_button.set_volume(
+                        self.settings_data["volume"]["sound"] * self.settings_data["volume"]["effect"])
                     self.sound_uno_button.play(1)
                     self.uno_check = False
                     self.uno_flags[self.current_player] = True
@@ -579,11 +659,67 @@ class SinglePlay:
                                                                                       self.player_count,
                                                                                       self.stage)
                 self.animation_method[self.pop_card.value](self.current_player)
+                if self.user_turn:
+                    if not self.story_mode:
+                        if self.pop_card.value == "one_more" and not self.achievement_data[7]["achieved"]:
+                            self.achievement_data[7]["achieved"] = True
+                            self.popup_achieved = Popup(self.screen.get_width() // 6,
+                                                        self.screen.get_height() * 0.4,
+                                                        self.screen.get_width() // 3,
+                                                        self.screen.get_height() // 6,
+                                                        self.screen,
+                                                        "업적 달성: " + game_data.ACHIEVEMENTS[7]["name"],
+                                                        self.ui_size["font"][1])
+                            self.popup_achievement_image = \
+                                game_view.scale_by(pygame.image.load(self.popup_achievement_image_path +
+                                                                     game_data.ACHIEVEMENTS[7][
+                                                                         "image"]).convert_alpha(),
+                                                   self.ui_size["change"])
+                            self.popup_start_time = pygame.time.get_ticks()
+                            self.popup_achieved.pop = True
+                            game_data.save_achieved_status(7)
+                        if self.pop_card.value == "shield" and not self.achievement_data[6]["achieved"]:
+                            self.achievement_data[6]["achieved"] = True
+                            self.popup_achieved = Popup(self.screen.get_width() // 6,
+                                                        self.screen.get_height() * 0.4,
+                                                        self.screen.get_width() // 3,
+                                                        self.screen.get_height() // 6,
+                                                        self.screen,
+                                                        "업적 달성: " + game_data.ACHIEVEMENTS[6]["name"],
+                                                        self.ui_size["font"][1])
+                            self.popup_achievement_image = \
+                                game_view.scale_by(pygame.image.load(self.popup_achievement_image_path +
+                                                                     game_data.ACHIEVEMENTS[6][
+                                                                         "image"]).convert_alpha(),
+                                                   self.ui_size["change"])
+                            self.popup_start_time = pygame.time.get_ticks()
+                            self.popup_achieved.pop = True
+                            game_data.save_achieved_status(6)
+                        if self.pop_card.value == "bomb" and not self.achievement_data[5]["achieved"]:
+                            self.achievement_data[5]["achieved"] = True
+                            self.popup_achieved = Popup(self.screen.get_width() // 6,
+                                                        self.screen.get_height() * 0.4,
+                                                        self.screen.get_width() // 3,
+                                                        self.screen.get_height() // 6,
+                                                        self.screen,
+                                                        "업적 달성: " + game_data.ACHIEVEMENTS[5]["name"],
+                                                        self.ui_size["font"][1])
+                            self.popup_achievement_image = \
+                                game_view.scale_by(pygame.image.load(self.popup_achievement_image_path +
+                                                                     game_data.ACHIEVEMENTS[5][
+                                                                         "image"]).convert_alpha(),
+                                                   self.ui_size["change"])
+                            self.popup_start_time = pygame.time.get_ticks()
+                            self.popup_achieved.pop = True
+                            game_data.save_achieved_status(5)
+                    self.flag_used_special_card = True
+                print("유저가 특수 카드를 사용: " + str(self.flag_used_special_card))
                 self.turn_end_method()
             # 내는 카드가 special이고, change일 경우, remain_cards가 5장 미만이면 발동 안함
             elif len(self.remain_cards) > 5 and self.pop_card.is_special() and self.pop_card.value == "change":
                 if self.user_turn:
                     self.change_card = True
+                    self.flag_used_special_card = True
                     if self.clicked_change_index is not None:
                         self.color_change = self.change_color_list[self.clicked_change_index]
                         self.current_player, self.game_direction = apply_special_card_effects(
@@ -602,6 +738,7 @@ class SinglePlay:
                         self.animation_method[self.pop_card.value](self.current_player)
                         self.board_card.append(self.color_change)
                         self.turn_end_method()
+                print("유저가 특수 카드를 사용: " + str(self.flag_used_special_card))
             # 내는 카드가 special이 아닌 경우
             elif len(self.remain_cards) > 5 and not self.pop_card.is_special():
                 self.current_player = (self.current_player + self.game_direction) % self.player_count
@@ -617,6 +754,45 @@ class SinglePlay:
         if len(self.player_hands[0]) == 0:
             popup = game_view.scale_by(pygame.image.load("./resources/Image/win.png"), self.ui_size["change"])
             self.game_over = True
+            self.win_flag = True
+            # 스토리 모드가 아닐 때
+            if self.game_over and not self.story_mode:
+                self.popup_achieved = Popup(self.screen.get_width() * 0.5,
+                                            self.screen.get_height() * 0.7,
+                                            self.screen.get_width() // 3,
+                                            self.screen.get_height() // 6,
+                                            self.screen,
+                                            "업적 달성: ",
+                                            self.ui_size["font"][1])
+                self.popup_start_time = pygame.time.get_ticks()
+                # '기사도' 업적 달성 조건
+                if not self.flag_used_special_card and not self.achievement_data[3]["achieved"]:
+                    self.popup_achieved.text += "기사도, "
+                    game_data.save_achieved_status(3)
+                    self.popup_achievement_image = game_view.scale_by(
+                        pygame.image.load(self.popup_achievement_image_path +
+                                          game_data.ACHIEVEMENTS[3]["image"]).convert_alpha(),
+                        self.ui_size["change"] * 0.6)
+                    self.popup_achieved.pop = True
+                # '스피드 레이서' 업적 달성 조건
+                if self.turn_count <= 10 and not self.achievement_data[2]["achieved"]:
+                    self.popup_achieved.text += "스피드 레이서, "
+                    game_data.save_achieved_status(2)
+                    self.popup_achievement_image = game_view.scale_by(
+                        pygame.image.load(self.popup_achievement_image_path +
+                                          game_data.ACHIEVEMENTS[2]["image"]).convert_alpha(),
+                        self.ui_size["change"] * 0.6)
+                    self.popup_achieved.pop = True
+                # '승리' 업적 달성 조건
+                if not self.achievement_data[0]["achieved"]:
+                    self.popup_achieved.text += "승리"
+                    game_data.save_achieved_status(0)
+                    self.popup_achievement_image = game_view.scale_by(
+                        pygame.image.load(self.popup_achievement_image_path +
+                                          game_data.ACHIEVEMENTS[0]["image"]).convert_alpha(),
+                        self.ui_size["change"] * 0.6)
+                    self.popup_achieved.pop = True
+                self.popup_achieved.font = pygame.font.Font(game_view.FONT_PATH, self.ui_size["font"][1]).render(self.popup_achieved.text, True, 0x000000)
         elif any(len(player_hand) == 0 for player_hand in self.player_hands[1:]):
             popup = game_view.scale_by(pygame.image.load("./resources/Image/lose.png"), self.ui_size["change"])
             self.game_over = True
@@ -626,6 +802,11 @@ class SinglePlay:
             self.screen.fill((0, 0, 0))
             self.screen.blit(popup, (self.screen.get_width() // 2 - popup.get_size()[0] // 2,
                                      self.screen.get_height() // 2 - popup.get_size()[1] // 2))
+            if self.popup_achieved.pop:
+                self.popup_achieved.open()
+                self.screen.blit(self.popup_achievement_image,
+                                 (self.screen.get_width() * 0.34, self.screen.get_height() * 0.64))
+
             pygame.display.flip()
             popup_running = True
             while popup_running:
@@ -641,10 +822,12 @@ class SinglePlay:
     def pause_popup(self):
         self.pause_popup_draw()
         self.settings_button.detect_event()
+        self.achievement_button.detect_event()
         self.close_button.detect_event()
         self.exit_button.detect_event()
         self.screen.blit(self.pause_popup_surface, self.pause_popup_rect)
         self.settings_button.draw()
+        self.achievement_button.draw()
         self.close_button.draw()
         self.exit_button.draw()
 
@@ -658,7 +841,7 @@ class SinglePlay:
         self.pause_popup_surface.fill((0, 0, 0))
 
         self.settings_button = Button(self.settings_data["resolution"]["width"] // 2,
-                                      self.settings_data["resolution"]["height"] // 2 * 0.85,
+                                      self.settings_data["resolution"]["height"] // 2 * 0.8,
                                       width // 2.5,
                                       height // 5,
                                       self.screen,
@@ -666,15 +849,24 @@ class SinglePlay:
                                       '설정',
                                       self.ui_size["font"][0],
                                       on_click_function=self.pause_popup_settings_button_event)
+        self.achievement_button = Button(self.settings_data["resolution"]["width"] // 2,
+                                  self.settings_data["resolution"]["height"] // 2 * 1.0,
+                                  width // 2.5,
+                                  height // 5,
+                                  self.screen,
+                                  0xffffff,
+                                  '업적',
+                                  self.ui_size["font"][0],
+                                  on_click_function=self.pause_popup_achievement_button_event)
         self.exit_button = Button(self.settings_data["resolution"]["width"] // 2,
-                                  self.settings_data["resolution"]["height"] // 2 * 1.15,
+                                  self.settings_data["resolution"]["height"] // 2 * 1.2,
                                   width // 2.5,
                                   height // 5,
                                   self.screen,
                                   0xffffff,
                                   '게임 나가기',
                                   self.ui_size["font"][0],
-                                  on_click_function=self.pause_popup_exit_button_event,)
+                                  on_click_function=self.pause_popup_exit_button_event)
         self.close_button = Button(self.settings_data["resolution"]["width"] // 2 * 1.3,
                                    self.settings_data["resolution"]["height"] // 2 * 0.7,
                                    width // 7,
@@ -686,7 +878,8 @@ class SinglePlay:
                                    on_click_function=self.pause_popup_close)
 
     def pause_popup_close(self):
-        self.background_music.set_volume(self.settings_data["volume"]["sound"] * self.settings_data["volume"]["background"])
+        self.background_music.set_volume(
+            self.settings_data["volume"]["sound"] * self.settings_data["volume"]["background"])
         self.background_music.play(-1)
         print('일시정지 해제')
         if self.turn_start_time is None:
@@ -700,6 +893,12 @@ class SinglePlay:
         self.sound_shuffle.stop()
         print('게임 종료 버튼 클릭')
         self.running = False
+
+    def pause_popup_achievement_button_event(self):
+        self.background_music.stop()
+        self.sound_shuffle.stop()
+        print('업적 버튼 클릭')
+        Achievement().run()
 
     def pause_popup_settings_button_event(self):
         self.background_music.stop()
@@ -759,7 +958,8 @@ class SinglePlay:
             pygame.display.flip()
 
     def draw_animation(self, index):
-        remain_pos = pygame.Vector2(self.remain_cards_x_position, self.screen.get_rect().centery - 151 * self.ui_size["change"])
+        remain_pos = pygame.Vector2(self.remain_cards_x_position,
+                                    self.screen.get_rect().centery - 151 * self.ui_size["change"])
         self.sound_card_place.set_volume(self.settings_data["volume"]["sound"] * self.settings_data["volume"]["effect"])
         self.sound_card_place.play(1)
         if index == 0:
@@ -791,8 +991,9 @@ class SinglePlay:
 
     def draw_2_animation(self, index):
         self.draw()
-        self.screen.blit(game_view.scale_by(pygame.image.load("./resources/Image/animation/+2.png"), self.ui_size["change"]),
-                         (self.center_x, self.center_y))
+        self.screen.blit(
+            game_view.scale_by(pygame.image.load("./resources/Image/animation/+2.png"), self.ui_size["change"]),
+            (self.center_x, self.center_y))
         pygame.display.flip()
         time.sleep(0.7)
         self.draw_animation((index - self.game_direction) % self.player_count)
@@ -872,8 +1073,9 @@ class SinglePlay:
 
     def one_more_animation(self, index):
         self.draw()
-        self.screen.blit(game_view.scale_by(pygame.image.load("./resources/Image/animation/_1.png"), self.ui_size["change"]),
-                         (self.center_x, self.center_y))
+        self.screen.blit(
+            game_view.scale_by(pygame.image.load("./resources/Image/animation/_1.png"), self.ui_size["change"]),
+            (self.center_x, self.center_y))
         pygame.display.flip()
         time.sleep(0.7)
 
@@ -912,29 +1114,41 @@ class SinglePlay:
 
         # 누구 턴인지 표시하는 화살표 그리기
         if self.user_turn:
-            self.screen.blit(self.turn_arrow_img, (self.user_coordinate[0]-self.turn_coordinate[0], self.user_coordinate[1]-self.turn_coordinate[1]))
+            self.screen.blit(self.turn_arrow_img, (
+                self.user_coordinate[0] - self.turn_coordinate[0], self.user_coordinate[1] - self.turn_coordinate[1]))
         elif self.current_player == 1:
-            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[0][0]-self.turn_coordinate[2], self.computer_coordinate[0][1]-self.turn_coordinate[3]))
+            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[0][0] - self.turn_coordinate[2],
+                                                   self.computer_coordinate[0][1] - self.turn_coordinate[3]))
         elif self.current_player == 2:
-            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[1][0]-self.turn_coordinate[2], self.computer_coordinate[1][1]-self.turn_coordinate[3]))
+            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[1][0] - self.turn_coordinate[2],
+                                                   self.computer_coordinate[1][1] - self.turn_coordinate[3]))
         elif self.current_player == 3:
-            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[2][0]-self.turn_coordinate[2], self.computer_coordinate[2][1]-self.turn_coordinate[3]))
+            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[2][0] - self.turn_coordinate[2],
+                                                   self.computer_coordinate[2][1] - self.turn_coordinate[3]))
         elif self.current_player == 4:
-            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[3][0]-self.turn_coordinate[2], self.computer_coordinate[3][1]-self.turn_coordinate[3]))
+            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[3][0] - self.turn_coordinate[2],
+                                                   self.computer_coordinate[3][1] - self.turn_coordinate[3]))
         elif self.current_player == 5:
-            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[4][0]-self.turn_coordinate[2], self.computer_coordinate[4][1]-self.turn_coordinate[3]))
+            self.screen.blit(self.turn_arrow_img, (self.computer_coordinate[4][0] - self.turn_coordinate[2],
+                                                   self.computer_coordinate[4][1] - self.turn_coordinate[3]))
 
         # 남은 카드 더미 그리기
-        self.screen.blit(self.remain_cards[0].card_img_back, (self.remain_cards_x_position, self.screen.get_rect().centery - 151 * self.ui_size["change"]))
+        self.screen.blit(self.remain_cards[0].card_img_back,
+                         (self.remain_cards_x_position, self.screen.get_rect().centery - 151 * self.ui_size["change"]))
         # 엎은 카드 그리기
-        draw_board_card(self.screen, self.board_card[-1], self.screen.get_rect().centerx, self.screen.get_rect().centery - 151 * self.ui_size["change"])
+        draw_board_card(self.screen, self.board_card[-1], self.screen.get_rect().centerx,
+                        self.screen.get_rect().centery - 151 * self.ui_size["change"])
         # 유저 카드 그리기
-        draw_cards_user(self.screen, self.player_hands[0], self.user_coordinate[0], self.user_coordinate[1], self.max_per_row,
+        draw_cards_user(self.screen, self.player_hands[0], self.user_coordinate[0], self.user_coordinate[1],
+                        self.max_per_row,
                         self.user_spacing, self.hovered_card_index)
         # 현재 색 그리기
-        card_folder = "./resources/Image/select_color_cw" if self.settings_data["color_weakness"] else "./resources/Image/select_color"
-        card_color = game_view.scale_by(pygame.image.load(f"{card_folder}/{self.top_card.color}.png"), self.ui_size["change"])
-        self.screen.blit(card_color, (self.remain_cards_x_position, self.screen.get_rect().centery - 350 * self.ui_size["change"]))
+        card_folder = "./resources/Image/select_color_cw" if self.settings_data[
+            "color_weakness"] else "./resources/Image/select_color"
+        card_color = game_view.scale_by(pygame.image.load(f"{card_folder}/{self.top_card.color}.png"),
+                                        self.ui_size["change"])
+        self.screen.blit(card_color,
+                         (self.remain_cards_x_position, self.screen.get_rect().centery - 350 * self.ui_size["change"]))
         # ai의 카드를 그린다.
         for i in range(len(self.player_hands) - 1):
             draw_cards_ai(self.screen, self.player_hands[i + 1], self.computer_coordinate[i][0],
@@ -945,7 +1159,8 @@ class SinglePlay:
 
         # 유저턴이고, 체인지 카드면 체인지카드를 그린다.
         if self.user_turn and self.change_card:
-            draw_change_card(self.screen, self.change_color_list, self.x5, self.y5, self.spacing5, self.hovered_change_index)  # 체인지 카드 그림
+            draw_change_card(self.screen, self.change_color_list, self.x5, self.y5, self.spacing5,
+                             self.hovered_change_index)  # 체인지 카드 그림
 
         # 우노 버튼 표시
         if self.uno_check and not self.uno_flags[self.current_player]:
@@ -956,11 +1171,14 @@ class SinglePlay:
         # 유저가 카드를 뽑았을 경우, next_turn 버튼 표시
         if self.user_turn and self.new_drawn_card is not None:
             if is_valid_move(self.new_drawn_card, self.top_card):
-                self.play_drawn_card_button.topleft = (self.screen.get_rect().centerx + 100, self.screen.get_rect().centery)
+                self.play_drawn_card_button.topleft = (
+                    self.screen.get_rect().centerx + 100, self.screen.get_rect().centery)
                 draw_button(self.screen, "Click NEXT TURN button to turn.\n Or If you want to submit a drawn card,"
-                                "\nclick on the drawn card.", self.small_font, (255, 255, 255), self.play_drawn_card_button)
+                                         "\nclick on the drawn card.", self.small_font, (255, 255, 255),
+                            self.play_drawn_card_button)
             elif not is_valid_move(self.new_drawn_card, self.top_card):
-                self.play_drawn_card_button.topleft = (self.screen.get_rect().centerx + 100, self.screen.get_rect().centery)
+                self.play_drawn_card_button.topleft = (
+                    self.screen.get_rect().centerx + 100, self.screen.get_rect().centery)
                 draw_button(self.screen, "Click NEXT TURN button to turn.", self.small_font, (255, 255, 255),
                             self.play_drawn_card_button)
             # 턴 넘기기는 버튼
@@ -970,7 +1188,8 @@ class SinglePlay:
         if self.user_turn and not self.uno_check and self.turn_start_time is not None:
             self.remaining_time = self.time_limit - (self.current_time - self.turn_start_time)
             self.remaining_time_text = f"턴 남은 시간: {self.remaining_time // 1000}초"
-            draw_text(self.screen, self.remaining_time_text, self.font, (255, 255, 255), self.screen.get_rect().centerx/2, 30)
+            draw_text(self.screen, self.remaining_time_text, self.font, (255, 255, 255),
+                      self.screen.get_rect().centerx / 2, 30)
 
         # 유저 이름 그리기
         self.screen.blit(self.text_player_name,
@@ -980,13 +1199,16 @@ class SinglePlay:
         for i in range(5):
             if self.computer_attends[i]:
                 self.screen.blit(self.text_computer_name[i],
-                                 (self.computer_coordinate[j][0] - self.turn_coordinate[2] - self.ui_size["font"][0] // 2,
-                                  self.computer_coordinate[j][1] - self.turn_coordinate[3] + self.ui_size["font"][0] * 2))
+                                 (self.computer_coordinate[j][0] - self.turn_coordinate[2] - self.ui_size["font"][
+                                     0] // 2,
+                                  self.computer_coordinate[j][1] - self.turn_coordinate[3] + self.ui_size["font"][
+                                      0] * 2))
                 j = j + 1
         # 키보드로 선택된 경우 체크 표시
         # 드로우
         if self.key_select_option == 0:
-            self.screen.blit(self.selected_image, (self.screen.get_rect().centerx - 100, self.screen.get_rect().centery))
+            self.screen.blit(self.selected_image,
+                             (self.screen.get_rect().centerx - 100, self.screen.get_rect().centery))
         # 우노 버튼
         elif self.key_select_option == 1:
             self.screen.blit(self.selected_image, self.uno_button_rect)
@@ -997,6 +1219,14 @@ class SinglePlay:
         # 일시정지 팝업 띄우기
         if self.paused:
             self.pause_popup()
+
+        # 팝업 표시
+        if self.popup_achieved.pop and not self.game_over:
+            self.popup_achieved.open()
+            self.screen.blit(self.popup_achievement_image,
+                             (self.screen.get_width() * 0.001, self.screen.get_height() * 0.3))
+            if pygame.time.get_ticks() - self.popup_start_time > 3500:
+                self.popup_achieved.pop = False
 
         # 매 프레임마다 화면 업데이트
         if self.draw_override is False:
@@ -1075,9 +1305,11 @@ class SinglePlay:
 
     def run(self):
         self.setting()
-        self.background_music.set_volume(self.settings_data["volume"]["sound"] * self.settings_data["volume"]["background"])
+        self.background_music.set_volume(
+            self.settings_data["volume"]["sound"] * self.settings_data["volume"]["background"])
         self.background_music.play(-1)
-        self.sound_shuffle.set_volume(self.settings_data["volume"]["sound"] * self.settings_data["volume"]["background"])
+        self.sound_shuffle.set_volume(
+            self.settings_data["volume"]["sound"] * self.settings_data["volume"]["background"])
         self.sound_shuffle.play(1)
         while self.running:
             self.win()
@@ -1091,3 +1323,4 @@ class SinglePlay:
             self.draw()
             self.event()
             self.pause_button_process()
+        return self.win_flag

@@ -1,5 +1,6 @@
 import json
 import pygame
+import datetime
 
 # 게임 설정 기본값
 FILEPATH = "./game_data.json"
@@ -10,7 +11,7 @@ ACHIEVEMENTS = [{
     }, {
         "name": "스테이지 마스터",
         "description": "스토리의 모든 스테이지 클리어",
-        "image": "single_player_winner.png"
+        "image": "stage_all_clear.png"
     }, {
         "name": "스피드 레이서",
         "description": "싱글 플레이에서 10턴안에 승리",
@@ -56,46 +57,40 @@ INIT_GAME_DATA = {
             "effect": 1.0
         }
     },
-    "stage_clear_count": {
-        "1st": 0,
-        "2nd": 0,
-        "3rd": 0,
-        "4th": 0
-    },
-    "achievement": {
-        0: {
+    "stage_clear_count": [0, 0, 0, 0],
+    "achievement": [{
             "achieved": False,
             "achieved_date": None
         },
-        1: {
+        {
             "achieved": False,
             "achieved_date": None
         },
-        2: {
+        {
             "achieved": False,
             "achieved_date": None
         },
-        3: {
+        {
             "achieved": False,
             "achieved_date": None
         },
-        4: {
+        {
             "achieved": False,
             "achieved_date": None
         },
-        5: {
+        {
             "achieved": False,
             "achieved_date": None
         },
-        6: {
+        {
             "achieved": False,
             "achieved_date": None
         },
-        7: {
+        {
             "achieved": False,
             "achieved_date": None
         }
-    }
+    ]
 }
 
 
@@ -144,3 +139,22 @@ def load_achieved_status():
             data = INIT_GAME_DATA["achievement"]
 
     return data
+
+
+def save_achieved_status(achievement_id):
+    with open(FILEPATH, encoding='utf-8') as fr:
+        data = json.load(fr)
+        data["achievement"][achievement_id]["achieved"] = True
+        data["achievement"][achievement_id]["achieved_date"] = datetime.date.today().strftime('%Y-%m-%d')
+
+    with open(FILEPATH, 'w', encoding='utf-8') as fw:
+        json.dump(data, fw, indent=4)
+
+
+def increment_stage_clear_count(stage_id):
+    with open(FILEPATH, encoding='utf-8') as fr:
+        data = json.load(fr)
+        data["stage_clear_count"][stage_id] += 1
+
+    with open(FILEPATH, 'w', encoding='utf-8') as fw:
+        json.dump(data, fw, indent=4)
