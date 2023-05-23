@@ -4,6 +4,8 @@ from controller import game_data, game_view
 from controller.mouse import Mouse
 from ui.button import Button
 from ui.popup import Popup
+from multi_play_lobby_host import LobbyHost
+from multi_play_lobby_client import LobbyClient
 
 
 class SelectMode:
@@ -70,7 +72,7 @@ class SelectMode:
 
     def event_create_server(self):
         print("서버 만들기")
-        pass
+        LobbyHost().run()
 
     def event_join(self):
         if len(self.ip) > 0:
@@ -81,6 +83,7 @@ class SelectMode:
     def event_popup_input_ip(self):
         self.ip = ""
         self.popup.pop = True
+        LobbyClient().run()
 
     # 게임 나가기 버튼 이벤트
     def event_exit(self):
