@@ -11,9 +11,9 @@ from scene.single_play_lobby import SinglePlayLobby
 
 
 class LobbyClient(SinglePlayLobby):
-    def __init__(self):
+    def __init__(self, ip):
         super().__init__()
-        self.server_ip = '127.0.0.1'  # 서버 IP 주소 설정 (이 경우 로컬 IP)
+        self.server_ip = ip  # 서버 IP 주소 설정 (이 경우 로컬 IP)
         self.server_port = 10613  # 포트 번호 설정
 
         # 소켓 객체 생성 (TCP)

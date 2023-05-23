@@ -78,12 +78,11 @@ class SelectMode:
         if len(self.ip) > 0:
             print(self.ip + "로 접속")
         self.popup.pop = False
-        pass
+        LobbyClient(self.ip).connect()
 
     def event_popup_input_ip(self):
         self.ip = ""
         self.popup.pop = True
-        LobbyClient().run()
 
     # 게임 나가기 버튼 이벤트
     def event_exit(self):
